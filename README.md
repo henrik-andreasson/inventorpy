@@ -1,10 +1,10 @@
 # About
 
-Schema service for multiple teams with on-call planning.
+Inventory management (or cmdb) service for multiple teams.
 
-Also can announce new/changes work and on-call to Rocket.Chat
+Also can announce new/changes to Rocket.Chat
 
-REST API for adding work and users exist, see utils/
+REST API for automatic management is on the agenda but not finished
 
 Very early version but working software.
 
@@ -14,27 +14,7 @@ Heavily based on the excellent tutorial  [Flask Mega Tutorial](https://blog.migu
 
 Big Thanks to Miguel!
 
-PLANNED feature is ical export (please send pull requests :-)
 
-
-# pictures
-
-## first page / month view
-![first page](doc/first-page.png)
-
-![month-view](doc/month-view.png)
-
-## On call
-![on-call](doc/oncall.png)
-
-## stats 
-![stats](doc/stats.png)
-
-## Non Working days
-![Non Working Days](doc/nwd.png)
-
-## absence
-![Absennse](doc/absence.png)
 
 # Run on CentOS
 
@@ -50,27 +30,27 @@ Used modules
 
 install source
 
-    mkdir /opt/teamplan
-    cd /opt/teamplan
-    unzip teamplan-x.y.z.zip
+    mkdir /opt/inventorpy
+    cd /opt/inventorpy
+    unzip inventorpy-x.y.z.zip
 
 start
-    export FLASK_APP=teamplan.py
-    cd /opt/teamplan
+    export FLASK_APP=inventorpy.py
+    cd /opt/inventorpy
     flask run --host=0.0.0.0
 
-See also the systemd service file teamplan.service to run with gunicorn
+See also the systemd service file inventorpy.service to run with gunicorn
 
 # Run in Docker
 
 build docker:
 
-    docker build -t teamplan  .
+    docker build -t inventorpy  .
 
 Run bash in docker:
 
-    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/teamplan teamplan bash
+    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy bash
 
 Run flask
 
-    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/teamplan teamplan flask run --host=0.0.0.0 --reload
+    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy flask run --host=0.0.0.0 --reload
