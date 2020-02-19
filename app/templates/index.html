@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>{{ _('Hi, %(username)s!', username=current_user.username) }}</h1>
+
+
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6">
+
+    {% if servers %}
+      <div class="list-group">
+        <a href="{{ url_for('main.server_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Servers')}}</h4>
+        </a>
+        {% for s in servers %}
+          <a href="{{ url_for('main.server_edit', server=s.id) }}" class="list-group-item">
+            {{s.hostname}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if networks %}
+      <div class="list-group">
+        <a href="{{ url_for('main.network_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Networks')}}</h4>
+        </a>
+        {% for n in networks %}
+          <a href="{{ url_for('main.network_edit', network=n.id) }}" class="list-group-item">
+            {{n.name}} - {{n.network}} - {{n.netmask}} - {{n.service.name}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if locations %}
+      <div class="list-group">
+        <a href="{{ url_for('main.location_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Locations')}}</h4>
+        </a>
+        {% for l in locations %}
+          <a href="{{ url_for('main.location_edit', id=l.id) }}" class="list-group-item">
+            {{l.place}} - {{l.facillity}} - {{l.area}} - {{l.position}} - {{l.type}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+
+
+    {% if services %}
+      <div class="list-group">
+        <a href="{{ url_for('main.service_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Services')}}</h4>
+        </a>
+        {% for serv in services %}
+          <a href="{{ url_for('main.service_edit', server=serv.id) }}" class="list-group-item">
+            {{serv.name}}
+          </a>
+        {% endfor %}
+-      </div>
+    {% endif %}
+
+
+  </div>
+  <div class="col-sm-6">
+
+    {% if hsmdomains %}
+      <div class="list-group">
+        <a href="{{ url_for('main.hsm_domain_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('HSM Domains')}}</h4>
+        </a>
+        {% for d in hsmdomains %}
+          <a href="{{ url_for('main.hsm_domain_edit', domain=d.id) }}" class="list-group-item">
+            {{d.name}} - {{d.service.name}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if hsmpeds %}
+      <div class="list-group">
+        <a href="{{ url_for('main.hsm_ped_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('HSM Ped')}}</h4>
+        </a>
+        {% for p in hsmpeds %}
+          <a href="{{ url_for('main.hsm_ped_edit', ped=p.id) }}" class="list-group-item">
+            {{p.keysn}} - {{p.keyno}} - {{p.hsmdomain.name}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if hsmpins %}
+      <div class="list-group">
+        <a href="{{ url_for('main.hsm_pin_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('HSM Pin')}}</h4>
+        </a>
+        {% for i in hsmpins %}
+          <a href="{{ url_for('main.hsm_pin_edit', pin=i.id) }}" class="list-group-item">
+            {{i.ped.keysn}} - {{i.ped.keyno}} - {{i.ped.hsmdomain.name}} - {{i.ped.user.username}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+
+  </div>
+</div>
+
+
+{% endblock %}
