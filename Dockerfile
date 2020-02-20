@@ -2,7 +2,7 @@
 FROM centos:latest
 
 # Set the working directory to /app
-WORKDIR /invent
+WORKDIR /inventorpy
 
 # Install any needed packages
 RUN yum install -y python3 sqlite
@@ -15,6 +15,6 @@ RUN pip3 install flask-sqlalchemy flask-migrate flask-login flask-mail \
 # Make port 8000 available to the world outside this container
 EXPOSE 5000
 
-ENV FLASK_APP=invent.py
+ENV FLASK_APP=inventorpy.py
 # Run flask when the container launches
 CMD [ "flask run --reload"]
