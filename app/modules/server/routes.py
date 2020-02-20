@@ -21,16 +21,14 @@ def server_add():
 
     if 'selected_service' in session:
         service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.name, service.name)]
+        form.service.choices = [(service.id, service.name)]
 
     else:
-        form.service.choices = [(s.name, s.name) for s in Service.query.all()]
+        form.service.choices = [(s.id, s.name) for s in Service.query.all()]
 
     location_choices = []
     for l in Location.query.all():
-        formatedloc = "%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position)
-        print("loc: %s:%s" % (l.id, formatedloc))
-        newloc = (formatedloc, formatedloc)
+        newloc = (l.id, l.longName())
         location_choices.append(newloc)
     form.location.choices = location_choices
 
@@ -39,9 +37,7 @@ def server_add():
         form.ipaddress.data = ip
 
     if request.method == 'POST' and form.validate_on_submit():
-        service = Service.query.filter_by(name=form.service.data).first()
-#        for field in ['hostname', 'ipaddress', 'netmask', 'gateway', 'memory', 'cpu', 'location', 'service_id', 'status']:
-#            setattr(self, field, data[field])
+        service = Service.query.get(form.service.data)
 
         server = Server(hostname=form.hostname.data,
                         ipaddress=form.ipaddress.data,
@@ -75,33 +71,31 @@ def server_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.server_delete', server=serverid))
+    if 'copy' in request.form:
+        return redirect(url_for('main.server_copy', copy_from_server=serverid))
 
     server = Server.query.get(serverid)
- 
+
     form = ServerForm(obj=server)
 
     if 'selected_service' in session:
         service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.name, service.name)]
-
     else:
-        form.service.choices = [(s.name, s.name) for s in Service.query.all()]
+        form.service.choices = [(s.id, s.name) for s in Service.query.all()]
 
     location_choices = []
     for l in Location.query.all():
-        formatedloc = "%s-%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position, l.type)
-        print("loc: %s:%s" % (l.id, formatedloc))
-        newloc = (formatedloc, formatedloc)
+        newloc = (l.id, l.longName())
         location_choices.append(newloc)
     form.location.choices = location_choices
+    form.service.data = server.service_id
 
     if server is None:
         render_template('service.html', title=_('Server is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
-        string_from = '%s\t%s\t%s\t@%s\n' % (server.hostname, server.ipaddress,
-                                             server.location, server.service)
-        service = Service.query.filter_by(name=form.service.data).first()
+
+        service = Service.query.get(form.service.data)
         server.hostname = form.hostname.data
         server.ipaddress = form.ipaddress.data
         server.netmask = form.netmask.data
@@ -114,16 +108,57 @@ def server_edit():
         db.session.commit()
         flash(_('Your changes have been saved.'))
 
-        if current_app.config['ROCKET_ENABLED']:
-            string_to = '%s\t%s\t%s\t@%s\n' % (server.start, server.stop,
-                                               server.service, server.username)
-            rocket = RocketChat(current_app.config['ROCKET_USER'],
-                                current_app.config['ROCKET_PASS'],
-                                server_url=current_app.config['ROCKET_URL'])
-            rocket.chat_post_message('edit of server from: \n%s\nto:\n%s\nby: %s' % (
-                                 string_from, string_to, current_user.username),
-                                 channel=current_app.config['ROCKET_CHANNEL']
-                                 ).json()
+        return redirect(url_for('main.index'))
+
+    else:
+        return render_template('server.html', title=_('Edit Server'),
+                               form=form)
+
+
+@bp.route('/server/copy/', methods=['GET', 'POST'])
+@login_required
+def server_copy():
+
+    serverid = request.args.get('copy_from_server')
+
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+
+    copy_from_server = Server.query.get(serverid)
+
+    form = ServerForm(obj=copy_from_server)
+    form.service.data = copy_from_server.service_id
+
+    if 'selected_service' in session:
+        service = Service.query.filter_by(name=session['selected_service']).first()
+        form.service.choices = [(service.di, service.name)]
+
+    else:
+        form.service.choices = [(s.id, s.name) for s in Service.query.all()]
+
+    location_choices = []
+    for l in Location.query.all():
+        newloc = (l.id, l.longName())
+        location_choices.append(newloc)
+    form.location.choices = location_choices
+
+    if copy_from_server is None:
+        render_template('service.html', title=_('Server is not defined'))
+
+    if request.method == 'POST' and form.validate_on_submit():
+        server = Server(hostname=form.hostname.data,
+                        ipaddress=form.ipaddress.data,
+                        status=form.status.data,
+                        netmask=form.netmask.data,
+                        gateway=form.gateway.data,
+                        memory=form.memory.data,
+                        cpu=form.cpu.data,
+                        location=form.location.data)
+        service = Service.query.get(form.service.data)
+        server.service = service
+        db.session.add(server)
+        db.session.commit()
+        flash(_('Copied values from server %s to %s.' % (copy_from_server.hostname, server.hostname)))
 
         return redirect(url_for('main.index'))
 
@@ -162,17 +197,8 @@ def server_delete():
         flash(_('Server was not deleted, id not found!'))
         return redirect(url_for('main.index'))
 
-    deleted_msg = 'Server deleted: %s\t%s\t%s\t@%s\n' % (server.start, server.stop,
-                                                       server.service.name,
-                                                       server.username)
-    if current_app.config['ROCKET_ENABLED']:
-        rocket = RocketChat(current_app.config['ROCKET_USER'],
-                            current_app.config['ROCKET_PASS'],
-                            server_url=current_app.config['ROCKET_URL'])
-        rocket.chat_post_message('server deleted: \n%s\nto:\n%s\nby: %s' % (
-                             deleted_msg, current_user.username),
-                             channel=current_app.config['ROCKET_CHANNEL']
-                             ).json()
+    deleted_msg = 'Server deleted: %s@%s\n' % (server.hostname,
+                                               server.service.name)
     flash(deleted_msg)
     db.session.delete(server)
     db.session.commit()

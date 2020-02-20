@@ -4,8 +4,6 @@
 {% block app_content %}
 
 
-
-
 {% if safes %}
 
   <table class="table table-hover">
@@ -16,6 +14,7 @@
 
     {% for s in safes %}
 
+
       <tr>
         <td>
               <A HREF="{{url_for('main.safe_edit', safe=s.id)}}">
@@ -23,7 +22,7 @@
               </A>
         </td>
         <td>
-                {{ s.location.name }}
+                {{ s.location.longName() }}
         </td>
 
       </tr>
@@ -54,7 +53,7 @@
           {{ c.safe.name }}
         </td>
         <td>
-          {{ c.user.name }}
+          {{ c.user.username }}
         </td>
 
   </tr>

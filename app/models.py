@@ -197,3 +197,7 @@ class Location(db.Model):
     def __repr__(self):
         return '<Location {}/{}/{}/{}>'.format(self.place, self.facillity,
                                                self.area, self.position)
+
+    def longName(self):
+        return '{} / {} / {} / {}'.format(self.place, self.facillity,
+                                          self.area, self.position)

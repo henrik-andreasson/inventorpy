@@ -106,6 +106,35 @@
       </div>
     {% endif %}
 
+    {% if safes %}
+
+    <div class="list-group">
+        <a href="{{ url_for('main.safe_add')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Safe')}}</h4>
+          </a>
+        {% for s in safes %}
+          <A HREF="{{url_for('main.safe_edit', safe=s.id)}}" class="list-group-item">
+                    {{ s.name }} - {{ s.location.longName() }}
+          </A>
+        {% endfor %}
+    </div>
+
+    {% endif %}
+
+    {% if compartments %}
+
+    <div class="list-group">
+        <a href="{{ url_for('main.compartment_add')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Compartment')}}</h4>
+          </a>
+        {% for c in compartments %}
+          <A HREF="{{url_for('main.compartment_edit', compartment=c.id)}}" class="list-group-item">
+                    {{ c.safe.name }} - {{ c.name }} ({{ c.user.username }})
+          </A>
+        {% endfor %}
+
+    </div>
+    {% endif %}
 
   </div>
 </div>

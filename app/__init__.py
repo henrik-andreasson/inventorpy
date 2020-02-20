@@ -40,6 +40,12 @@ def create_app(config_class=Config):
     from app.modules.server import bp as server_bp
     app.register_blueprint(server_bp, url_prefix='/server')
 
+    from app.modules.safe import bp as safe_bp
+    app.register_blueprint(safe_bp, url_prefix='/safe')
+
+    from app.modules.safe import bp as rack_bp
+    app.register_blueprint(rack_bp, url_prefix='/rack')
+
     from app.modules.network import bp as network_bp
     app.register_blueprint(network_bp, url_prefix='/network')
 

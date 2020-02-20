@@ -6,8 +6,9 @@ from flask_babel import _, get_locale
 from app import db
 from app.main.forms import EditProfileForm, ServiceForm, LocationForm
 from app.models import User, Service, Location
-from app.modules.server.models import Server
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin
+from app.modules.safe.models import Safe, Compartment
+from app.modules.server.models import Server
 from app.modules.network.models import Network
 from app.main import bp
 from datetime import datetime
@@ -25,19 +26,22 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    servers = Server.query.all()
-    locations = Location.query.all()
-    services = Service.query.all()
-    hsmdomains = HsmDomain.query.all()
-    hsmpeds = HsmPed.query.all()
-    hsmpins = HsmPin.query.all()
-    networks = Network.query.all()
+    servers = Server.query.order_by(Server.hostname).limit(10)
+    locations = Location.query.order_by(Location.place).limit(10)
+    services = Service.query.order_by(Service.name).limit(10)
+    hsmdomains = HsmDomain.query.order_by(HsmDomain.name).limit(10)
+    hsmpeds = HsmPed.query.order_by(HsmPed.keysn).limit(10)
+    hsmpins = HsmPin.query.order_by(HsmPin.id).limit(10)
+    networks = Network.query.order_by(Network.name).limit(10)
+    safes = Safe.query.order_by(Safe.name).limit(10)
+    compartments = Compartment.query.order_by(Compartment.name).limit(10)
 
     return render_template('index.html', title=_('Explore'),
                            servers=servers, locations=locations,
                            services=services, hsmdomains=hsmdomains,
                            hsmpeds=hsmpeds, hsmpins=hsmpins,
-                           networks=networks)
+                           networks=networks, safes=safes,
+                           compartments=compartments)
 
 
 @bp.route('/user/<username>')

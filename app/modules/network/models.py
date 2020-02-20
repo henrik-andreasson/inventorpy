@@ -23,10 +23,11 @@ class Network(db.Model):
             'network': self.network,
             'netmask': self.netmask,
             'gateway': self.gateway,
-            'location': self.location,
+            'location_id': self.location_id,
+            'service_id': self.service_id,
             }
         return data
 
-    def from_dict(self, data, new_work=False):
-        for field in ['name', 'network', 'netmask', 'gateway', 'location']:
+    def from_dict(self, data):
+        for field in ['name', 'network', 'netmask', 'gateway', 'location_id', 'service_id']:
             setattr(self, field, data[field])
