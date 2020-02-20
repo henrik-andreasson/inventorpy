@@ -11,6 +11,7 @@ from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
 import ipcalc
 
+
 @bp.route('/network/add', methods=['GET', 'POST'])
 @login_required
 def network_add():
@@ -77,7 +78,7 @@ def network_edit():
 
     else:
         form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-
+ 
     location_choices = []
     for l in Location.query.all():
         formatedloc = "%s-%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position, l.type)
@@ -172,12 +173,14 @@ def network_view():
     if network is None:
         flash(_('Network was not found, id not found!'))
         return redirect(url_for('main.index'))
-
+    network = network
     networkview = []
-    for x in ipcalc.Network(network.network/network.netmask):
-        s = Server.query.filter_by(ipaddress=x).all()
+    netstr = "%s/%s" % (network.network, network.netmask)
+    for x in ipcalc.Network(netstr):
+        s = Server.query.filter_by(ipaddress=str(x)).first()
         server_net_tuple = (x, s)
         networkview.append(server_net_tuple)
 
     return render_template('network.html', title=_('Network'),
-                           networkview=networkview)
+                           networkview=networkview,
+                           network=network)

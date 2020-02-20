@@ -33,7 +33,10 @@ def server_add():
         newloc = (formatedloc, formatedloc)
         location_choices.append(newloc)
     form.location.choices = location_choices
-#    form.location.choices = [(l.id, l.city) for l in Location.query.all()]
+
+    ip = request.args.get('ip')
+    if ip:
+        form.ipaddress.data = ip
 
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.filter_by(name=form.service.data).first()
@@ -74,7 +77,7 @@ def server_edit():
         return redirect(url_for('main.server_delete', server=serverid))
 
     server = Server.query.get(serverid)
-
+ 
     form = ServerForm(obj=server)
 
     if 'selected_service' in session:

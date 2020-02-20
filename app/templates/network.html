@@ -18,8 +18,12 @@
 
       <tr>
         <td>
+              {{ n.name }}
+              <A HREF="{{url_for('main.network_view', network=n.id)}}">
+                {{ _('View') }}
+              </A>
               <A HREF="{{url_for('main.network_edit', network=n.id)}}">
-                {{ n.name }}
+                {{ _('Edit') }}
               </A>
         </td>
         <td>
@@ -54,12 +58,31 @@
             </li>
         </ul>
     </nav>
-    {% if form %}
-      {{ wtf.quick_form(form) }}
-    {% endif %}
 
 {% endif %}
 {% if networkview %}
+<h1> {{_('Network')}} {{network.name}}</h1>
+<table class="table table-hover">
+
+  <tr>
+    <td>{{_('Name')}}</td>
+    <td>{{_('IP Network')}}</td>
+    <td>{{_('IP Netmask')}}</td>
+    <td>{{_('IP Gateway')}}</td>
+    <td>{{_('Location')}}</td>
+    <td>{{_('Service')}}</td>
+  </tr>
+  <tr>
+    <td>{{network.name}}</td>
+    <td>{{network.network}}</td>
+    <td>{{network.netmask}}</td>
+    <td>{{network.gateway}}</td>
+    <td>{{network.location.name}}</td>
+    <td>{{network.service.name}}</td>
+  </tr>
+</table>
+
+
 <table class="table table-hover">
     <tr>
       <td>{{_('Server')}}</td>
@@ -70,10 +93,18 @@
 
       <tr>
         <td>
-                {{ sn }}
+          {% if sn[1].hostname %}
+            {{ sn[1].hostname }}
+          {% elif network.gateway == sn[0] %}
+            {{ _('Gateway') }}
+          {% else %}
+            <A HREF="{{url_for('main.server_add', ip=sn[0])}}">
+            {{ _('Add Server') }}
+          </A>
+          {% endif %}
         </td>
         <td>
-                {{ sn[0].hostname }}
+          {{ sn[0] }}
         </td>
 
       </tr>
@@ -84,6 +115,9 @@
 
 {% endif %}
 
+{% if form %}
+  {{ wtf.quick_form(form) }}
+{% endif %}
 
 
 {% endblock %}
