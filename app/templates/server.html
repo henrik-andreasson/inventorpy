@@ -10,6 +10,7 @@
       <td>{{_('IP Address')}}</td>
       <td>{{_('Location')}}</td>
       <td>{{_('Service')}}</td>
+      <td>{{_('Rack')}}</td>
     </tr>
 
     {% for s in servers %}
@@ -24,10 +25,13 @@
                 {{s.ipaddress}}
         </td>
         <td>
-                {{s.location}}
+                {{s.location.longName()}}
         </td>
         <td>
                 {{s.service.name}}
+        </td>
+        <td>
+                {{s.rack.name}}
         </td>
 
       </tr>

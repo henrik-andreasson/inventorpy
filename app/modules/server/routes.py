@@ -5,6 +5,7 @@ from app import db
 from app.main import bp
 from app.models import Service, Location
 from app.modules.server.models import Server
+from app.modules.rack.models import Rack
 from app.modules.server.forms import ServerForm
 from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
@@ -32,12 +33,16 @@ def server_add():
         location_choices.append(newloc)
     form.location.choices = location_choices
 
+    form.rack.choices = [(r.id, r.name) for r in Rack.query.all()]
+
     ip = request.args.get('ip')
     if ip:
         form.ipaddress.data = ip
 
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.get(form.service.data)
+        location = Location.query.get(form.location.data)
+        rack = Rack.query.get(form.rack.data)
 
         server = Server(hostname=form.hostname.data,
                         ipaddress=form.ipaddress.data,
@@ -46,8 +51,16 @@ def server_add():
                         gateway=form.gateway.data,
                         memory=form.memory.data,
                         cpu=form.cpu.data,
-                        location=form.location.data)
+                        psu=form.psu.data,
+                        hd=form.hd.data,
+                        os_name=form.os_name.data,
+                        os_version=form.os_version.data,
+                        serial=form.serial.data,
+                        model=form.model.data,
+                        manufacturer=form.manufacturer.data)
         server.service = service
+        server.location = location
+        server.rack = rack
         db.session.add(server)
         db.session.commit()
         flash(_('New server is now posted!'))
@@ -89,21 +102,25 @@ def server_edit():
         location_choices.append(newloc)
     form.location.choices = location_choices
     form.service.data = server.service_id
+    form.rack.choices = [(r.id, r.name) for r in Rack.query.all()]
 
     if server is None:
         render_template('service.html', title=_('Server is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
-
+        location = Location.query.get(form.location.data)
         service = Service.query.get(form.service.data)
+        rack = Rack.query.get(form.rack.data)
+
         server.hostname = form.hostname.data
         server.ipaddress = form.ipaddress.data
         server.netmask = form.netmask.data
         server.gateway = form.gateway.data
         server.memory = form.memory.data
         server.cpu = form.cpu.data
-        server.location = form.location.data
+        server.location = location
         server.service = service
+        server.rack = rack
 
         db.session.commit()
         flash(_('Your changes have been saved.'))
