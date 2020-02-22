@@ -28,7 +28,7 @@ class HsmPed(db.Model):
     __tablename__ = "hsm_ped"
     id = db.Column(db.Integer, primary_key=True)
     keyno = db.Column(db.String(140))
-    keysn = db.Column(db.String(140))
+    keysn = db.Column(db.String(140), unique=True)
 #    safe = db.Column(db.String(140))
     hsmdomain = db.relationship('HsmDomain')
     hsmdomain_id = db.Column(db.Integer, db.ForeignKey('hsm_domain.id'))
@@ -82,9 +82,6 @@ class HsmPin(db.Model):
 class HsmPciCard(db.Model):
     __tablename__ = "hsm_pci_card"
     id = db.Column(db.Integer, primary_key=True)
-    serial = db.Column(db.String(140))
-    model = db.Column(db.String(140))
-    manufacturedate = db.Column(db.String(140))
     fbno = db.Column(db.String(140))
     hsmdomain = db.Column(db.String(140))
     server = db.Column(db.String(140))
