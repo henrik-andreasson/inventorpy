@@ -4,7 +4,7 @@ from app import db
 class Network(db.Model):
     __tablename__ = "network"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(140))
+    name = db.Column(db.String(140), unique=True)
     network = db.Column(db.String(140))
     netmask = db.Column(db.String(140))
     gateway = db.Column(db.String(140))
