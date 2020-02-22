@@ -4,8 +4,8 @@ from flask_login import current_user, login_required
 from app import db
 from app.main import bp
 from app.models import Service, Location, User
-from app.modules.rack.models import Rack, Compartment
-from app.modules.rack.forms import RackForm, CompartmentForm
+from app.modules.rack.models import Rack
+from app.modules.rack.forms import RackForm
 from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
 
