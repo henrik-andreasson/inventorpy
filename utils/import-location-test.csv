@@ -1,0 +1,4 @@
+#Place (City/Region),Facillity (House),Area (Room/Rack/Safe),Position,Type of Facillity
+Stockholm,Kista,HQ,Floor 1,office
+Stockholm,Solna,dc1,Floor 1,dc
+New York,Manhattan,ny office,Floor 23,office

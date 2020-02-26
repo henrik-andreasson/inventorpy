@@ -201,3 +201,19 @@ class Location(db.Model):
     def longName(self):
         return '{} / {} / {} / {}'.format(self.place, self.facillity,
                                           self.area, self.position)
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'place': self.place,
+            'facillity': self.facillity,
+            'area': self.area,
+            'position': self.position,
+            'type': self.type
+        }
+        return data
+
+    def from_dict(self, data):
+        for field in ['place', 'facillity', 'area', 'position', 'type']:
+            if field in data:
+                setattr(self, field, data[field])
