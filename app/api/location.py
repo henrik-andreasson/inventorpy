@@ -31,9 +31,12 @@ def create_location():
 @bp.route('/locationlist', methods=['GET'])
 @token_auth.login_required
 def get_locationlist():
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Location.to_collection_dict(Location.query, page, per_page, 'api.get_location')
+
+    locations = Location.query.all()
+
+    data = {
+        'items': [(item.id,) for item in locations],
+    }
     return jsonify(data)
 
 

@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
+from wtforms.fields.html5 import DateTimeField
 from wtforms.validators import DataRequired
 from flask_babel import lazy_gettext as _l
+from datetime import datetime
 
 
 class HsmDomainForm(FlaskForm):
@@ -15,8 +17,8 @@ class HsmDomainForm(FlaskForm):
 class HsmPedForm(FlaskForm):
     keyno = StringField(_l('Key No.'), validators=[DataRequired()])
     keysn = StringField(_l('Key S/N'), validators=[DataRequired()])
-    hsmdomain = SelectField(_l('HSM Domain'), validators=[DataRequired()])
-#    safe = SelectField(_l('Safe'), validators=[DataRequired()])
+    hsmdomain = SelectField(_l('HSM Domain'))
+    compartment = SelectField(_l('Compartment'))
     user = SelectField(_l('User'))
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
@@ -25,7 +27,7 @@ class HsmPedForm(FlaskForm):
 
 class HsmPinForm(FlaskForm):
     ped = SelectField(_l('HSM PED'), coerce=int)
-    safe = StringField(_l('Safe'), validators=[DataRequired()])
+    compartment = SelectField(_l('Compartment'))
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
@@ -33,12 +35,15 @@ class HsmPinForm(FlaskForm):
 
 class HsmPciCardForm(FlaskForm):
     serial = StringField(_l('HSM PCI S/N'), validators=[DataRequired()])
-    model = StringField(_l('HSM PCI FB No.'), validators=[DataRequired()])
-    manufacturedate = StringField(_l('Manufacture Date'), validators=[DataRequired()])
-    fbno = StringField(_l('HSM PCI FB No.'), validators=[DataRequired()])
-    hsmdomain = SelectField(_l('HSM Domain'), validators=[DataRequired()])
-    server = SelectField(_l('Server'), validators=[DataRequired()])
-    safe = SelectField(_l('Safe'), validators=[DataRequired()])
+    fbno = StringField(_l('HSM PCI FB No.'), validators=[DataRequired()],
+                       default="FBxxxxxx")
+    manufacturedate = DateTimeField(_l('Manufacture Date'), validators=[DataRequired()],
+                                    format='%Y-%m-%d', default=datetime.now())
+    model = SelectField(_l('HSM Model'), choices=[('luna6', 'Luna 6'),
+                                                  ('luna7', 'Luna 7')])
+    hsmdomain = SelectField(_l('HSM Domain'), coerce=int)
+    server = SelectField(_l('Server'), coerce=int)
+    compartment = SelectField(_l('Compartment'), coerce=int)
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))

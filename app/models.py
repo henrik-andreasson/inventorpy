@@ -9,8 +9,6 @@ from flask import url_for
 import base64
 from datetime import datetime, timedelta
 import os
-# from sqlalchemy.orm import backref, relationship
-# from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
 
@@ -37,11 +35,11 @@ class PaginatedAPIMixin(object):
                 'total_items': resources.total
             },
             '_links': {
-                'self': url_for(endpoint, page=page, per_page=per_page,
+                'self': url_for(endpoint, id=id, page=page, per_page=per_page,
                                 **kwargs),
-                'next': url_for(endpoint, page=page + 1, per_page=per_page,
+                'next': url_for(endpoint, id=id, page=page + 1, per_page=per_page,
                                 **kwargs) if resources.has_next else None,
-                'prev': url_for(endpoint, page=page - 1, per_page=per_page,
+                'prev': url_for(endpoint, id=id, page=page - 1, per_page=per_page,
                                 **kwargs) if resources.has_prev else None
             }
         }
@@ -185,7 +183,7 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-class Location(db.Model):
+class Location(PaginatedAPIMixin, db.Model):
     __tablename__ = "location"
     id = db.Column(db.Integer, primary_key=True)
     place = db.Column(db.String(140), index=True)

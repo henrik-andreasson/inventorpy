@@ -57,7 +57,14 @@ def server_add():
                         os_version=form.os_version.data,
                         serial=form.serial.data,
                         model=form.model.data,
-                        manufacturer=form.manufacturer.data)
+                        manufacturer=form.manufacturer.data,
+                        comment=form.comment.data,
+                        support_start=form.support_start.data,
+                        support_end=form.support_end.data,
+                        rack_position=form.rack_position.data,
+                        environment=form.environment.data
+                        )
+
         server.service = service
         server.location = location
         server.rack = rack
@@ -121,6 +128,11 @@ def server_edit():
         server.location = location
         server.service = service
         server.rack = rack
+        server.comment = form.comment.data
+        server.support_start = form.support_start.data
+        server.support_end = form.support_end.data
+        server.rack_position = form.rack_position.data
+        server.environment = form.environment.data
 
         db.session.commit()
         flash(_('Your changes have been saved.'))
@@ -214,8 +226,7 @@ def server_delete():
         flash(_('Server was not deleted, id not found!'))
         return redirect(url_for('main.index'))
 
-    deleted_msg = 'Server deleted: %s@%s\n' % (server.hostname,
-                                               server.service.name)
+    deleted_msg = 'Server deleted: %s\n' % (server.hostname)
     flash(deleted_msg)
     db.session.delete(server)
     db.session.commit()

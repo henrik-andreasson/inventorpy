@@ -5,13 +5,15 @@ from app import db
 from app.main import bp
 from app.models import Service, Location, User
 from app.modules.server.models import Server
+from app.modules.safe.models import Compartment
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmBackupUnit, \
     HsmPciCard
 from app.modules.hsm.forms import HsmDomainForm, HsmPedForm, HsmPinForm, \
     HsmPciCardForm, HsmBackupUnitForm
 from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
-import pprint
+from datetime import datetime
+
 
 @bp.route('/hsm/domain/add', methods=['GET', 'POST'])
 @login_required
@@ -132,10 +134,11 @@ def hsm_ped_add():
         return redirect(request.referrer)
 
     form = HsmPedForm()
-    print("ped input: %s-%s-%s-%s" % (form.hsmdomain.data,form.user.data,form.keyno.data,form.keysn.data))
+    print("ped input: %s-%s-%s-%s" % (form.hsmdomain.data, form.user.data, form.keyno.data, form.keysn.data))
 
     form.hsmdomain.choices = [(h.name, h.name) for h in HsmDomain.query.all()]
     form.user.choices = [(u.username, u.username) for u in User.query.all()]
+    form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmdomain = HsmDomain.query.filter_by(name=form.hsmdomain.data).first()
@@ -358,18 +361,27 @@ def hsm_pcicard_add():
 
     form = HsmPciCardForm()
 
-    form.hsmdomain.choices = [(h.name, h.name) for h in HsmDomain.query.all()]
+    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
     form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+    form.server.choices.insert(0, (0, 'None'))
+    form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    form.compartment.choices.insert(0, (0, 'None'))
 
     if request.method == 'POST' and form.validate_on_submit():
-        hsmdomain = HsmDomain.query.filter_by(name=form.hsmdomain.data).first()
-        server = Server.query.filter_by(id=form.server.data).first()
+        print('{} - {}'.format(form.server.data, form.compartment.data))
+        if form.server.data == 0 and form.compartment.data == 0:
+            flash(_('Must select server OR compartment!'))
+            return redirect(request.referrer)
+
+        hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
+        server = Server.query.get(form.server.data)
+        compartment = Compartment.query.get(form.compartment.data)
         hsmpcicard = HsmPciCard(serial=form.serial.data,
                                 model=form.model.data,
                                 manufacturedate=form.manufacturedate.data,
                                 fbno=form.fbno.data)
         hsmpcicard.hsmdomain = hsmdomain
-    #    hsmpcicard.safe = safe
+        hsmpcicard.compartment = compartment
         hsmpcicard.server = server
         db.session.add(hsmpcicard)
         db.session.commit()
@@ -379,7 +391,7 @@ def hsm_pcicard_add():
 
     else:
 
-        hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.hsmdomain.desc()).limit(10)
+        hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id.desc()).limit(10)
         return render_template('hsm.html', title=_('HSM'),
                                form=form, hsmpcicards=hsmpcicards)
 
@@ -398,17 +410,24 @@ def hsm_pcicard_edit():
     hsmpcicard = HsmPciCard.query.get(pcicardid)
 
     form = HsmPciCardForm(obj=hsmpcicard)
-    form.hsmdomain.choices = [(h.name, h.name) for h in HsmDomain.query.all()]
-    form.user.choices = [(u.username, u.username) for u in User.query.all()]
+    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+    form.compartment.choices = [(c.id, c.name) for c in Compartment.query.all()]
 
     if hsmpcicard is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
-        service = Service.query.filter_by(name=form.service.data).first()
-        hsmpcicard.name = form.name.data
-        hsmpcicard.service = service
-
+        hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
+        server = Server.query.get(form.server.data)
+        compartment = Compartment.query.get(form.compartment.data)
+        hsmpcicard.fbno = form.fbno.data
+        hsmpcicard.serial = form.serial.data
+        hsmpcicard.model = form.model.data
+        hsmpcicard.manufacturedate = form.manufacturedate.data
+        hsmpcicard.hsmdomain = hsmdomain
+        hsmpcicard.compartment = compartment
+        hsmpcicard.server = server
         db.session.commit()
         flash(_('Your changes have been saved.'))
 
@@ -425,7 +444,7 @@ def hsm_pcicard_list():
 
     page = request.args.get('page', 1, type=int)
 
-    hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.keysn).paginate(
+    hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.hsm_domain_list', page=hsmpcicards.next_num) \

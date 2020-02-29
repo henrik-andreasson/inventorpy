@@ -33,6 +33,12 @@ for row in $(cat "${csvfile}") ; do
   location_id=$(echo $row | cut -f15 -d,)
   service_id=$(echo $row | cut -f16 -d,)
   status=$(echo $row | cut -f17 -d,)
+  support_start=$(echo $row | cut -f18 -d,)
+  support_end=$(echo $row | cut -f19 -d,)
+  rack_position=$(echo $row | cut -f20 -d,)
+  environment=$(echo $row | cut -f21 -d,)
+  comment=$(echo $row | cut -f22 -d,)
+
   iscomment=$(echo $row | grep "#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
@@ -56,6 +62,11 @@ for row in $(cat "${csvfile}") ; do
     "rack_id=${rack_id}" \
     "location_id=${location_id}" \
     "service_id=${service_id}" \
+    "support_start=${support_start}" \
+    "support_end=${support_end}" \
+    "environment=${environment}" \
+    "comment=${comment}" \
+    "rack_position=${rack_position}" \
      "Authorization:Bearer $token"
 
 done

@@ -15,12 +15,12 @@ class Safe(db.Model):
         data = {
             'id': self.id,
             'name': self.name,
-            'service_id': self.service_id,
+            'location_id': self.location_id,
             }
         return data
 
     def from_dict(self, data, new_work=False):
-        for field in ['name', 'service_id']:
+        for field in ['name', 'location_id']:
             setattr(self, field, data[field])
 
 
@@ -40,11 +40,11 @@ class Compartment(db.Model):
         data = {
             'id': self.id,
             'name': self.name,
-            'user': self.user.username,
-            'safe': self.safe.name
+            'user_id': self.user_id,
+            'safe_id': self.safe_id
             }
         return data
 
     def from_dict(self, data, new_work=False):
-        for field in ['name', 'user', 'safe']:
+        for field in ['name', 'user_id', 'safe_id']:
             setattr(self, field, data[field])

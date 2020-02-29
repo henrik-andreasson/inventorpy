@@ -1,6 +1,5 @@
 from app import db
-from app.models import Service, Location
-from app.modules.rack.models import Rack
+from datetime import datetime
 
 
 class Server(db.Model):
@@ -26,6 +25,10 @@ class Server(db.Model):
     location = db.relationship('Location')
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
     service = db.relationship('Service')
+    comment = db.Column(db.String(2000))
+    support_start = db.Column(db.DateTime)
+    support_end = db.Column(db.DateTime)
+    rack_position = db.Column(db.String(10))
 
     def __repr__(self):
         return '<Server {}>'.format(self.hostname)
@@ -47,14 +50,23 @@ class Server(db.Model):
             'model': self.model,
             'manufacturer': self.manufacturer,
             'rack_id': self.rack_id,
+            'rack_position': self.rack_position,
             'location_id': self.location_id,
             'service_id': self.service_id,
-            'status': self.status
+            'status': self.status,
+            'comment': self.comment,
+            'support_start': self.support_start,
+            'support_end': self.support_end,
             }
         return data
 
     def from_dict(self, data, new_work=False):
         for field in ['hostname', 'ipaddress', 'netmask', 'gateway', 'memory',
                       'cpu', 'psu', 'hd', 'os_name', 'os_version', 'serial',
-                      'model', 'manufacturer', 'status']:
-            setattr(self, field, data[field])
+                      'model', 'manufacturer', 'status', 'comment',
+                      'support_start', 'support_end']:
+            if field == "support_start" or field == "support_end":
+                date = datetime.strptime(data[field], "%Y-%m-%d")
+                setattr(self, field, date)
+            else:
+                setattr(self, field, data[field])

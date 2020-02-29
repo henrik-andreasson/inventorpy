@@ -17,7 +17,8 @@ def create_server():
     for field in ['hostname', 'status', 'ipaddress', 'netmask', 'gateway',
                   'memory', 'cpu', 'psu', 'hd', 'serial', 'model', 'os_name',
                   'os_version', 'manufacturer', 'rack_id', 'location_id',
-                  'service_id']:
+                  'service_id', 'support_start', 'support_end', 'comment',
+                  'rack_position']:
         if field not in data:
             return bad_request('must include %s fields' % field)
 

@@ -25,13 +25,19 @@
                 {{s.ipaddress}}
         </td>
         <td>
+            {% if s.location %}
                 {{s.location.longName()}}
+            {% endif %}
         </td>
         <td>
-                {{s.service.name}}
+          {% if s.service %}
+              {{s.service.name}}
+          {% endif %}
         </td>
         <td>
+          {% if s.rack %}
                 {{s.rack.name}}
+          {% endif %}
         </td>
 
       </tr>
