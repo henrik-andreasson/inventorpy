@@ -80,6 +80,21 @@
       </div>
     {% endif %}
 
+
+    {% if hsmpcicards %}
+      <div class="list-group">
+        <a href="{{ url_for('main.hsm_domain_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('HSM PCI Card')}}</h4>  </a>
+
+        {% for h in hsmpcicards %}
+          <A HREF="{{url_for('main.hsm_pcicard_edit', pcicard=h.id)}}" class="list-group-item">
+            {{ h.hsmdomain.name }} - {{ h.serial }} - {{ h.server.hostname }}  {{ h.compartment.name }}
+          </A>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+
     {% if hsmpeds %}
       <div class="list-group">
         <a href="{{ url_for('main.hsm_ped_list')}}" class="list-group-item">
