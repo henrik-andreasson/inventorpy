@@ -49,7 +49,7 @@ class PaginatedAPIMixin(object):
 class Service(PaginatedAPIMixin, db.Model):
     __tablename__ = "service"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(140))
+    name = db.Column(db.String(140), unique=True)
     updated = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     color = db.Column(db.String(140))
     users = db.relationship('User', secondary=service_user)
