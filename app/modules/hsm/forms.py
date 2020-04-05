@@ -17,9 +17,9 @@ class HsmDomainForm(FlaskForm):
 class HsmPedForm(FlaskForm):
     keyno = StringField(_l('Key No.'), validators=[DataRequired()])
     keysn = StringField(_l('Key S/N'), validators=[DataRequired()])
-    hsmdomain = SelectField(_l('HSM Domain'))
-    compartment = SelectField(_l('Compartment'))
-    user = SelectField(_l('User'))
+    hsmdomain = SelectField(_l('HSM Domain'), coerce=int)
+    compartment = SelectField(_l('Compartment'), coerce=int)
+    user = SelectField(_l('User'), coerce=int)
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
@@ -27,7 +27,7 @@ class HsmPedForm(FlaskForm):
 
 class HsmPinForm(FlaskForm):
     ped = SelectField(_l('HSM PED'), coerce=int)
-    compartment = SelectField(_l('Compartment'))
+    compartment = SelectField(_l('Compartment'), coerce=int)
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))

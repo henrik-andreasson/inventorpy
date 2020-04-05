@@ -60,7 +60,7 @@ class HsmPin(db.Model):
     __tablename__ = "hsm_pin"
     id = db.Column(db.Integer, primary_key=True)
     ped = db.relationship('HsmPed')
-    ped_id = db.Column(db.Integer, db.ForeignKey('hsm_ped.id'), unique=True)
+    ped_id = db.Column(db.Integer, db.ForeignKey('hsm_ped.id'))
     compartment = db.relationship('Compartment')
     compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
 

@@ -20,8 +20,12 @@ class Safe(db.Model):
         return data
 
     def from_dict(self, data, new_work=False):
+
         for field in ['name', 'location_id']:
-            setattr(self, field, data[field])
+            if field == 'location_id':
+                setattr(self, field, int(data[field]))
+            else:
+                setattr(self, field, data[field])
 
 
 class Compartment(db.Model):

@@ -134,20 +134,17 @@ def hsm_ped_add():
         return redirect(request.referrer)
 
     form = HsmPedForm()
-    print("ped input: %s-%s-%s-%s" % (form.hsmdomain.data, form.user.data, form.keyno.data, form.keysn.data))
 
-    form.hsmdomain.choices = [(h.name, h.name) for h in HsmDomain.query.all()]
-    form.user.choices = [(u.username, u.username) for u in User.query.all()]
     form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    form.user.choices = [(u.id, u.username) for u in User.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
-        hsmdomain = HsmDomain.query.filter_by(name=form.hsmdomain.data).first()
-        user = User.query.filter_by(username=form.user.data).first()
-
         hsmped = HsmPed(keyno=form.keyno.data,
                         keysn=form.keysn.data)
-        hsmped.hsmdomain = hsmdomain
-        hsmped.user = user
+        hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
+        hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
+        hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.add(hsmped)
         db.session.commit()
         flash(_('New HSM PED is now posted!'))
@@ -179,16 +176,16 @@ def hsm_ped_edit():
 
     form = HsmPedForm(obj=hsmped)
 
-    form.hsmdomain.choices = [(h.name, h.name) for h in HsmDomain.query.all()]
-    form.user.choices = [(u.username, u.username) for u in User.query.all()]
+    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    form.user.choices = [(u.id, u.username) for u in User.query.all()]
+    form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
-        hsmdomain = HsmDomain.query.filter_by(name=form.hsmdomain.data).first()
-        user = User.query.filter_by(username=form.user.data).first()
         hsmped.keyno = form.keyno.data
         hsmped.keysn = form.keysn.data
-        hsmped.hsmdomain = hsmdomain
-        hsmped.user = user
+        hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
+        hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
+        hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.commit()
         flash(_('Your changes have been saved.'))
 
@@ -245,19 +242,14 @@ def hsm_pin_add():
         return redirect(request.referrer)
 
     form = HsmPinForm()
-    peds = []
-    for h in HsmPed.query.all():
-        pedstr = "%s-%s-%s-%s-%s" % (h.id, h.hsmdomain.name, h.keyno, h.keysn, h.user.username)
-        ped = (h.id, pedstr)
-        peds.append(ped)
+    form.ped.choices = [(p.id, '{}-{} ({})'.format(p.keyno, p.keysn, p.user.username)) for p in HsmPed.query.all()]
+    form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    form.compartment.choices.insert(0, (0, 'None'))
 
-    form.ped.choices = peds
     if request.method == 'POST' and form.validate_on_submit():
-        hsmped = HsmPed.query.get(form.ped.data)
-#        safe = HsmPed.query.filter_by(id=form.safe.data).first()
-        hsmpin = HsmPin(safe=form.safe.data)
-        hsmpin.ped = hsmped
-#        hsmpin.safe = safe
+        hsmpin = HsmPin()
+        hsmpin.ped = HsmPed.query.get(form.ped.data)
+        hsmpin.compartment = Compartment.query.get(form.compartment.data)
         db.session.add(hsmpin)
         db.session.commit()
         flash(_('New HSM PIN is now posted!'))
@@ -266,9 +258,8 @@ def hsm_pin_add():
 
     else:
 
-        hsmpins = HsmPin.query.all()
-        return render_template('hsm.html', title=_('HSM'),
-                               form=form, hsmpins=hsmpins)
+        return render_template('hsm.html', title=_('HSM PIN'),
+                               form=form)
 
 
 @bp.route('/hsm/pin/edit/', methods=['GET', 'POST'])
@@ -289,18 +280,10 @@ def hsm_pin_edit():
     if hsmpin is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
 
-    peds = []
-    for h in HsmPed.query.all():
-        pedstr = "%s-%s-%s-%s-%s" % (h.id, h.hsmdomain.name, h.keyno, h.keysn, h.user.username)
-        ped = (h.id, pedstr)
-        peds.append(ped)
-
-    form.ped.choices = peds
+    form.ped.choices = [(p.id, '{} ({})'.format(p.keyno, p.keysn)) for p in HsmPed.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmped = HsmPed.query.get(form.ped.data)
-#        safe = HsmPed.query.filter_by(id=form.safe.data).first()
-#        hsmpin.safe = safe
         hsmpin.safe = form.safe.data
         hsmpin.ped = hsmped
         db.session.commit()
