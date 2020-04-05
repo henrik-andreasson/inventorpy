@@ -6,7 +6,7 @@ from flask_babel import _, get_locale
 from app import db
 from app.main.forms import EditProfileForm, ServiceForm, LocationForm
 from app.models import User, Service, Location
-from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin
+from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard
 from app.modules.safe.models import Safe, Compartment
 from app.modules.server.models import Server
 from app.modules.network.models import Network
@@ -35,13 +35,14 @@ def index():
     networks = Network.query.order_by(Network.name).limit(10)
     safes = Safe.query.order_by(Safe.name).limit(10)
     compartments = Compartment.query.order_by(Compartment.name).limit(10)
+    hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.serial).limit(10)
 
     return render_template('index.html', title=_('Explore'),
                            servers=servers, locations=locations,
                            services=services, hsmdomains=hsmdomains,
                            hsmpeds=hsmpeds, hsmpins=hsmpins,
                            networks=networks, safes=safes,
-                           compartments=compartments)
+                           compartments=compartments, hsmpcicards=hsmpcicards)
 
 
 @bp.route('/user/<username>')
