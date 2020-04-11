@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import os
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
+from flask_login import current_user
 
 
 Base = declarative_base()
@@ -215,3 +216,88 @@ class Location(PaginatedAPIMixin, db.Model):
         for field in ['place', 'facillity', 'area', 'position', 'type']:
             if field in data:
                 setattr(self, field, data[field])
+
+
+class Audit(PaginatedAPIMixin, db.Model):
+    __tablename__ = "audit"
+    id = db.Column(db.Integer, primary_key=True)
+    module = db.Column(db.String(140))
+    module_id = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    original_data = db.Column(db.String(255))
+    updated_data = db.Column(db.String(255))
+    updated_column = db.Column(db.String(255))
+    user = db.relationship('User')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    type = db.Column(db.String(128))
+
+    def __repr__(self):
+        return '<Audit {}/{}/{}/{}>'.format(self.timestamp,
+                                            self.module,
+                                            self.original_data,
+                                            self.updated_data)
+
+    def record(self):
+        return '{} - {} - {} - {}'.format(self.timestap, self.module,
+                                          self.original_data, self.updated_data)
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'module': self.module,
+            'module_id': self.module_id,
+            'timestamp': self.timestamp,
+            'original_data': self.original_data,
+            'updated_data': self.updated_data,
+            'updated_column': self.updated_column,
+            'type': self.type,
+            'user_id': self.user_id
+        }
+        return data
+
+    def from_dict(self, data):
+        for field in ['id', 'module', 'module_id', 'timestamp', 'original_data',
+                      'updated_data', 'type', 'user_id']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def dict_to_string(self, dict):
+        str = ""
+        for field in dict.keys():
+            str += "{}: {} ".format(field, dict[field])
+        return str
+
+    def auditlog_new_post(self, module, original_data):
+        ts = datetime.utcnow()
+        user = User.query.filter_by(username=current_user.username).first()
+        audit = Audit(module='service', module_id=original_data['id'],
+                      timestamp=ts,
+                      original_data=self.dict_to_string(original_data),
+                      type='new', user=user)
+        db.session.add(audit)
+        db.session.commit()
+
+    def auditlog_update_post(self, module, original_data, updated_data):
+        ts = datetime.utcnow()
+        user = User.query.filter_by(username=current_user.username).first()
+
+        for field in updated_data:
+            if original_data[field] != updated_data[field]:
+                audit = Audit(module=module, module_id=original_data['id'],
+                              timestamp=ts,
+                              original_data=original_data[field],
+                              updated_data=updated_data[field],
+                              updated_column=field,
+                              type='update', user=user)
+                db.session.add(audit)
+                db.session.commit()
+
+    def auditlog_delete_post(self, module, data):
+        ts = datetime.utcnow()
+        user = User.query.filter_by(username=current_user.username).first()
+
+        audit = Audit(module=module, module_id=self.id, timestamp=ts,
+                      original_data=self.dict_to_string(data),
+                      type='delete', user=user)
+        db.session.add(audit)
+        db.session.commit()

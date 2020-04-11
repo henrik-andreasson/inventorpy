@@ -1,10 +1,19 @@
 #!/bin/bash
 
-# uses httpie  - pip3 install httpie
+if [ -f variables ] ; then
+  . variables
+  echo "URL: ${API_URL}"
+  echo "User: ${API_USER}"
 
-read -p "username > " user_name
-read -p "password > " pass_word
-apiserverurl="http://127.0.0.1:5000/api"
+fi
+
+if [ -f rest-get-token.sh ] ; then
+  . rest-get-token.sh
+  get_new_token
+else
+  echo "login/get token failed"
+  exit
+fi
 
 if [ "x$1" != "x" ] ; then
     csvfile=$1
@@ -13,8 +22,6 @@ else
     echo "name,location_id"
     exit
 fi
-
-token=$(http --auth "$user_name:$pass_word" POST "${apiserverurl}/tokens" | jq ".token" | sed 's/\"//g')
 
 IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
@@ -25,7 +32,7 @@ for row in $(cat "${csvfile}") ; do
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
-  http --verbose POST "${apiserverurl}/safe" \
+  http --verbose POST "${API_URL}/safe" \
     "name=${name}" \
     "location_id=${location_id}" \
     "Authorization:Bearer $token"

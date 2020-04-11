@@ -27,6 +27,7 @@
                     <li class="nav-item"><a href="{{ url_for('main.hsm_pin_add') }}">{{ _('Pin') }}</a></li>
                     <li class="nav-item"><a href="{{ url_for('main.rack_add') }}">{{ _('Rack') }}</a></li>
                     <li class="nav-item"><a href="{{ url_for('main.safe_add') }}">{{ _('Safe') }}</a></li>
+                    <li class="nav-item"><a href="{{ url_for('main.logs_list') }}">{{ _('Logs') }}</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_anonymous %}

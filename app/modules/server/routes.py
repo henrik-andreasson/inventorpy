@@ -1,9 +1,9 @@
 from flask import render_template, flash, redirect, url_for, request, \
     current_app, session
 from flask_login import current_user, login_required
-from app import db
+from app import db, audit
 from app.main import bp
-from app.models import Service, Location
+from app.models import Service, Location, Audit
 from app.modules.server.models import Server
 from app.modules.rack.models import Rack
 from app.modules.server.forms import ServerForm
@@ -61,15 +61,17 @@ def server_add():
                         comment=form.comment.data,
                         support_start=form.support_start.data,
                         support_end=form.support_end.data,
-                        rack_position=form.rack_position.data,
-                        environment=form.environment.data
+                        rack_position=form.rack_position.data
                         )
 
+#,
+#environment=form.environment.data
         server.service = service
         server.location = location
         server.rack = rack
         db.session.add(server)
         db.session.commit()
+        audit.auditlog_new_post(server.__class__.__name, original_data=server.to_dict())
         flash(_('New server is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -93,9 +95,11 @@ def server_edit():
         return redirect(url_for('main.server_delete', server=serverid))
     if 'copy' in request.form:
         return redirect(url_for('main.server_copy', copy_from_server=serverid))
+    if 'logs' in request.form:
+        return redirect(url_for('main.logs_list', module='server', module_id=serverid))
 
     server = Server.query.get(serverid)
-
+    original_data = server.to_dict()
     form = ServerForm(obj=server)
 
     if 'selected_service' in session:
@@ -135,6 +139,7 @@ def server_edit():
         server.environment = form.environment.data
 
         db.session.commit()
+        audit.auditlog_update_post('server', original_data=original_data, updated_data=server.to_dict())
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))

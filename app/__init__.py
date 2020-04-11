@@ -21,6 +21,9 @@ bootstrap = Bootstrap()
 moment = Moment()
 babel = Babel()
 
+from app.models import Audit
+audit = Audit()
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)

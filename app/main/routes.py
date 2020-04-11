@@ -3,9 +3,9 @@ from flask import render_template, flash, redirect, url_for, request, g, \
 from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 # from guess_language import guess_language
-from app import db
+from app import db, audit
 from app.main.forms import EditProfileForm, ServiceForm, LocationForm
-from app.models import User, Service, Location
+from app.models import User, Service, Location, Audit
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard
 from app.modules.safe.models import Safe, Compartment
 from app.modules.server.models import Server
@@ -72,6 +72,8 @@ def service_add():
             service.users.append(user)
         db.session.add(service)
         db.session.commit()
+#        audit = Audit()
+        audit.auditlog_new_post(service.__class__.__name__, original_data=service.to_dict())
         flash(_('Service have been saved.'))
         return redirect(url_for('main.service_list'))
 
@@ -92,7 +94,7 @@ def service_edit():
 
     servicename = request.args.get('name')
     service = Service.query.filter_by(name=servicename).first()
-
+    original_data = service.to_dict()
     if service is None:
         render_template('service.html', title=_('Service is not defined'))
 
@@ -111,6 +113,8 @@ def service_edit():
         service.color = form.color.data
 
         db.session.commit()
+        audit.auditlog_update_post(service.__class__.__name__, original_data=original_data, updated_data=service.to_dict())
+
         flash(_('Your changes have been saved.'))
         return redirect(url_for('main.service_list'))
 
@@ -165,6 +169,7 @@ def location_add():
         location.type = form.type.data
         db.session.add(location)
         db.session.commit()
+        audit.auditlog_new_post(location.__class__.__name__, original_data=location.to_dict())
         flash(_('Location have been saved.'))
         return redirect(url_for('main.location_list'))
 
@@ -185,7 +190,7 @@ def location_edit():
 
     locationid = request.args.get('location')
     location = Location.query.filter_by(id=locationid).first()
-
+    original_data = location.to_dict()
     if location is None:
         render_template('location.html', title=_('Location is not defined'))
 
@@ -199,6 +204,8 @@ def location_edit():
         location.type = form.type.data
 
         db.session.commit()
+        audit.auditlog_update_post('location', original_data=original_data, updated_data=location.to_dict())
+
         flash(_('Your changes have been saved.'))
         return redirect(url_for('main.location_list'))
 
@@ -216,4 +223,31 @@ def location_list():
     next_url = url_for('main.location_list', page=locations.next_num) if locations.has_next else None
     prev_url = url_for('main.location_list', page=locations.prev_num) if locations.has_prev else None
     return render_template('location.html', locations=locations.items,
+                           next_url=next_url, prev_url=prev_url)
+
+
+@bp.route('/logs/list/', methods=['GET', 'POST'])
+@login_required
+def logs_list():
+    page = request.args.get('page', 1, type=int)
+    module = request.args.get('module')
+    module_id = request.args.get('module_id', type=int)
+    logs_for_user = request.args.get('user_id', type=int)
+
+    if logs_for_user is not None:
+        logs = Audit.query.filter_by(user_id=logs_for_user).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    elif module is not None and module_id is not None:
+        logs = Audit.query.filter_by(module=module, module_id=module_id).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    elif module is not None:
+        logs = Audit.query.filter_by(module=module).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    else:
+        logs = Audit.query.order_by(Audit.timestamp.desc()).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+
+    next_url = url_for('main.logs_list', page=logs.next_num) if logs.has_next else None
+    prev_url = url_for('main.logs_list', page=logs.prev_num) if logs.has_prev else None
+    return render_template('logs.html', logs=logs.items,
                            next_url=next_url, prev_url=prev_url)

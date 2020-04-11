@@ -4,7 +4,7 @@ if [ -f variables ] ; then
   . variables
   echo "URL: ${API_URL}"
   echo "User: ${API_USER}"
-  
+
 fi
 
 if [ -f rest-get-token.sh ] ; then
@@ -38,7 +38,7 @@ for row in $(cat "${csvfile}") ; do
   if [ "x$iscomment" != "x" ] ; then
     continiue
   fi
-  http --verify cacerts.pem --verbose POST "${apiserverurl}/users" \
+  http --verify cacerts.pem --verbose POST "${API_URL}/users" \
     "email=${email}" \
     "about_me=${about_me}" \
     "username=${username}" \
