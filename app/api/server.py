@@ -4,7 +4,7 @@ from app.modules.server.models import Server
 from app.modules.rack.models import Rack
 from app.models import User, Service, Location
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -39,6 +39,8 @@ def create_server():
 
     db.session.add(server)
     db.session.commit()
+    audit.auditlog_new_post('server', original_data=server.to_dict(), record_name=server.hostname)
+
     response = jsonify(server.to_dict())
 
     response.status_code = 201
@@ -65,26 +67,11 @@ def get_server(id):
 @token_auth.login_required
 def update_server(id):
     server = Server.query.get_or_404(id)
+    original_data = server.to_dict()
+
     data = request.get_json() or {}
     server.from_dict(data, new_server=False)
     db.session.commit()
+    audit.auditlog_update_post('server', original_data=original_data, updated_data=server.to_dict(), record_name=server.hostname)
+
     return jsonify(server.to_dict())
-
-
-@bp.route('/server/adduser', methods=['POST'])
-def add_user_to_server():
-
-    data = request.get_json() or {}
-    if 'server' not in data or 'username' not in data:
-        return bad_request('must include server(name) and username fields')
-
-    server = Server.query.filter_by(name=data['server']).first()
-    user = User.query.filter_by(username=data['username']).first()
-
-    server.users.append(user)
-    db.session.commit()
-    response = jsonify(server.to_dict())
-
-    response.status_code = 201
-    response.headers['Location'] = url_for('api.get_server', id=server.id)
-    return response

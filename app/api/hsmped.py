@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify
 from app.modules.hsm.models import HsmPed
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -21,6 +21,7 @@ def create_hsmped():
 
     db.session.add(hsmped)
     db.session.commit()
+    audit.auditlog_new_post('hsm_ped', original_data=hsmped.to_dict(), record_name=hsmped.keyno)
     response = jsonify(hsmped.to_dict())
 
     response.status_code = 201
@@ -50,7 +51,10 @@ def get_hsmped(id):
 @token_auth.login_required
 def update_hsmped(id):
     hsmped = HsmPed.query.get_or_404(id)
+    original_data = hsmped.to_dict()
     data = request.get_json() or {}
     hsmped.from_dict(data)
     db.session.commit()
+    audit.auditlog_update_post('hsm_ped', original_data=original_data, updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+
     return jsonify(hsmped.to_dict())

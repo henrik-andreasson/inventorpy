@@ -1,12 +1,10 @@
-from flask import render_template, flash, redirect, url_for, request, \
-    current_app, session
-from flask_login import current_user, login_required
-from app import db
+from flask import render_template, flash, redirect, url_for, request, current_app
+from flask_login import login_required
+from app import db, audit
 from app.main import bp
-from app.models import Service, Location, User
+from app.models import Location, User
 from app.modules.safe.models import Safe, Compartment
 from app.modules.safe.forms import SafeForm, CompartmentForm
-from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
 
 
@@ -18,13 +16,13 @@ def safe_add():
 
     form = SafeForm(formdata=request.form)
 
-    location_choices = []
-    for l in Location.query.all():
-        formatedloc = "%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position)
-        print("loc: %s:%s" % (l.id, formatedloc))
-        newloc = (l.id, formatedloc)
-        location_choices.append(newloc)
-    form.location.choices = location_choices
+    # location_choices = []
+    # for l in Location.query.all():
+    #     formatedloc = "%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position)
+    #     print("loc: %s:%s" % (l.id, formatedloc))
+    #     newloc = (l.id, formatedloc)
+    #     location_choices.append(newloc)
+    # form.location.choices = location_choices
 
     if request.method == 'POST' and form.validate_on_submit():
 
@@ -33,6 +31,8 @@ def safe_add():
         safe.location = location
         db.session.add(safe)
         db.session.commit()
+        audit.auditlog_new_post('safe', original_data=safe.to_dict(), record_name=safe.name)
+
         flash(_('New Safe is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -56,16 +56,17 @@ def safe_edit():
 
     safe = Safe.query.get(safeid)
     form = SafeForm(obj=safe)
+    original_data = safe.to_dict()
 
     if safe is None:
         flash(_('Safe not found'))
         return redirect(request.referrer)
-
-    location_choices = []
-    for l in Location.query.all():
-        newloc = (l.id, l.longName())
-        location_choices.append(newloc)
-    form.location.choices = location_choices
+    #
+    # location_choices = []
+    # for l in Location.query.all():
+    #     newloc = (l.id, l.longName())
+    #     location_choices.append(newloc)
+    # form.location.choices = location_choices
 
     if request.method == 'POST' and form.validate_on_submit():
         location = Location.query.get(form.location.data)
@@ -73,11 +74,15 @@ def safe_edit():
         safe.name = form.name.data
         safe.location = location
         db.session.commit()
+        audit.auditlog_update_post('safe', original_data=original_data, updated_data=safe.to_dict(), record_name=safe.name)
+
         flash(_('Your changes to the safe have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+        form.location.data = safe.location_id
+
         return render_template('safe.html', title=_('Edit Safe'),
                                form=form)
 
@@ -116,6 +121,7 @@ def safe_delete():
                                            safe.location.longName())
     db.session.delete(safe)
     db.session.commit()
+    audit.auditlog_delete_post('safe', data=safe.to_dict(), record_name=safe.name)
     flash(deleted_msg)
 
     return redirect(url_for('main.index'))
@@ -140,6 +146,8 @@ def compartment_add():
         compartment.user = user
         db.session.add(compartment)
         db.session.commit()
+        audit.auditlog_new_post('compartment', original_data=compartment.to_dict(), record_name=compartment.name)
+
         flash(_('New Compartment is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -162,6 +170,8 @@ def compartment_edit():
         return redirect(url_for('main.compartment_delete', compartment=compartmentid))
 
     compartment = Compartment.query.get(compartmentid)
+    original_data = compartment.to_dict()
+
     form = CompartmentForm(obj=compartment)
     form.safe.choices = [(s.id, s.name) for s in Safe.query.all()]
     form.user.choices = [(u.id, u.username) for u in User.query.all()]
@@ -177,6 +187,8 @@ def compartment_edit():
         compartment.safe = safe
         compartment.user = user
         db.session.commit()
+        audit.auditlog_update_post('compartment', original_data=original_data, updated_data=compartment.to_dict(), record_name=compartment.name)
+
         flash(_('Your changes to the compartment have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -219,6 +231,8 @@ def compartment_delete():
     deleted_msg = 'Compartment deleted: %s' % (compartment.name)
     db.session.delete(compartment)
     db.session.commit()
+    audit.auditlog_delete_post('compartment', data=compartment.to_dict(), record_name=compartment.name)
+
     flash(deleted_msg)
 
     return redirect(url_for('main.index'))

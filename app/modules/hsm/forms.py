@@ -4,14 +4,22 @@ from wtforms.fields.html5 import DateTimeField
 from wtforms.validators import DataRequired
 from flask_babel import lazy_gettext as _l
 from datetime import datetime
+from app.models import Service, User
+from app.modules.safe.models import Safe, Compartment
+from app.modules.hsm.models import HsmDomain, HsmPed
+from app.modules.server.models import Server
 
 
 class HsmDomainForm(FlaskForm):
     name = StringField(_l('Name'), validators=[DataRequired()])
-    service = SelectField(_l('Service'), validators=[DataRequired()])
+    service = SelectField(_l('Service'), validators=[DataRequired()], coerce=int)
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
 
 
 class HsmPedForm(FlaskForm):
@@ -24,6 +32,12 @@ class HsmPedForm(FlaskForm):
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+        self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+        self.user.choices = [(u.id, u.username) for u in User.query.all()]
+
 
 class HsmPinForm(FlaskForm):
     ped = SelectField(_l('HSM PED'), coerce=int)
@@ -31,6 +45,11 @@ class HsmPinForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.compartment.choices = [(c.id, c.name) for c in Compartment.query.order_by(Compartment.id).all()]
+        self.ped.choices = [(p.id, '{} - {} - {}'.format(p.keyno, p.keysn, p.user.username)) for p in HsmPed.query.all()]
 
 
 class HsmPciCardForm(FlaskForm):
@@ -48,6 +67,14 @@ class HsmPciCardForm(FlaskForm):
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.compartment.choices = [(c.id, c.name) for c in Compartment.query.order_by(Compartment.id).all()]
+        self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+        self.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+        self.server.choices.insert(0, (0, 'None'))
+        self.compartment.choices.insert(0, (0, 'None'))
+
 
 class HsmBackupUnitForm(FlaskForm):
     serial = StringField(_l('Serial No.'), validators=[DataRequired()])
@@ -55,8 +82,12 @@ class HsmBackupUnitForm(FlaskForm):
     manufacturedate = StringField(_l('Manufacture Date'), validators=[DataRequired()])
     fbno = StringField(_l('FB No.'), validators=[DataRequired()])
     hsmdomain = SelectField(_l('HSM Domain'), validators=[DataRequired()])
-    server = SelectField(_l('Server'), validators=[DataRequired()])
     safe = SelectField(_l('Safe'), validators=[DataRequired()])
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.safe.choices = [(s.id, s.name) for s in Safe.query.order_by(Safe.name).all()]
+        self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]

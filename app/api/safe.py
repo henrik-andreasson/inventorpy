@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify
 from app.modules.safe.models import Safe, Compartment
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -21,6 +21,8 @@ def create_safe():
 
     db.session.add(safe)
     db.session.commit()
+    audit.auditlog_new_post('safe', original_data=safe.to_dict(), record_name=safe.name)
+
     response = jsonify(safe.to_dict())
 
     response.status_code = 201
@@ -50,9 +52,13 @@ def get_safe(id):
 @token_auth.login_required
 def update_safe(id):
     safe = Safe.query.get_or_404(id)
+    original_data = safe.to_dict()
+
     data = request.get_json() or {}
     safe.from_dict(data, new_safe=False)
     db.session.commit()
+    audit.auditlog_update_post('safe', original_data=original_data, updated_data=safe.to_dict(), record_name=safe.name)
+
     return jsonify(safe.to_dict())
 
 
@@ -69,6 +75,8 @@ def create_compartment():
 
     db.session.add(compartment)
     db.session.commit()
+    audit.auditlog_new_post('compartment', original_data=compartment.to_dict(), record_name=compartment.name)
+
     response = jsonify(compartment.to_dict())
 
     response.status_code = 201
@@ -98,7 +106,11 @@ def get_compartment(id):
 @token_auth.login_required
 def update_compartment(id):
     compartment = Compartment.query.get_or_404(id)
+    original_data = compartment.to_dict()
+
     data = request.get_json() or {}
     compartment.from_dict(data, new_compartment=False)
     db.session.commit()
+    audit.auditlog_update_post('compartment', original_data=original_data, updated_data=compartment.to_dict(), record_name=compartment.name)
+
     return jsonify(compartment.to_dict())

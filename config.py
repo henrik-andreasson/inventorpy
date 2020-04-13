@@ -18,10 +18,10 @@ class Config(object):
     ADMINS = ['your-email@example.com']
     POSTS_PER_PAGE = 25
     LANGUAGES = ['en', 'es']
-    ROCKET_ENABLED = os.environ.get('ROCKET_ENABLED') or False
-    ROCKET_USER = os.environ.get('ROCKET_USER') or 'inventorpy'
+    ROCKET_ENABLED = os.environ.get('ROCKET_ENABLED') or True
+    ROCKET_USER = os.environ.get('ROCKET_USER') or 'inventory'
     ROCKET_PASS = os.environ.get('ROCKET_PASS') or 'foo123'
     ROCKET_URL = os.environ.get('ROCKET_URL') or 'http://172.17.0.4:3000'
-    ROCKET_CHANNEL = os.environ.get('ROCKET_CHANNEL') or 'GENERAL'
+    ROCKET_CHANNEL = os.environ.get('ROCKET_CHANNEL') or 'general'
     OPEN_REGISTRATION = os.environ.get('OPEN_REGISTRATION') or True
     INVENTORPY_TZ = os.environ.get('TEAMPLAN_TZ') or "Europe/Stockholm"

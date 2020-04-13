@@ -12,6 +12,7 @@ import os
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
 from flask_login import current_user
+from app.rocketchat import InventorpyRocketChatClient
 
 
 Base = declarative_base()
@@ -222,6 +223,7 @@ class Audit(PaginatedAPIMixin, db.Model):
     __tablename__ = "audit"
     id = db.Column(db.Integer, primary_key=True)
     module = db.Column(db.String(140))
+    record_name = db.Column(db.String(140))
     module_id = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     original_data = db.Column(db.String(255))
@@ -267,37 +269,44 @@ class Audit(PaginatedAPIMixin, db.Model):
             str += "{}: {} ".format(field, dict[field])
         return str
 
-    def auditlog_new_post(self, module, original_data):
+    def auditlog_new_post(self, module, original_data, record_name):
         ts = datetime.utcnow()
         user = User.query.filter_by(username=current_user.username).first()
-        audit = Audit(module='service', module_id=original_data['id'],
-                      timestamp=ts,
+        audit = Audit(module=module, module_id=original_data['id'],
+                      timestamp=ts, record_name=record_name,
                       original_data=self.dict_to_string(original_data),
                       type='new', user=user)
         db.session.add(audit)
         db.session.commit()
+        rocket = InventorpyRocketChatClient()
+        rs = "{} added {} a {} with data {}".format(user.username, record_name, module, self.dict_to_string(original_data))
+        rocket.send_message_to_rocket_chat(rs)
 
-    def auditlog_update_post(self, module, original_data, updated_data):
+    def auditlog_update_post(self, module, original_data, updated_data, record_name):
         ts = datetime.utcnow()
         user = User.query.filter_by(username=current_user.username).first()
 
         for field in updated_data:
             if original_data[field] != updated_data[field]:
                 audit = Audit(module=module, module_id=original_data['id'],
-                              timestamp=ts,
+                              timestamp=ts, record_name=record_name,
                               original_data=original_data[field],
                               updated_data=updated_data[field],
                               updated_column=field,
                               type='update', user=user)
                 db.session.add(audit)
                 db.session.commit()
+                rocket = InventorpyRocketChatClient()
+                rs = "{} changed {} a {} field: {} from: {} to: {}".format(user.username, record_name, module, field, original_data[field], updated_data[field])
+                rocket.send_message_to_rocket_chat(rs)
 
-    def auditlog_delete_post(self, module, data):
+    def auditlog_delete_post(self, module, data, record_name):
         ts = datetime.utcnow()
         user = User.query.filter_by(username=current_user.username).first()
 
         audit = Audit(module=module, module_id=self.id, timestamp=ts,
                       original_data=self.dict_to_string(data),
+                      record_name=record_name,
                       type='delete', user=user)
         db.session.add(audit)
         db.session.commit()

@@ -1,13 +1,12 @@
 from flask import render_template, flash, redirect, url_for, request, \
     current_app, session
-from flask_login import current_user, login_required
-from app import db
+from flask_login import login_required
+from app import db, audit
 from app.main import bp
 from app.models import Service, Location
 from app.modules.network.models import Network
 from app.modules.network.forms import NetworkForm
 from app.modules.server.models import Server
-from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
 import ipcalc
 
@@ -21,20 +20,20 @@ def network_add():
 
     form = NetworkForm(formdata=request.form)
 
-    if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.id, service.name)]
-
-    else:
-        form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-
-    location_choices = []
-    for l in Location.query.all():
-        formatedloc = "%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position)
-        print("loc: %s:%s" % (l.id, formatedloc))
-        newloc = (l.id, formatedloc)
-        location_choices.append(newloc)
-    form.location.choices = location_choices
+    # if 'selected_service' in session:
+    #     service = Service.query.filter_by(name=session['selected_service']).first()
+    #     form.service.choices = [(service.id, service.name)]
+    #
+    # else:
+    #     form.service.choices = [(s.id, s.name) for s in Service.query.all()]
+    #
+    # location_choices = []
+    # for l in Location.query.all():
+    #     formatedloc = "%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position)
+    #     print("loc: %s:%s" % (l.id, formatedloc))
+    #     newloc = (l.id, formatedloc)
+    #     location_choices.append(newloc)
+    # form.location.choices = location_choices
 
     if request.method == 'POST' and form.validate_on_submit():
         location = Location.query.filter_by(id=form.location.data).first()
@@ -45,16 +44,16 @@ def network_add():
                           gateway=form.gateway.data,
                           location=location)
         db.session.add(network)
+
         db.session.commit()
+        audit.auditlog_new_post('network', original_data=network.to_dict(), record_name=network.name)
         flash(_('New network is now posted!'))
 
         return redirect(url_for('main.index'))
 
     else:
-
-        networks = Network.query.order_by(Network.id.desc()).limit(10)
         return render_template('network.html', title=_('Add Network'),
-                               form=form, networks=networks)
+                               form=form)
 
 
 @bp.route('/network/edit/', methods=['GET', 'POST'])
@@ -69,57 +68,49 @@ def network_edit():
         return redirect(url_for('main.network_delete', network=networkid))
 
     network = Network.query.get(networkid)
+    original_data = network.to_dict()
 
     form = NetworkForm(obj=network)
 
-    if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.name, service.name)]
-
-    else:
-        form.service.choices = [(s.id, s.name) for s in Service.query.all()]
- 
-    location_choices = []
-    for l in Location.query.all():
-        formatedloc = "%s-%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position, l.type)
-        print("loc: %s:%s" % (l.id, formatedloc))
-        newloc = (l.id, formatedloc)
-        location_choices.append(newloc)
-    form.location.choices = location_choices
+    # if 'selected_service' in session:
+    #     service = Service.query.filter_by(name=session['selected_service']).first()
+    #     form.service.choices = [(service.name, service.name)]
+    #
+    # else:
+    #     form.service.choices = [(s.id, s.name) for s in Service.query.all()]
+    #
+    # location_choices = []
+    # for l in Location.query.all():
+    #     formatedloc = "%s-%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position, l.type)
+    #     print("loc: %s:%s" % (l.id, formatedloc))
+    #     newloc = (l.id, formatedloc)
+    #     location_choices.append(newloc)
+    # form.location.choices = location_choices
 
     if network is None:
         render_template('service.html', title=_('Network is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
-        string_from = '%s\t%s\t%s\t@%s\n' % (network.name, network.network,
-                                             network.location, network.service)
-        service = Service.query.filter_by(name=form.service.data).first()
-        location = Location.query.get(form.location.data)
+    #    service = Service.query.filter_by(name=form.service.data).first()
+    #    location = Location.query.get(form.location.data)
 
         network.name = form.name.data
         network.network = form.network.data
         network.netmask = form.netmask.data
         network.gateway = form.gateway.data
-        network.location = location
-        network.service = service
+        network.location_id = form.location.data
+        network.service_id = form.service.data
 
         db.session.commit()
+        audit.auditlog_update_post('network', original_data=original_data, updated_data=network.to_dict(), record_name=network.name)
         flash(_('Your changes have been saved.'))
-
-        if current_app.config['ROCKET_ENABLED']:
-            string_to = '%s\t%s\t%s\t@%s\n' % (network.start, network.stop,
-                                               network.service, network.username)
-            rocket = RocketChat(current_app.config['ROCKET_USER'],
-                                current_app.config['ROCKET_PASS'],
-                                network_url=current_app.config['ROCKET_URL'])
-            rocket.chat_post_message('edit of network from: \n%s\nto:\n%s\nby: %s' % (
-                                 string_from, string_to, current_user.username),
-                                 channel=current_app.config['ROCKET_CHANNEL']
-                                 ).json()
 
         return redirect(url_for('main.index'))
 
     else:
+
+        form.location.data = network.location_id
+        form.service.data = network.service_id
         return render_template('network.html', title=_('Edit Network'),
                                form=form)
 
@@ -159,7 +150,7 @@ def network_delete():
     flash(deleted_msg)
     db.session.delete(network)
     db.session.commit()
-
+    audit.auditlog_delete_post('network', data=network.to_dict(), record_name=network.name)
     return redirect(url_for('main.index'))
 
 

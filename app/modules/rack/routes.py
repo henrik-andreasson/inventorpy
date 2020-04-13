@@ -1,12 +1,10 @@
-from flask import render_template, flash, redirect, url_for, request, \
-    current_app, session
-from flask_login import current_user, login_required
-from app import db
+from flask import render_template, flash, redirect, url_for, request, current_app
+from flask_login import login_required
+from app import db, audit
 from app.main import bp
-from app.models import Service, Location, User
+from app.models import Location
 from app.modules.rack.models import Rack
 from app.modules.rack.forms import RackForm
-from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
 
 
@@ -31,6 +29,8 @@ def rack_add():
         rack.location = location
         db.session.add(rack)
         db.session.commit()
+        audit.auditlog_new_post('rack', original_data=rack.to_dict(), record_name=rack.name)
+
         flash(_('New Rack is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -53,29 +53,26 @@ def rack_edit():
         return redirect(url_for('main.rack_delete', rack=rackid))
 
     rack = Rack.query.get(rackid)
-    form = RackForm(obj=rack)
-
     if rack is None:
         flash(_('Rack not found'))
         return redirect(request.referrer)
 
-    location_choices = []
-    for l in Location.query.all():
-        newloc = (l.id, l.longName())
-        location_choices.append(newloc)
-    form.location.choices = location_choices
+    form = RackForm(formdata=request.form, obj=rack)
+    original_data = rack.to_dict()
 
     if request.method == 'POST' and form.validate_on_submit():
-        location = Location.query.get(form.location.data)
 
         rack.name = form.name.data
-        rack.location = location
+        rack.location_id = form.location.data
+
         db.session.commit()
+        audit.auditlog_update_post('rack', original_data=original_data, updated_data=rack.to_dict(), record_name=rack.name)
         flash(_('Your changes to the rack have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+        form.location.data = rack.location.id
         return render_template('rack.html', title=_('Edit Rack'),
                                form=form)
 
@@ -113,7 +110,9 @@ def rack_delete():
     deleted_msg = 'Rack deleted: %s %s' % (rack.name,
                                            rack.location.longName())
     db.session.delete(rack)
+
     db.session.commit()
     flash(deleted_msg)
+    audit.auditlog_delete_post('rack', data=rack.to_dict(), record_name=rack.name)
 
     return redirect(url_for('main.index'))

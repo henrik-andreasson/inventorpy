@@ -60,7 +60,22 @@
             {{serv.name}}
           </a>
         {% endfor %}
--      </div>
+      </div>
+    {% endif %}
+
+    {% if racks %}
+
+    <div class="list-group">
+        <a href="{{ url_for('main.rack_add')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Rack')}}</h4>
+          </a>
+        {% for r in racks %}
+          <A HREF="{{url_for('main.rack_edit', rack=r.id)}}" class="list-group-item">
+                    {{ r.name }} - {{ r.location.longName() }}
+          </A>
+        {% endfor %}
+
+    </div>
     {% endif %}
 
 
@@ -83,7 +98,7 @@
 
     {% if hsmpcicards %}
       <div class="list-group">
-        <a href="{{ url_for('main.hsm_domain_list')}}" class="list-group-item">
+        <a href="{{ url_for('main.hsm_pcicard_list')}}" class="list-group-item">
           <h4 class="list-group-item-heading">{{_('HSM PCI Card')}}</h4>  </a>
 
         {% for h in hsmpcicards %}

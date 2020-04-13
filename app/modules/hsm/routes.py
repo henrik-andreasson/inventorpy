@@ -1,18 +1,16 @@
 from flask import render_template, flash, redirect, url_for, request, \
     current_app, session
-from flask_login import current_user, login_required
-from app import db
+from flask_login import login_required
+from app import db, audit
 from app.main import bp
-from app.models import Service, Location, User
+from app.models import Service, User
 from app.modules.server.models import Server
 from app.modules.safe.models import Compartment
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmBackupUnit, \
     HsmPciCard
 from app.modules.hsm.forms import HsmDomainForm, HsmPedForm, HsmPinForm, \
     HsmPciCardForm, HsmBackupUnitForm
-from rocketchat_API.rocketchat import RocketChat
 from flask_babel import _
-from datetime import datetime
 
 
 @bp.route('/hsm/domain/add', methods=['GET', 'POST'])
@@ -22,30 +20,31 @@ def hsm_domain_add():
         return redirect(request.referrer)
 
     form = HsmDomainForm(formdata=request.form)
-
-    if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.name, service.name)]
-
-    else:
-        form.service.choices = [(s.name, s.name) for s in Service.query.all()]
+    #
+    # if 'selected_service' in session:
+    #     service = Service.query.filter_by(name=session['selected_service']).first()
+    #     form.service.choices = [(service.name, service.name)]
+    #
+    # else:
+    #     form.service.choices = [(s.name, s.name) for s in Service.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
-        service = Service.query.filter_by(name=form.service.data).first()
+        service = Service.query.filter_by(id=form.service.data).first()
 
         hsmdomain = HsmDomain(name=form.name.data)
-        hsmdomain.service = service
+        hsmdomain.service_id = service.id
         db.session.add(hsmdomain)
         db.session.commit()
+        audit.auditlog_new_post('hsm_domain', original_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
+
         flash(_('New HSM Domain is now posted!'))
 
         return redirect(url_for('main.index'))
 
     else:
 
-        hsmdomains = HsmDomain.query.order_by(HsmDomain.name.desc()).limit(10)
         return render_template('hsm.html', title=_('HSM'),
-                               form=form, hsmdomains=hsmdomains)
+                               form=form)
 
 
 @bp.route('/hsm/domain/edit/', methods=['GET', 'POST'])
@@ -60,30 +59,33 @@ def hsm_domain_edit():
         return redirect(url_for('main.hsm_domain_delete', domain=domainid))
 
     hsmdomain = HsmDomain.query.get(domainid)
+    original_data = hsmdomain.to_dict()
 
     form = HsmDomainForm(obj=hsmdomain)
 
-    if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.name, service.name)]
-
-    else:
-        form.service.choices = [(s.name, s.name) for s in Service.query.all()]
+    # if 'selected_service' in session:
+    #     service = Service.query.filter_by(name=session['selected_service']).first()
+    #     form.service.choices = [(service.name, service.name)]
+    #
+    # else:
+    #     form.service.choices = [(s.name, s.name) for s in Service.query.all()]
 
     if hsmdomain is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
-        service = Service.query.filter_by(name=form.service.data).first()
+        service = Service.query.filter_by(id=form.service.data).first()
         hsmdomain.name = form.name.data
-        hsmdomain.service = service
+        hsmdomain.service_id = service.id
 
         db.session.commit()
+        audit.auditlog_update_post('hsm_domain', original_data=original_data, updated_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+        form.service.data = hsmdomain.service_id
         return render_template('hsm.html', title=_('Edit HSM Domain'),
                                form=form)
 
@@ -122,6 +124,7 @@ def hsm_domain_delete():
                                                  hsmdomain.service.name)
     db.session.delete(hsmdomain)
     db.session.commit()
+    audit.auditlog_delete_post('hsm_domain', data=hsmdomain.to_dict())
     flash(deleted_msg)
 
     return redirect(url_for('main.index'))
@@ -135,9 +138,9 @@ def hsm_ped_add():
 
     form = HsmPedForm()
 
-    form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    form.user.choices = [(u.id, u.username) for u in User.query.all()]
+    # form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    # form.user.choices = [(u.id, u.username) for u in User.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmped = HsmPed(keyno=form.keyno.data,
@@ -147,15 +150,15 @@ def hsm_ped_add():
         hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.add(hsmped)
         db.session.commit()
+        audit.auditlog_new_post('hsm_ped', original_data=hsmped.to_dict(), record_name=hsmped.keyno)
+
         flash(_('New HSM PED is now posted!'))
 
         return redirect(url_for('main.index'))
 
     else:
-
-        hsmpeds = HsmPed.query.order_by(HsmPed.keysn.desc()).limit(10)
         return render_template('hsm.html', title=_('HSM'),
-                               form=form, hsmpeds=hsmpeds)
+                               form=form)
 
 
 @bp.route('/hsm/ped/edit/', methods=['GET', 'POST'])
@@ -169,16 +172,17 @@ def hsm_ped_edit():
     if 'delete' in request.form:
         return redirect(url_for('main.hsm_ped_delete', ped=pedid))
 
-    print("pedid: %s" % pedid)
     hsmped = HsmPed.query.get(pedid)
+    original_data = hsmped.to_dict()
+
     if hsmped is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
 
     form = HsmPedForm(obj=hsmped)
 
-    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    form.user.choices = [(u.id, u.username) for u in User.query.all()]
-    form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    # form.user.choices = [(u.id, u.username) for u in User.query.all()]
+    # form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmped.keyno = form.keyno.data
@@ -187,11 +191,16 @@ def hsm_ped_edit():
         hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
         hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.commit()
+        audit.auditlog_update_post('hsm_ped', original_data=original_data, updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+        form.compartment.data = hsmped.compartment_id
+        form.hsmdomain.data = hsmped.hsmdomain_id
+        form.user.data = hsmped.user_id
         return render_template('hsm.html', title=_('Edit HSM Domain'),
                                form=form)
 
@@ -230,6 +239,7 @@ def hsm_ped_delete():
                                               hsmped.hsmdomain.name)
     db.session.delete(hsmped)
     db.session.commit()
+    audit.auditlog_delete_post('hsm_ped', data=hsmped.to_dict(), record_name=hsmped.keyno)
     flash(deleted_msg)
 
     return redirect(url_for('main.index'))
@@ -242,9 +252,9 @@ def hsm_pin_add():
         return redirect(request.referrer)
 
     form = HsmPinForm()
-    form.ped.choices = [(p.id, '{}-{} ({})'.format(p.keyno, p.keysn, p.user.username)) for p in HsmPed.query.all()]
-    form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    form.compartment.choices.insert(0, (0, 'None'))
+    # form.ped.choices = [(p.id, '{}-{} ({})'.format(p.keyno, p.keysn, p.user.username)) for p in HsmPed.query.all()]
+    # form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    # form.compartment.choices.insert(0, (0, 'None'))
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmpin = HsmPin()
@@ -252,6 +262,8 @@ def hsm_pin_add():
         hsmpin.compartment = Compartment.query.get(form.compartment.data)
         db.session.add(hsmpin)
         db.session.commit()
+        audit.auditlog_new_post('hsm_pin', original_data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
+
         flash(_('New HSM PIN is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -274,24 +286,26 @@ def hsm_pin_edit():
         return redirect(url_for('main.hsm_pin_delete', pin=pinid))
 
     hsmpin = HsmPin.query.get(pinid)
+    original_data = hsmpin.to_dict()
 
     form = HsmPinForm(obj=hsmpin)
 
     if hsmpin is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
-
-    form.ped.choices = [(p.id, '{} ({})'.format(p.keyno, p.keysn)) for p in HsmPed.query.all()]
-
+ 
     if request.method == 'POST' and form.validate_on_submit():
-        hsmped = HsmPed.query.get(form.ped.data)
-        hsmpin.safe = form.safe.data
-        hsmpin.ped = hsmped
+        hsmpin.compartment_id = form.compartment.data
+        hsmpin.ped_id = form.ped.data
+
         db.session.commit()
+        audit.auditlog_update_post('hsm_pin', original_data=original_data, updated_data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+        form.ped.data = hsmpin.ped_id
+        form.compartment.data = hsmpin.compartment_id
         return render_template('hsm.html', title=_('Edit HSM Domain'),
                                form=form)
 
@@ -330,8 +344,10 @@ def hsm_pin_delete():
                                                  hsmpin.ped.keysn,
                                                  hsmpin.ped.hsmdomain.name)
     db.session.delete(hsmpin)
+
     db.session.commit()
     flash(deleted_msg)
+    audit.auditlog_delete_post('hsm_ped', data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
 
     return redirect(url_for('main.index'))
 
@@ -344,14 +360,14 @@ def hsm_pcicard_add():
 
     form = HsmPciCardForm()
 
-    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
-    form.server.choices.insert(0, (0, 'None'))
-    form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    form.compartment.choices.insert(0, (0, 'None'))
+    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+    # form.server.choices.insert(0, (0, 'None'))
+    # form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    # form.compartment.choices.insert(0, (0, 'None'))
 
     if request.method == 'POST' and form.validate_on_submit():
-        print('{} - {}'.format(form.server.data, form.compartment.data))
+#        print('{} - {}'.format(form.server.data, form.compartment.data))
         if form.server.data == 0 and form.compartment.data == 0:
             flash(_('Must select server OR compartment!'))
             return redirect(request.referrer)
@@ -368,15 +384,17 @@ def hsm_pcicard_add():
         hsmpcicard.server = server
         db.session.add(hsmpcicard)
         db.session.commit()
+        audit.auditlog_new_post('hsm_pci_card', original_data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
+
         flash(_('New HSM PCI is now posted!'))
 
         return redirect(url_for('main.index'))
 
     else:
 
-        hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id.desc()).limit(10)
+#        hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id.desc()).limit(10)
         return render_template('hsm.html', title=_('HSM'),
-                               form=form, hsmpcicards=hsmpcicards)
+                               form=form)
 
 
 @bp.route('/hsm/pcicard/edit/', methods=['GET', 'POST'])
@@ -391,11 +409,12 @@ def hsm_pcicard_edit():
         return redirect(url_for('main.hsm_pcicard_delete', pcicard=pcicardid))
 
     hsmpcicard = HsmPciCard.query.get(pcicardid)
+    original_data = hsmpcicard.to_dict()
 
     form = HsmPciCardForm(obj=hsmpcicard)
-    form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
-    form.compartment.choices = [(c.id, c.name) for c in Compartment.query.all()]
+    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+    # form.compartment.choices = [(c.id, c.name) for c in Compartment.query.all()]
 
     if hsmpcicard is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
@@ -411,12 +430,19 @@ def hsm_pcicard_edit():
         hsmpcicard.hsmdomain = hsmdomain
         hsmpcicard.compartment = compartment
         hsmpcicard.server = server
+
         db.session.commit()
+        audit.auditlog_update_post('hsm_pci_card', original_data=original_data, updated_data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+
+        form.hsmdomain.data = hsmpcicard.hsmdomain_id
+        form.compartment.data = hsmpcicard.compartment_id
+        form.server.data = hsmpcicard.server_id
+
         return render_template('hsm.html', title=_('Edit HSM Domain'),
                                form=form)
 
@@ -456,5 +482,6 @@ def hsm_pcicard_delete():
     db.session.delete(hsmpcicard)
     db.session.commit()
     flash(deleted_msg)
+    audit.auditlog_delete_post('hsm_ped', data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
 
     return redirect(url_for('main.index'))

@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify
 from app.modules.hsm.models import HsmDomain
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -21,6 +21,8 @@ def create_hsmdomain():
 
     db.session.add(hsmdomain)
     db.session.commit()
+    audit.auditlog_new_post('hsm_domain', original_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
+
     response = jsonify(hsmdomain.to_dict())
 
     response.status_code = 201
@@ -50,7 +52,10 @@ def get_hsmdomain(id):
 @token_auth.login_required
 def update_hsmdomain(id):
     hsmdomain = HsmDomain.query.get_or_404(id)
+    original_data = hsmdomain.to_dict()
     data = request.get_json() or {}
     hsmdomain.from_dict(data, new_hsmdomain=False)
     db.session.commit()
+    audit.auditlog_update_post('hsm_domain', original_data=original_data, updated_data=data)
+
     return jsonify(hsmdomain.to_dict())

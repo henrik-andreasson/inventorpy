@@ -1,9 +1,8 @@
 from app.api import bp
-from flask import jsonify, current_app
+from flask import jsonify
 from app.modules.network.models import Network
-from app.models import User
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -22,6 +21,8 @@ def create_network():
 
     db.session.add(network)
     db.session.commit()
+    audit.auditlog_new_post('network', original_data=network.to_dict(), record_name=network.name)
+
     response = jsonify(network.to_dict())
 
     response.status_code = 201
@@ -48,26 +49,11 @@ def get_network(id):
 @token_auth.login_required
 def update_network(id):
     network = Network.query.get_or_404(id)
+    original_data = network.to_dict()
+
     data = request.get_json() or {}
     network.from_dict(data, new_network=False)
     db.session.commit()
+    audit.auditlog_update_post('network', original_data=original_data, updated_data=network.to_dict(), record_name=network.name)
+
     return jsonify(network.to_dict())
-
-
-@bp.route('/network/adduser', methods=['POST'])
-def add_user_to_network():
-
-    data = request.get_json() or {}
-    if 'network' not in data or 'username' not in data:
-        return bad_request('must include network(name) and username fields')
-
-    network = Network.query.filter_by(name=data['network']).first()
-    user = User.query.filter_by(username=data['username']).first()
-
-    network.users.append(user)
-    db.session.commit()
-    response = jsonify(network.to_dict())
-
-    response.status_code = 201
-    response.headers['Location'] = url_for('api.get_network', id=network.id)
-    return response

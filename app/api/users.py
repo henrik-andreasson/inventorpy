@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify, current_app
 from app.models import User
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -21,6 +21,8 @@ def create_user():
     user.from_dict(data, new_user=True)
     db.session.add(user)
     db.session.commit()
+    audit.auditlog_new_post('user', original_data=user.to_dict(), record_name=user.username)
+
     response = jsonify(user.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('api.get_user', id=user.id)
@@ -46,6 +48,8 @@ def get_users():
 @token_auth.login_required
 def update_user(id):
     user = User.query.get_or_404(id)
+    original_data = user.to_dict()
+
     data = request.get_json() or {}
     if 'username' in data and data['username'] != user.username and \
             User.query.filter_by(username=data['username']).first():
@@ -55,4 +59,6 @@ def update_user(id):
         return bad_request('please use a different email address')
     user.from_dict(data, new_user=False)
     db.session.commit()
+    audit.auditlog_update_post('user', original_data=original_data, updated_data=user.to_dict(), record_name=user.username)
+
     return jsonify(user.to_dict())

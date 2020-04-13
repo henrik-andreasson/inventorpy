@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify
 from app.models import Location
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -21,6 +21,7 @@ def create_location():
 
     db.session.add(location)
     db.session.commit()
+    audit.auditlog_new_post('location', original_data=location.to_dict(), record_name=location.longName())
     response = jsonify(location.to_dict())
 
     response.status_code = 201
@@ -50,7 +51,11 @@ def get_location(id):
 @token_auth.login_required
 def update_location(id):
     location = Location.query.get_or_404(id)
+    original_data = location.to_dict()
+
     data = request.get_json() or {}
     location.from_dict(data, new_location=False)
     db.session.commit()
+    audit.auditlog_update_post('location', original_data=original_data, updated_data=location.to_dict(), record_name=location.longName())
+
     return jsonify(location.to_dict())

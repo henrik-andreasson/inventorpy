@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify
 from app.modules.hsm.models import HsmPciCard
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -25,6 +25,8 @@ def create_hsmpcicard():
 
     db.session.add(hsmpcicard)
     db.session.commit()
+    audit.auditlog_new_post('hsm_pci_card', original_data=hsmpcicard.to_dict(), record_name=hsmpcicard.name)
+
     response = jsonify(hsmpcicard.to_dict())
 
     response.status_code = 201
@@ -54,7 +56,11 @@ def get_hsmpcicard(id):
 @token_auth.login_required
 def update_hsmpcicard(id):
     hsmpcicard = HsmPciCard.query.get_or_404(id)
+    original_data = hsmpcicard.to_dict()
+
     data = request.get_json() or {}
     hsmpcicard.from_dict(data)
     db.session.commit()
+    audit.auditlog_update_post('hsm_pci_card', original_data=original_data, updated_data=data, record_name=hsmpcicard.name)
+
     return jsonify(hsmpcicard.to_dict())

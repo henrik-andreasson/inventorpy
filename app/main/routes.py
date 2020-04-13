@@ -1,18 +1,16 @@
-from flask import render_template, flash, redirect, url_for, request, g, \
-    current_app, session
+from flask import render_template, flash, redirect, url_for, request, g, current_app
 from flask_login import current_user, login_required
 from flask_babel import _, get_locale
-# from guess_language import guess_language
 from app import db, audit
 from app.main.forms import EditProfileForm, ServiceForm, LocationForm
 from app.models import User, Service, Location, Audit
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard
 from app.modules.safe.models import Safe, Compartment
+from app.modules.rack.models import Rack
 from app.modules.server.models import Server
 from app.modules.network.models import Network
 from app.main import bp
 from datetime import datetime
-from rocketchat_API.rocketchat import RocketChat
 
 
 @bp.before_app_request
@@ -36,13 +34,15 @@ def index():
     safes = Safe.query.order_by(Safe.name).limit(10)
     compartments = Compartment.query.order_by(Compartment.name).limit(10)
     hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.serial).limit(10)
+    racks = Rack.query.order_by(Rack.name).limit(10)
 
     return render_template('index.html', title=_('Explore'),
                            servers=servers, locations=locations,
                            services=services, hsmdomains=hsmdomains,
                            hsmpeds=hsmpeds, hsmpins=hsmpins,
                            networks=networks, safes=safes,
-                           compartments=compartments, hsmpcicards=hsmpcicards)
+                           compartments=compartments, hsmpcicards=hsmpcicards,
+                           racks=racks)
 
 
 @bp.route('/user/<username>')
@@ -72,8 +72,7 @@ def service_add():
             service.users.append(user)
         db.session.add(service)
         db.session.commit()
-#        audit = Audit()
-        audit.auditlog_new_post(service.__class__.__name__, original_data=service.to_dict())
+        audit.auditlog_new_post('service', original_data=service.to_dict(), record_name=service.name)
         flash(_('Service have been saved.'))
         return redirect(url_for('main.service_list'))
 
@@ -99,26 +98,29 @@ def service_edit():
         render_template('service.html', title=_('Service is not defined'))
 
     form = ServiceForm(formdata=request.form, obj=service)
-# TODO select the previously selected users: service.users
-    form.users.choices = [(u.username, u.username)
-                          for u in User.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         # TODO remove not selected users ...
+        service.users = []
         for u in form.users.data:
-            user = User.query.filter_by(username=u).first()
+            user = User.query.filter_by(id=u).first()
             print("Adding: User: %s to: %s" % (user.username, service.name))
             service.users.append(user)
         service.name = form.name.data
         service.color = form.color.data
 
         db.session.commit()
-        audit.auditlog_update_post(service.__class__.__name__, original_data=original_data, updated_data=service.to_dict())
+        audit.auditlog_update_post('service', original_data=original_data, updated_data=service.to_dict(), record_name=service.name)
 
         flash(_('Your changes have been saved.'))
         return redirect(url_for('main.service_list'))
 
     else:
+
+        pre_selected_users = [(su.id) for su in service.users]
+        form = ServiceForm(users=pre_selected_users)
+        form.name.data = service.name
+        form.color.data = service.color
         return render_template('service.html', title=_('Edit Service'),
                                form=form)
 
@@ -143,6 +145,7 @@ def edit_profile():
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         db.session.commit()
+# todo audit + rewrite
         flash(_('Your changes have been saved.'))
         return redirect(url_for('main.edit_profile'))
     elif request.method == 'GET':
@@ -169,7 +172,7 @@ def location_add():
         location.type = form.type.data
         db.session.add(location)
         db.session.commit()
-        audit.auditlog_new_post(location.__class__.__name__, original_data=location.to_dict())
+        audit.auditlog_new_post('location', original_data=location.to_dict(), record_name=location.longName())
         flash(_('Location have been saved.'))
         return redirect(url_for('main.location_list'))
 
@@ -204,9 +207,9 @@ def location_edit():
         location.type = form.type.data
 
         db.session.commit()
-        audit.auditlog_update_post('location', original_data=original_data, updated_data=location.to_dict())
-
+        audit.auditlog_update_post('location', original_data=original_data, updated_data=location.to_dict(), record_name=location.longName())
         flash(_('Your changes have been saved.'))
+
         return redirect(url_for('main.location_list'))
 
     else:

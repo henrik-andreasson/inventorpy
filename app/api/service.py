@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify, current_app
 from app.models import User, Service
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 # from flask import g, abort
@@ -23,6 +23,8 @@ def create_service():
 
     db.session.add(service)
     db.session.commit()
+    audit.auditlog_new_post('service', original_data=service.to_dict(), record_name=service.name)
+
     response = jsonify(service.to_dict())
 
     response.status_code = 201
@@ -49,9 +51,12 @@ def get_service(id):
 @token_auth.login_required
 def update_service(id):
     service = Service.query.get_or_404(id)
+    original_data = service.to_dict()
+
     data = request.get_json() or {}
     service.from_dict(data, new_service=False)
     db.session.commit()
+    audit.auditlog_update_post('service', original_data=original_data, updated_data=service.to_dict(), record_name=service.name)
     return jsonify(service.to_dict())
 
 

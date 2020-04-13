@@ -2,7 +2,7 @@ from app.api import bp
 from flask import jsonify
 from app.modules.rack.models import Rack
 from flask import url_for
-from app import db
+from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
@@ -21,6 +21,8 @@ def create_rack():
 
     db.session.add(rack)
     db.session.commit()
+    audit.auditlog_new_post('rack', original_data=rack.to_dict(), record_name=rack.name)
+
     response = jsonify(rack.to_dict())
 
     response.status_code = 201
@@ -50,7 +52,11 @@ def get_rack(id):
 @token_auth.login_required
 def update_rack(id):
     rack = Rack.query.get_or_404(id)
+    original_data = rack.to_dict()
+
     data = request.get_json() or {}
     rack.from_dict(data, new_rack=False)
     db.session.commit()
+    audit.auditlog_update_post('rack', original_data=original_data, updated_data=rack.to_dict(), record_name=rack.name)
+
     return jsonify(rack.to_dict())
