@@ -61,9 +61,11 @@
         <td>
                 {{ p.user.username }}
         </td>
+        {% if p.requested_by %}
         <td>
-
+            {{ p.requested_by.username }}
         </td>
+        {% endif %}
 
       </tr>
     {% endfor %}

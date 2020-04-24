@@ -54,6 +54,39 @@ class HsmPed(db.Model):
     def from_dict(self, data):
         for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id']:
             setattr(self, field, data[field])
+ 
+
+class HsmPedUpdates(db.Model):
+    __tablename__ = "hsm_ped_updates"
+    id = db.Column(db.Integer, primary_key=True)
+    keyno = db.Column(db.String(140))
+    keysn = db.Column(db.String(140), unique=True)
+    hsmdomain = db.relationship('HsmDomain')
+    hsmdomain_id = db.Column(db.Integer, db.ForeignKey('hsm_domain.id'))
+    user = db.relationship('User', foreign_keys='HsmPedUpdates.user_id')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    requested_by = db.relationship('User', foreign_keys='HsmPedUpdates.requested_by_id')
+    requested_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    compartment = db.relationship('Compartment')
+    compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
+
+    def __repr__(self):
+        return '<HsmPedUpdates {}>'.format(self.keyno)
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'keyno': self.keyno,
+            'keysn': self.keysn,
+            'compartment_id': self.compartment_id,
+            'user_id': self.user_id,
+            'hsmdomain_id': self.hsmdomain_id
+            }
+        return data
+
+    def from_dict(self, data):
+        for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id']:
+            setattr(self, field, data[field])
 
 
 class HsmPin(db.Model):
@@ -123,13 +156,14 @@ class HsmPciCard(db.Model):
 class HsmBackupUnit(db.Model):
     __tablename__ = "hsm_backup_unit"
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(140))
     serial = db.Column(db.String(140))
     model = db.Column(db.String(140))
     manufacturedate = db.Column(db.String(140))
     fbno = db.Column(db.String(140))
     hsmdomain = db.Column(db.String(140))
-    server = db.Column(db.String(140))
     safe = db.Column(db.String(140))
+    comment = db.Column(db.String(255))
 
     def __repr__(self):
         return '<HsmBackupUnit {}>'.format(self.serial)
@@ -137,16 +171,16 @@ class HsmBackupUnit(db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
+            'name': self.name,
             'serial': self.serial,
             'model': self.model,
             'manufacturedate': self.manufacturedate,
             'fbno': self.fbno,
-            'hsmdomain': self.hsmdomain,
-            'server': self.server,
-            'safe': self.safe
+            'hsmdomain_id': self.hsmdomain_id,
+            'safe_id': self.safe_id
             }
         return data
 
-    def from_dict(self, data, new_work=False):
-        for field in ['serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain', 'server', 'safe']:
+    def from_dict(self, data):
+        for field in ['name', 'serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'safe_id']:
             setattr(self, field, data[field])

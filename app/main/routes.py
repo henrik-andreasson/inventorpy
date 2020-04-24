@@ -4,7 +4,7 @@ from flask_babel import _, get_locale
 from app import db, audit
 from app.main.forms import EditProfileForm, ServiceForm, LocationForm
 from app.models import User, Service, Location, Audit
-from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard
+from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard, HsmPedUpdates
 from app.modules.safe.models import Safe, Compartment
 from app.modules.rack.models import Rack
 from app.modules.server.models import Server
@@ -35,6 +35,7 @@ def index():
     compartments = Compartment.query.order_by(Compartment.name).limit(10)
     hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.serial).limit(10)
     racks = Rack.query.order_by(Rack.name).limit(10)
+    hsmpedupdates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).limit(10)
 
     return render_template('index.html', title=_('Explore'),
                            servers=servers, locations=locations,
@@ -42,7 +43,7 @@ def index():
                            hsmpeds=hsmpeds, hsmpins=hsmpins,
                            networks=networks, safes=safes,
                            compartments=compartments, hsmpcicards=hsmpcicards,
-                           racks=racks)
+                           racks=racks, hsmpedupdates=hsmpedupdates)
 
 
 @bp.route('/user/<username>')
@@ -70,6 +71,8 @@ def service_add():
             user = User.query.filter_by(username=u).first()
             print("Adding: User: %s to: %s" % (user.username, service.name))
             service.users.append(user)
+        service.manager = User.query.filter_by(id=form.manager.data).first()
+
         db.session.add(service)
         db.session.commit()
         audit.auditlog_new_post('service', original_data=service.to_dict(), record_name=service.name)
@@ -106,6 +109,7 @@ def service_edit():
             user = User.query.filter_by(id=u).first()
             print("Adding: User: %s to: %s" % (user.username, service.name))
             service.users.append(user)
+        service.manager = User.query.filter_by(id=form.manager.data).first()
         service.name = form.name.data
         service.color = form.color.data
 
@@ -226,6 +230,18 @@ def location_list():
     next_url = url_for('main.location_list', page=locations.next_num) if locations.has_next else None
     prev_url = url_for('main.location_list', page=locations.prev_num) if locations.has_prev else None
     return render_template('location.html', locations=locations.items,
+                           next_url=next_url, prev_url=prev_url)
+
+
+@bp.route('/updates/list/', methods=['GET'])
+@login_required
+def updates_list():
+    page = request.args.get('page', 1, type=int)
+    hsm_ped_updates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('main.updates_list', page=hsm_ped_updates.next_num) if hsm_ped_updates.has_next else None
+    prev_url = url_for('main.updates_list', page=hsm_ped_updates.prev_num) if hsm_ped_updates.has_prev else None
+    return render_template('updates.html', hsmpedupdates=hsm_ped_updates.items,
                            next_url=next_url, prev_url=prev_url)
 
 

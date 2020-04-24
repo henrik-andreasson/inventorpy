@@ -1,15 +1,15 @@
 from flask import render_template, flash, redirect, url_for, request, \
-    current_app, session
-from flask_login import login_required
+    current_app
+from flask_login import login_required, current_user
 from app import db, audit
 from app.main import bp
 from app.models import Service, User
 from app.modules.server.models import Server
 from app.modules.safe.models import Compartment
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmBackupUnit, \
-    HsmPciCard
+    HsmPciCard, HsmPedUpdates
 from app.modules.hsm.forms import HsmDomainForm, HsmPedForm, HsmPinForm, \
-    HsmPciCardForm, HsmBackupUnitForm
+    HsmPciCardForm, HsmBackupUnitForm, HsmPedUpdateForm
 from flask_babel import _
 
 
@@ -176,7 +176,7 @@ def hsm_ped_edit():
     original_data = hsmped.to_dict()
 
     if hsmped is None:
-        render_template('hsm.html', title=_('HSM Domain is not defined'))
+        render_template('hsm.html', title=_('HSM PED is not defined'))
 
     form = HsmPedForm(obj=hsmped)
 
@@ -185,12 +185,15 @@ def hsm_ped_edit():
     # form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
-        hsmped.keyno = form.keyno.data
-        hsmped.keysn = form.keysn.data
-        hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
-        hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
-        hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
+
+        hsmpedupdate = HsmPedUpdates(keyno=form.keyno.data,
+                                     keysn=form.keysn.data)
+        hsmpedupdate.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
+        hsmpedupdate.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
+        hsmpedupdate.user = User.query.filter_by(id=form.user.data).first_or_404()
+        db.session.add(hsmpedupdate)
         db.session.commit()
+
         audit.auditlog_update_post('hsm_ped', original_data=original_data, updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
 
         flash(_('Your changes have been saved.'))
@@ -203,6 +206,67 @@ def hsm_ped_edit():
         form.user.data = hsmped.user_id
         return render_template('hsm.html', title=_('Edit HSM Domain'),
                                form=form)
+
+
+@bp.route('/hsm/ped/approve/', methods=['GET', 'POST'])
+@login_required
+def hsm_ped_approve():
+
+    pedid = request.args.get('ped')
+
+    hsmpedupdate = HsmPedUpdates.query.get(pedid)
+    print("hsmpedupdate id: {}".format(hsmpedupdate.id))
+    original_data = hsmpedupdate.to_dict()
+
+    if hsmpedupdate is None:
+        render_template('hsm.html', title=_('HSM PED Update is not defined'))
+
+    if 'postpone' in request.form:
+        return redirect(request.referrer)
+    if 'deny' in request.form:
+        db.session.delete(hsmpedupdate)
+        db.session.commit()
+        flash("Pending Approval was denied")
+        return redirect(url_for('main.index'))
+
+    form = HsmPedUpdateForm(obj=hsmpedupdate)
+
+    if request.method == 'POST' and form.validate_on_submit():
+        service = Service.query.filter_by(name=hsmpedupdate.hsmdomain.service.name).first()
+        if current_user.username != service.manager.username:
+            flash(_('You are not the service manager of the service thus not allowed to approve this action'))
+            return redirect(request.referrer)
+
+        hsmped = HsmPed.query.get(pedid)
+        hsmped.keyno = form.keyno.data
+        hsmped.keysn = form.keysn.data
+        hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
+        hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
+        hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
+        db.session.delete(hsmpedupdate)
+        db.session.commit()
+
+        audit.auditlog_update_post('hsm_ped', original_data=original_data, updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+
+        flash(_('Your changes have been saved.'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+        service = Service.query.filter_by(name=hsmpedupdate.hsmdomain.service.name).first()
+        flash(_('Only the service manager ({}) of the service are allowed to approve this action'.format(service.manager.username)))
+
+        form.compartment.data = hsmpedupdate.compartment_id
+        form.hsmdomain.data = hsmpedupdate.hsmdomain_id
+        form.user.data = hsmpedupdate.user_id
+        previous_ped = HsmPed.query.get(pedid)
+        hsmpeds = []
+        hsmpeds.append(previous_ped)
+        if previous_ped is None:
+            render_template('hsm.html', title=_('HSM PED Update is not defined'))
+
+        return render_template('hsm.html', title=_('Approve HSM PED Update'),
+                               form=form, hsmpeds=hsmpeds)
 
 
 @bp.route('/hsm/ped/list/', methods=['GET', 'POST'])
@@ -292,7 +356,7 @@ def hsm_pin_edit():
 
     if hsmpin is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
- 
+
     if request.method == 'POST' and form.validate_on_submit():
         hsmpin.compartment_id = form.compartment.data
         hsmpin.ped_id = form.ped.data
@@ -483,5 +547,140 @@ def hsm_pcicard_delete():
     db.session.commit()
     flash(deleted_msg)
     audit.auditlog_delete_post('hsm_ped', data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
+
+    return redirect(url_for('main.index'))
+
+
+@bp.route('/hsm/backupunit/add', methods=['GET', 'POST'])
+@login_required
+def hsm_backupunit_add():
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+
+    form = HsmBackupUnitForm()
+
+    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+    # form.server.choices.insert(0, (0, 'None'))
+    # form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
+    # form.compartment.choices.insert(0, (0, 'None'))
+
+    if request.method == 'POST' and form.validate_on_submit():
+#        print('{} - {}'.format(form.server.data, form.compartment.data))
+        if form.server.data == 0 and form.compartment.data == 0:
+            flash(_('Must select server OR compartment!'))
+            return redirect(request.referrer)
+
+        hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
+        server = Server.query.get(form.server.data)
+        compartment = Compartment.query.get(form.compartment.data)
+        hsmbackupunit = HsmBackupUnit(serial=form.serial.data,
+                                model=form.model.data,
+                                manufacturedate=form.manufacturedate.data,
+                                fbno=form.fbno.data)
+        hsmbackupunit.hsmdomain = hsmdomain
+        hsmbackupunit.compartment = compartment
+        hsmbackupunit.server = server
+        db.session.add(hsmbackupunit)
+        db.session.commit()
+        audit.auditlog_new_post('hsm_backup_unit', original_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
+
+        flash(_('New HSM PCI is now posted!'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+
+#        hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.id.desc()).limit(10)
+        return render_template('hsm.html', title=_('HSM'),
+                               form=form)
+
+
+@bp.route('/hsm/backupunit/edit/', methods=['GET', 'POST'])
+@login_required
+def hsm_backupunit_edit():
+
+    backupunitid = request.args.get('backupunit')
+
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+    if 'delete' in request.form:
+        return redirect(url_for('main.hsm_backupunit_delete', backupunit=backupunitid))
+
+    hsmbackupunit = HsmBackupUnit.query.get(backupunitid)
+    original_data = hsmbackupunit.to_dict()
+
+    form = HsmBackupUnitForm(obj=hsmbackupunit)
+    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
+    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
+    # form.compartment.choices = [(c.id, c.name) for c in Compartment.query.all()]
+
+    if hsmbackupunit is None:
+        render_template('hsm.html', title=_('HSM Domain is not defined'))
+
+    if request.method == 'POST' and form.validate_on_submit():
+        hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
+        server = Server.query.get(form.server.data)
+        compartment = Compartment.query.get(form.compartment.data)
+        hsmbackupunit.fbno = form.fbno.data
+        hsmbackupunit.serial = form.serial.data
+        hsmbackupunit.model = form.model.data
+        hsmbackupunit.manufacturedate = form.manufacturedate.data
+        hsmbackupunit.hsmdomain = hsmdomain
+        hsmbackupunit.compartment = compartment
+        hsmbackupunit.server = server
+
+        db.session.commit()
+        audit.auditlog_update_post('hsm_backup_unit', original_data=original_data, updated_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
+        flash(_('Your changes have been saved.'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+
+        form.hsmdomain.data = hsmbackupunit.hsmdomain_id
+        form.compartment.data = hsmbackupunit.compartment_id
+        form.server.data = hsmbackupunit.server_id
+
+        return render_template('hsm.html', title=_('Edit HSM Domain'),
+                               form=form)
+
+
+@bp.route('/hsm/backupunit/list/', methods=['GET', 'POST'])
+@login_required
+def hsm_backupunit_list():
+
+    page = request.args.get('page', 1, type=int)
+
+    hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.id).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+
+    next_url = url_for('main.hsm_domain_list', page=hsmbackupunits.next_num) \
+        if hsmbackupunits.has_next else None
+    prev_url = url_for('main.hsm_domain_list', page=hsmbackupunits.prev_num) \
+        if hsmbackupunits.has_prev else None
+
+    return render_template('hsm.html', title=_('HSM Domains'),
+                           hsmbackupunits=hsmbackupunits.items, next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/hsm/backupunit/delete/', methods=['GET', 'POST'])
+@login_required
+def hsm_backupunit_delete():
+
+    backupunitid = request.args.get('backupunit')
+    hsmbackupunit = HsmBackupUnit.query.get(backupunitid)
+
+    if hsmbackupunit is None:
+        flash(_('HSM PED was not deleted, id not found!'))
+        return redirect(url_for('main.index'))
+
+    deleted_msg = 'HSM PED deleted: %s %s' % (hsmbackupunit.keyno,
+                                              hsmbackupunit.service.name)
+    db.session.delete(hsmbackupunit)
+    db.session.commit()
+    flash(deleted_msg)
+    audit.auditlog_delete_post('hsm_ped', data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
 
     return redirect(url_for('main.index'))
