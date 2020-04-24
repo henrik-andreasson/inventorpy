@@ -1,8 +1,8 @@
 from app.api import bp
-from flask import jsonify, current_app
+from flask import jsonify
 from app.modules.server.models import Server
 from app.modules.rack.models import Rack
-from app.models import User, Service, Location
+from app.models import Service, Location
 from flask import url_for
 from app import db, audit
 from app.api.errors import bad_request

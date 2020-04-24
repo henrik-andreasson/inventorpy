@@ -1,5 +1,5 @@
 from app.api import bp
-from flask import jsonify, current_app
+from flask import jsonify
 from app.models import User, Service
 from flask import url_for
 from app import db, audit
@@ -7,8 +7,6 @@ from app.api.errors import bad_request
 from flask import request
 # from flask import g, abort
 from app.api.auth import token_auth
-from pprint import pprint
-from rocketchat_API.rocketchat import RocketChat
 
 
 @bp.route('/service', methods=['POST'])
@@ -69,11 +67,13 @@ def add_user_to_service():
 
     service = Service.query.filter_by(name=data['service']).first()
     user = User.query.filter_by(username=data['username']).first()
+    original_data = service.to_dict()
 
     service.users.append(user)
     db.session.commit()
-    response = jsonify(service.to_dict())
+    audit.auditlog_update_post('service', original_data=original_data, updated_data=service.to_dict(), record_name=service.name)
 
+    response = jsonify(service.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('api.get_service', id=service.id)
     return response

@@ -1,12 +1,11 @@
 from app.api import bp
-from flask import jsonify, current_app
+from flask import jsonify
 from app.models import User
 from flask import url_for
 from app import db, audit
 from app.api.errors import bad_request
 from flask import request
 from app.api.auth import token_auth
-from flask import g, abort
 
 
 @bp.route('/users', methods=['POST'])
@@ -21,7 +20,6 @@ def create_user():
     user.from_dict(data, new_user=True)
     db.session.add(user)
     db.session.commit()
-    audit.auditlog_new_post('user', original_data=user.to_dict(), record_name=user.username)
 
     response = jsonify(user.to_dict())
     response.status_code = 201

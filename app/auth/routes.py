@@ -52,7 +52,6 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        audit.auditlog_new_post('user', original_data=user.to_dict(), record_name=user.username)
 
         flash(_('Congratulations, you are now a registered user!'))
         return redirect(url_for('auth.login'))
