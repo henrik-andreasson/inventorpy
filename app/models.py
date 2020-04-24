@@ -1,6 +1,6 @@
 from hashlib import md5
 from time import time
-from flask import current_app
+from flask import current_app, g
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -55,6 +55,8 @@ class Service(PaginatedAPIMixin, db.Model):
     updated = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     color = db.Column(db.String(140))
     users = db.relationship('User', secondary=service_user)
+    manager = db.relationship('User', foreign_keys='Service.manager_id')
+    manager_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return '<Service {}>'.format(self.name)
@@ -64,11 +66,12 @@ class Service(PaginatedAPIMixin, db.Model):
             'id': self.id,
             'name': self.name,
             'color': self.color,
+            'manager_id': self.manager_id
         }
         return data
 
     def from_dict(self, data, new_service=False):
-        for field in ['name', 'color']:
+        for field in ['name', 'color', 'manager_id']:
             if field in data:
                 setattr(self, field, data[field])
 
@@ -271,7 +274,7 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_new_post(self, module, original_data, record_name):
         ts = datetime.utcnow()
-        user = User.query.filter_by(username=current_user.username).first()
+        user = User.query.filter_by(username=g.current_user.username).first()
         audit = Audit(module=module, module_id=original_data['id'],
                       timestamp=ts, record_name=record_name,
                       original_data=self.dict_to_string(original_data),
@@ -284,7 +287,7 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_update_post(self, module, original_data, updated_data, record_name):
         ts = datetime.utcnow()
-        user = User.query.filter_by(username=current_user.username).first()
+        user = User.query.filter_by(username=g.current_user.username).first()
 
         for field in updated_data:
             if original_data[field] != updated_data[field]:
@@ -302,7 +305,7 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_delete_post(self, module, data, record_name):
         ts = datetime.utcnow()
-        user = User.query.filter_by(username=current_user.username).first()
+        user = User.query.filter_by(username=g.current_user.username).first()
 
         audit = Audit(module=module, module_id=self.id, timestamp=ts,
                       original_data=self.dict_to_string(data),
