@@ -27,7 +27,7 @@ class EditProfileForm(FlaskForm):
 class ServiceForm(FlaskForm):
     name = StringField(_l('name'), validators=[DataRequired()])
     color = StringField(_l('color'), validators=[DataRequired()])
-    users = SelectMultipleField(_l('Users'), validators=[DataRequired()], coerce=int)
+    users = SelectMultipleField(_l('Users'), validators=[DataRequired()], coerce=int, render_kw={"size": 20})
     manager = SelectField(_l('Users'), validators=[DataRequired()], coerce=int)
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
