@@ -4,7 +4,7 @@ from flask_babel import _, get_locale
 from app import db, audit
 from app.main.forms import EditProfileForm, ServiceForm, LocationForm
 from app.models import User, Service, Location, Audit
-from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard, HsmPedUpdates
+from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard, HsmPedUpdates, HsmBackupUnit
 from app.modules.safe.models import Safe, Compartment
 from app.modules.rack.models import Rack
 from app.modules.server.models import Server
@@ -34,6 +34,7 @@ def index():
     safes = Safe.query.order_by(Safe.name).limit(10)
     compartments = Compartment.query.order_by(Compartment.name).limit(10)
     hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.serial).limit(10)
+    hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.serial).limit(10)
     racks = Rack.query.order_by(Rack.name).limit(10)
     hsmpedupdates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).limit(10)
 
@@ -43,7 +44,8 @@ def index():
                            hsmpeds=hsmpeds, hsmpins=hsmpins,
                            networks=networks, safes=safes,
                            compartments=compartments, hsmpcicards=hsmpcicards,
-                           racks=racks, hsmpedupdates=hsmpedupdates)
+                           racks=racks, hsmpedupdates=hsmpedupdates,
+                           hsmbackupunits=hsmbackupunits)
 
 
 @bp.route('/user/<username>')

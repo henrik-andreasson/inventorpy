@@ -54,7 +54,7 @@ class HsmPed(db.Model):
     def from_dict(self, data):
         for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id']:
             setattr(self, field, data[field])
- 
+
 
 class HsmPedUpdates(db.Model):
     __tablename__ = "hsm_ped_updates"
@@ -162,11 +162,14 @@ class HsmBackupUnit(db.Model):
     manufacturedate = db.Column(db.String(140))
     fbno = db.Column(db.String(140))
     hsmdomain = db.Column(db.String(140))
-    safe = db.Column(db.String(140))
+    safe = db.relationship('Safe')
+    safe_id = db.Column(db.Integer, db.ForeignKey('safe.id'))
+    hsmdomain = db.relationship('HsmDomain')
+    hsmdomain_id = db.Column(db.Integer, db.ForeignKey('hsm_domain.id'))
     comment = db.Column(db.String(255))
 
     def __repr__(self):
-        return '<HsmBackupUnit {}>'.format(self.serial)
+        return '<HsmBackupUnit {}/{}>'.format(self.name, self.serial)
 
     def to_dict(self):
         data = {

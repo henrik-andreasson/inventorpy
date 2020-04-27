@@ -5,7 +5,7 @@ from app import db, audit
 from app.main import bp
 from app.models import Service, User
 from app.modules.server.models import Server
-from app.modules.safe.models import Compartment
+from app.modules.safe.models import Compartment, Safe
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmBackupUnit, \
     HsmPciCard, HsmPedUpdates
 from app.modules.hsm.forms import HsmDomainForm, HsmPedForm, HsmPinForm, \
@@ -559,39 +559,28 @@ def hsm_backupunit_add():
 
     form = HsmBackupUnitForm()
 
-    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
-    # form.server.choices.insert(0, (0, 'None'))
-    # form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    # form.compartment.choices.insert(0, (0, 'None'))
-
     if request.method == 'POST' and form.validate_on_submit():
-#        print('{} - {}'.format(form.server.data, form.compartment.data))
-        if form.server.data == 0 and form.compartment.data == 0:
-            flash(_('Must select server OR compartment!'))
-            return redirect(request.referrer)
 
         hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
-        server = Server.query.get(form.server.data)
-        compartment = Compartment.query.get(form.compartment.data)
-        hsmbackupunit = HsmBackupUnit(serial=form.serial.data,
-                                model=form.model.data,
-                                manufacturedate=form.manufacturedate.data,
-                                fbno=form.fbno.data)
+        safe = Safe.query.get(form.safe.data)
+        hsmbackupunit = HsmBackupUnit(name=form.name.data,
+                                      serial=form.serial.data,
+                                      model=form.model.data,
+                                      manufacturedate=form.manufacturedate.data,
+                                      fbno=form.fbno.data,
+                                      comment=form.comment.data)
         hsmbackupunit.hsmdomain = hsmdomain
-        hsmbackupunit.compartment = compartment
-        hsmbackupunit.server = server
+        hsmbackupunit.safe = safe
         db.session.add(hsmbackupunit)
         db.session.commit()
         audit.auditlog_new_post('hsm_backup_unit', original_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
 
-        flash(_('New HSM PCI is now posted!'))
+        flash(_('Added HSM backupunit {} - {}'.format(hsmbackupunit.name, hsmbackupunit.serial)))
 
         return redirect(url_for('main.index'))
 
     else:
 
-#        hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.id.desc()).limit(10)
         return render_template('hsm.html', title=_('HSM'),
                                form=form)
 
@@ -600,7 +589,7 @@ def hsm_backupunit_add():
 @login_required
 def hsm_backupunit_edit():
 
-    backupunitid = request.args.get('backupunit')
+    backupunitid = request.args.get('id')
 
     if 'cancel' in request.form:
         return redirect(request.referrer)
@@ -608,27 +597,25 @@ def hsm_backupunit_edit():
         return redirect(url_for('main.hsm_backupunit_delete', backupunit=backupunitid))
 
     hsmbackupunit = HsmBackupUnit.query.get(backupunitid)
-    original_data = hsmbackupunit.to_dict()
-
-    form = HsmBackupUnitForm(obj=hsmbackupunit)
-    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
-    # form.compartment.choices = [(c.id, c.name) for c in Compartment.query.all()]
 
     if hsmbackupunit is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
 
+    original_data = hsmbackupunit.to_dict()
+
+    form = HsmBackupUnitForm(obj=hsmbackupunit)
+
     if request.method == 'POST' and form.validate_on_submit():
         hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
-        server = Server.query.get(form.server.data)
-        compartment = Compartment.query.get(form.compartment.data)
-        hsmbackupunit.fbno = form.fbno.data
+        safe = Safe.query.get(form.safe.data)
+        hsmbackupunit.name = form.name.data
         hsmbackupunit.serial = form.serial.data
         hsmbackupunit.model = form.model.data
         hsmbackupunit.manufacturedate = form.manufacturedate.data
+        hsmbackupunit.fbno = form.fbno.data
         hsmbackupunit.hsmdomain = hsmdomain
-        hsmbackupunit.compartment = compartment
-        hsmbackupunit.server = server
+        hsmbackupunit.safe = safe
+        hsmbackupunit.comment = form.comment.data
 
         db.session.commit()
         audit.auditlog_update_post('hsm_backup_unit', original_data=original_data, updated_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
@@ -639,8 +626,7 @@ def hsm_backupunit_edit():
     else:
 
         form.hsmdomain.data = hsmbackupunit.hsmdomain_id
-        form.compartment.data = hsmbackupunit.compartment_id
-        form.server.data = hsmbackupunit.server_id
+        form.safe.data = hsmbackupunit.safe_id
 
         return render_template('hsm.html', title=_('Edit HSM Domain'),
                                form=form)
@@ -652,7 +638,7 @@ def hsm_backupunit_list():
 
     page = request.args.get('page', 1, type=int)
 
-    hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.id).paginate(
+    hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.name).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.hsm_domain_list', page=hsmbackupunits.next_num) \

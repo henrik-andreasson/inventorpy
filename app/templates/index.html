@@ -109,6 +109,19 @@
       </div>
     {% endif %}
 
+    {% if hsmbackupunits %}
+      <div class="list-group">
+        <a href="{{ url_for('main.hsm_backupunit_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('HSM Backup Unit')}}</h4>  </a>
+
+        {% for b in hsmbackupunits %}
+          <A HREF="{{url_for('main.hsm_backupunit_edit', id=b.id)}}" class="list-group-item">
+            {{ b.hsmdomain.name }} - {{ b.serial }} - {{ b.safe.name }}  {{ b.hsmdomain.service.name }}
+          </A>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {% if hsmpedupdates %}
         <div class="list-group">
           <a href="{{ url_for('main.hsm_ped_list')}}" class="list-group-item">

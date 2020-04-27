@@ -146,8 +146,46 @@
   </tr>
 {% endfor %}
 
+
 </table>
 {% endif %}
+
+
+{% if hsmbackupunits %}
+
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Serial')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('HSM Domain')}}</td>
+      <td>{{_('Service')}}</td>
+    </tr>
+
+
+{% for b in hsmbackupunits %}
+
+  <tr>
+      <td>
+          <A HREF="{{url_for('main.hsm_backupunit_edit', id=b.id)}}">
+            {{ b.serial }}
+          </A>
+        </td>
+        <td>
+          {{ b.name }}
+        </td>
+        <td>
+          {{ b.hsmdomain.name }}
+        </td>
+        <td>
+          {{ b.hsmdomain.service.name }}
+        </td>
+
+  </tr>
+{% endfor %}
+
+</table>
+{% endif %}
+
 
 
     <nav aria-label="...">
