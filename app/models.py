@@ -274,7 +274,7 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_new_post(self, module, original_data, record_name):
         ts = datetime.utcnow()
-        if g.current_user:
+        if hasattr(g, 'current_user'):
             user = User.query.filter_by(username=g.current_user.username).first()
         else:
             user = User.query.filter_by(username=current_user.username).first()
@@ -290,7 +290,7 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_update_post(self, module, original_data, updated_data, record_name):
         ts = datetime.utcnow()
-        if g.current_user:
+        if hasattr(g, 'current_user'):
             user = User.query.filter_by(username=g.current_user.username).first()
         else:
             user = User.query.filter_by(username=current_user.username).first()
@@ -311,7 +311,7 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_delete_post(self, module, data, record_name):
         ts = datetime.utcnow()
-        if g.current_user:
+        if hasattr(g, 'current_user'):
             user = User.query.filter_by(username=g.current_user.username).first()
         else:
             user = User.query.filter_by(username=current_user.username).first()
