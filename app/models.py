@@ -274,7 +274,10 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_new_post(self, module, original_data, record_name):
         ts = datetime.utcnow()
-        user = User.query.filter_by(username=g.current_user.username).first()
+        if g.current_user:
+            user = User.query.filter_by(username=g.current_user.username).first()
+        else:
+            user = User.query.filter_by(username=current_user.username).first()
         audit = Audit(module=module, module_id=original_data['id'],
                       timestamp=ts, record_name=record_name,
                       original_data=self.dict_to_string(original_data),
@@ -287,7 +290,10 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_update_post(self, module, original_data, updated_data, record_name):
         ts = datetime.utcnow()
-        user = User.query.filter_by(username=g.current_user.username).first()
+        if g.current_user:
+            user = User.query.filter_by(username=g.current_user.username).first()
+        else:
+            user = User.query.filter_by(username=current_user.username).first()
 
         for field in updated_data:
             if original_data[field] != updated_data[field]:
@@ -305,7 +311,10 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def auditlog_delete_post(self, module, data, record_name):
         ts = datetime.utcnow()
-        user = User.query.filter_by(username=g.current_user.username).first()
+        if g.current_user:
+            user = User.query.filter_by(username=g.current_user.username).first()
+        else:
+            user = User.query.filter_by(username=current_user.username).first()
 
         audit = Audit(module=module, module_id=self.id, timestamp=ts,
                       original_data=self.dict_to_string(data),
