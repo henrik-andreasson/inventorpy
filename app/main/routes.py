@@ -64,13 +64,11 @@ def service_add():
         return redirect(request.referrer)
 
     form = ServiceForm()
-    form.users.choices = [(u.username, u.username)
-                          for u in User.query.all()]
 
     if form.validate_on_submit():
         service = Service(name=form.name.data, color=form.color.data)
         for u in form.users.data:
-            user = User.query.filter_by(username=u).first()
+            user = User.query.filter_by(id=u).first()
             print("Adding: User: %s to: %s" % (user.username, service.name))
             service.users.append(user)
         service.manager = User.query.filter_by(id=form.manager.data).first()
@@ -81,13 +79,8 @@ def service_add():
         flash(_('Service have been saved.'))
         return redirect(url_for('main.service_list'))
 
-    page = request.args.get('page', 1, type=int)
-    services = Service.query.order_by(Service.updated.desc()).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.service_list', page=services.next_num) if services.has_next else None
-    prev_url = url_for('main.service_list', page=services.prev_num) if services.has_prev else None
-    return render_template('service.html', form=form, services=services.items,
-                           next_url=next_url, prev_url=prev_url)
+    else:
+        return render_template('service.html', form=form)
 
 
 @bp.route('/service/edit', methods=['GET', 'POST'])
@@ -125,6 +118,7 @@ def service_edit():
 
         pre_selected_users = [(su.id) for su in service.users]
         form = ServiceForm(users=pre_selected_users)
+        form.manager.data = service.manager_id
         form.name.data = service.name
         form.color.data = service.color
         return render_template('service.html', title=_('Edit Service'),
@@ -182,13 +176,8 @@ def location_add():
         flash(_('Location have been saved.'))
         return redirect(url_for('main.location_list'))
 
-    page = request.args.get('page', 1, type=int)
-    locations = Location.query.order_by(Location.place).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.location_list', page=locations.next_num) if locations.has_next else None
-    prev_url = url_for('main.location_list', page=locations.prev_num) if locations.has_prev else None
-    return render_template('location.html', form=form, locations=locations.items,
-                           next_url=next_url, prev_url=prev_url)
+    else:
+        return render_template('location.html', form=form)
 
 
 @bp.route('/location/edit', methods=['GET', 'POST'])
