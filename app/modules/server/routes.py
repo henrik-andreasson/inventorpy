@@ -64,9 +64,8 @@ def server_add():
 
     else:
 
-        servers = Server.query.order_by(Server.id.desc()).limit(10)
         return render_template('server.html', title=_('Add Server'),
-                               form=form, servers=servers)
+                               form=form)
 
 
 @bp.route('/server/edit/', methods=['GET', 'POST'])
