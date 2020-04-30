@@ -22,3 +22,6 @@ class Rack(db.Model):
     def from_dict(self, data, new_work=False):
         for field in ['name', 'location_id']:
             setattr(self, field, data[field])
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

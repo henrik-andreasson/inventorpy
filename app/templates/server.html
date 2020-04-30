@@ -6,6 +6,7 @@
 
 <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Hostname')}}</td>
       <td>{{_('IP Address')}}</td>
       <td>{{_('Location')}}</td>
@@ -16,6 +17,9 @@
     {% for s in servers %}
 
       <tr>
+        <td>
+              {{ s.inventory_id() }}
+        </td>
         <td>
               <A HREF="{{url_for('main.server_edit', server=s.id)}}">
                 {{ s.hostname }}

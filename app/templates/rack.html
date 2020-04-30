@@ -8,6 +8,7 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Name')}}</td>
       <td>{{_('Location')}}</td>
     </tr>
@@ -16,6 +17,7 @@
 
 
       <tr>
+        <td>  {{ r.inventory_id() }} </td>
         <td>
               <A HREF="{{url_for('main.rack_edit', rack=r.id)}}">
                 {{ r.name }}

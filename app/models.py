@@ -75,6 +75,9 @@ class Service(PaginatedAPIMixin, db.Model):
             if field in data:
                 setattr(self, field, data[field])
 
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
 
 class User(PaginatedAPIMixin, UserMixin, db.Model):
     __tablename__ = "user"
@@ -182,6 +185,9 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         else:
             return False
 
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
 
 @login.user_loader
 def load_user(id):
@@ -220,6 +226,9 @@ class Location(PaginatedAPIMixin, db.Model):
         for field in ['place', 'facillity', 'area', 'position', 'type']:
             if field in data:
                 setattr(self, field, data[field])
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
 
 class Audit(PaginatedAPIMixin, db.Model):
@@ -322,3 +331,6 @@ class Audit(PaginatedAPIMixin, db.Model):
                       type='delete', user=user)
         db.session.add(audit)
         db.session.commit()
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

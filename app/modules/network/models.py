@@ -31,3 +31,6 @@ class Network(db.Model):
     def from_dict(self, data):
         for field in ['name', 'network', 'netmask', 'gateway', 'location_id', 'service_id']:
             setattr(self, field, data[field])
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

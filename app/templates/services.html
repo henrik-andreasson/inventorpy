@@ -5,6 +5,7 @@
 
 <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Service')}}</td>
       <td>{{_('Users')}}</td>
       <td>{{_('Manager')}}</td>
@@ -14,6 +15,7 @@
     {% for service in services %}
 
       <tr>
+        <td>  {{ service.inventory_id() }} </td>
         {% set service_link %}
           <a href="{{ url_for('main.service_edit', name=service.name) }}">
             {{ service.name }}

@@ -6,6 +6,7 @@
 {% if networks %}
 <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Name')}}</td>
       <td>{{_('IP Network')}}</td>
       <td>{{_('IP Netmask')}}</td>
@@ -17,6 +18,8 @@
     {% for n in networks %}
 
       <tr>
+        <td>  {{ n.inventory_id() }} </td>
+      
         <td>
               {{ n.name }}
               <A HREF="{{url_for('main.network_view', network=n.id)}}">

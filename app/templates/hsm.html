@@ -10,12 +10,14 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Name')}}</td>
       <td>{{_('Service')}}</td>
     </tr>
 
     {% for d in hsmdomains %}
       <tr>
+        <td>  {{ d.inventory_id() }} </td>
         <td>
             <A HREF="{{url_for('main.hsm_domain_edit', domain=d.id)}}">
               {{ d.name }}
@@ -34,6 +36,7 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Key No')}}</td>
       <td>{{_('Key S/N')}}</td>
       <td>{{_('HSM Domain')}}</td>
@@ -44,6 +47,7 @@
     {% for p in hsmpeds %}
 
       <tr>
+        <td>  {{ p.inventory_id() }} </td>
         <td>
               <A HREF="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
                 {{ p.keyno }}
@@ -78,6 +82,7 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Key No')}}</td>
       <td>{{_('Key S/N')}}</td>
       <td>{{_('HSM Domain')}}</td>
@@ -89,6 +94,7 @@
 {% for i in hsmpins %}
 
   <tr>
+      <td>  {{ i.inventory_id() }} </td>
       <td>
           <A HREF="{{url_for('main.hsm_pin_edit', pin=i.id)}}">
             i.id
@@ -118,6 +124,7 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Serial')}}</td>
       <td>{{_('HSM Domain')}}</td>
       <td>{{_('Server')}}</td>
@@ -128,6 +135,7 @@
 {% for h in hsmpcicards %}
 
   <tr>
+      <td>  {{ h.inventory_id() }} </td>
       <td>
           <A HREF="{{url_for('main.hsm_pcicard_edit', pcicard=h.id)}}">
             {{ h.serial }}
@@ -155,6 +163,7 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Serial')}}</td>
       <td>{{_('Name')}}</td>
       <td>{{_('HSM Domain')}}</td>
@@ -165,6 +174,7 @@
 {% for b in hsmbackupunits %}
 
   <tr>
+      <td>  {{ b.inventory_id() }} </td>
       <td>
           <A HREF="{{url_for('main.hsm_backupunit_edit', id=b.id)}}">
             {{ b.serial }}

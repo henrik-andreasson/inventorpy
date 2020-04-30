@@ -24,6 +24,9 @@ class HsmDomain(db.Model):
         for field in ['name', 'service_id']:
             setattr(self, field, data[field])
 
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
 
 class HsmPed(db.Model):
     __tablename__ = "hsm_ped"
@@ -54,6 +57,9 @@ class HsmPed(db.Model):
     def from_dict(self, data):
         for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id']:
             setattr(self, field, data[field])
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
 
 class HsmPedUpdates(db.Model):
@@ -112,6 +118,9 @@ class HsmPin(db.Model):
         for field in ['ped_id', 'compartment_id']:
             setattr(self, field, data[field])
 
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
 
 class HsmPciCard(db.Model):
     __tablename__ = "hsm_pci_card"
@@ -152,6 +161,9 @@ class HsmPciCard(db.Model):
             else:
                 setattr(self, field, data[field])
 
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
 
 class HsmBackupUnit(db.Model):
     __tablename__ = "hsm_backup_unit"
@@ -187,3 +199,6 @@ class HsmBackupUnit(db.Model):
     def from_dict(self, data):
         for field in ['name', 'serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'safe_id']:
             setattr(self, field, data[field])
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

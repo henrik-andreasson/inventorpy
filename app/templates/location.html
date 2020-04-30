@@ -6,6 +6,7 @@
 
 <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory id')}}</td>
       <td>{{_('Place (City/Region)')}}</td>
       <td>{{_('Facillity (House)')}}</td>
       <td>{{_('Area (Room/Rack/Safe)')}}</td>
@@ -16,6 +17,8 @@
     {% for l in locations %}
 
       <tr>
+        <td>  {{ l.inventory_id() }} </td>
+
         <td>
               <A HREF="{{url_for('main.location_edit', location=l.id)}}">
                 {{ l.place }}

@@ -33,6 +33,9 @@ class Server(db.Model):
     def __repr__(self):
         return '<Server {}>'.format(self.hostname)
 
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
     def to_dict(self):
         data = {
             'id': self.id,
