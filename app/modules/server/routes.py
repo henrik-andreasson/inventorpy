@@ -19,27 +19,15 @@ def server_add():
 
     form = ServerForm(formdata=request.form)
 
-    # if 'selected_service' in session:
-    #     service = Service.query.filter_by(name=session['selected_service']).first()
-    #     form.service.choices = [(service.id, service.name)]
-    #
-    # else:
-    #     form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-
-    # location_choices = []
-    # for l in Location.query.all():
-    #     newloc = (l.id, l.longName())
-    #     location_choices.append(newloc)
-    # form.location.choices = location_choices
-    #
-    # form.rack.choices = [(r.id, r.name) for r in Rack.query.all()]
-
     ip = request.args.get('ip')
     if ip:
         form.ipaddress.data = ip
 
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.get(form.service.data)
+        if service is None:
+            flash('Service is required')
+            return redirect(request.referrer)
         location = Location.query.get(form.location.data)
         rack = Rack.query.get(form.rack.data)
 
@@ -63,8 +51,7 @@ def server_add():
                         rack_position=form.rack_position.data
                         )
 
-#,
-#environment=form.environment.data
+        server.environment = form.environment.data
         server.service = service
         server.location = location
         server.rack = rack
@@ -99,19 +86,6 @@ def server_edit():
 
     server = Server.query.get(serverid)
     original_data = server.to_dict()
-
-    # if 'selected_service' in session:
-    #     service = Service.query.filter_by(name=session['selected_service']).first()
-    # else:
-    #     form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-    #
-    # location_choices = []
-    # for l in Location.query.all():
-    #     newloc = (l.id, l.longName())
-    #     location_choices.append(newloc)
-    # form.location.choices = location_choices
-    # form.service.data = server.service_id
-    # form.rack.choices = [(r.id, r.name) for r in Rack.query.all()]
 
     if server is None:
         render_template('service.html', title=_('Server is not defined'))
