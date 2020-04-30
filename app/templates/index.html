@@ -164,7 +164,7 @@
     {% if safes %}
 
     <div class="list-group">
-        <a href="{{ url_for('main.safe_add')}}" class="list-group-item">
+        <a href="{{ url_for('main.safe_list')}}" class="list-group-item">
           <h4 class="list-group-item-heading">{{_('Safe')}}</h4>
           </a>
         {% for s in safes %}
@@ -179,7 +179,7 @@
     {% if compartments %}
 
     <div class="list-group">
-        <a href="{{ url_for('main.compartment_add')}}" class="list-group-item">
+        <a href="{{ url_for('main.compartment_list')}}" class="list-group-item">
           <h4 class="list-group-item-heading">{{_('Compartment')}}</h4>
           </a>
         {% for c in compartments %}
