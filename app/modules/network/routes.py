@@ -20,21 +20,6 @@ def network_add():
 
     form = NetworkForm(formdata=request.form)
 
-    # if 'selected_service' in session:
-    #     service = Service.query.filter_by(name=session['selected_service']).first()
-    #     form.service.choices = [(service.id, service.name)]
-    #
-    # else:
-    #     form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-    #
-    # location_choices = []
-    # for l in Location.query.all():
-    #     formatedloc = "%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position)
-    #     print("loc: %s:%s" % (l.id, formatedloc))
-    #     newloc = (l.id, formatedloc)
-    #     location_choices.append(newloc)
-    # form.location.choices = location_choices
-
     if request.method == 'POST' and form.validate_on_submit():
         location = Location.query.filter_by(id=form.location.data).first()
 
@@ -72,27 +57,10 @@ def network_edit():
 
     form = NetworkForm(obj=network)
 
-    # if 'selected_service' in session:
-    #     service = Service.query.filter_by(name=session['selected_service']).first()
-    #     form.service.choices = [(service.name, service.name)]
-    #
-    # else:
-    #     form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-    #
-    # location_choices = []
-    # for l in Location.query.all():
-    #     formatedloc = "%s-%s-%s-%s-%s" % (l.place, l.facillity, l.area, l.position, l.type)
-    #     print("loc: %s:%s" % (l.id, formatedloc))
-    #     newloc = (l.id, formatedloc)
-    #     location_choices.append(newloc)
-    # form.location.choices = location_choices
-
     if network is None:
         render_template('service.html', title=_('Network is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
-    #    service = Service.query.filter_by(name=form.service.data).first()
-    #    location = Location.query.get(form.location.data)
 
         network.name = form.name.data
         network.network = form.network.data

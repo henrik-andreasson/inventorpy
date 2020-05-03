@@ -180,10 +180,6 @@ def hsm_ped_edit():
 
     form = HsmPedForm(obj=hsmped)
 
-    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    # form.user.choices = [(u.id, u.username) for u in User.query.all()]
-    # form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-
     if request.method == 'POST' and form.validate_on_submit():
 
         hsmpedupdate = HsmPedUpdates(keyno=form.keyno.data,
@@ -215,7 +211,6 @@ def hsm_ped_approve():
     pedid = request.args.get('ped')
 
     hsmpedupdate = HsmPedUpdates.query.get(pedid)
-    print("hsmpedupdate id: {}".format(hsmpedupdate.id))
     original_data = hsmpedupdate.to_dict()
 
     if hsmpedupdate is None:
@@ -424,14 +419,8 @@ def hsm_pcicard_add():
 
     form = HsmPciCardForm()
 
-    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
-    # form.server.choices.insert(0, (0, 'None'))
-    # form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    # form.compartment.choices.insert(0, (0, 'None'))
-
     if request.method == 'POST' and form.validate_on_submit():
-#        print('{} - {}'.format(form.server.data, form.compartment.data))
+
         if form.server.data == 0 and form.compartment.data == 0:
             flash(_('Must select server OR compartment!'))
             return redirect(request.referrer)
