@@ -8,6 +8,7 @@
 
   <table class="table table-hover">
     <tr>
+      <td>{{_('Inventory ID')}}</td>
       <td>{{_('Name')}}</td>
       <td>{{_('Location')}}</td>
     </tr>
@@ -17,13 +18,206 @@
 
       <tr>
         <td>
-              <A HREF="{{url_for('main.safe_edit', safe=s.id)}}">
-                {{ s.name }}
+          {{ s.inventory_id() }}
+        </td>
+        <td>
+           {{ s.name }} -
+            <A HREF="{{url_for('main.safe_edit', safe=s.id)}}">{{_('Edit')}}</A>
+            <A HREF="{{url_for('main.safe_content', safe=s.id)}}">{{_('Content')}}</A>
+        </td>
+        <td>
+          {{ s.location.longName() }}
+        </td>
+      </tr>
+    {% endfor %}
+
+  </table>
+{% endif %}
+
+
+
+{% if hsmpcicards %}
+
+  <h2> HSM PCI Cards </h2>
+
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Serial')}}</td>
+      <td>{{_('HSM Domain')}}</td>
+      <td>{{_('Server')}}</td>
+      <td>{{_('Compartment')}}</td>
+    </tr>
+
+
+{% for h in hsmpcicards %}
+
+  <tr>
+      <td>  {{ h.inventory_id() }} </td>
+      <td>
+          <A HREF="{{url_for('main.hsm_pcicard_edit', pcicard=h.id)}}">
+            {{ h.serial }}
+          </A>
+        </td>
+        <td>
+          {{ h.hsmdomain.name }}
+        </td>
+        <td>
+          {{ h.server.hostname }}
+        </td>
+        <td>
+          {{ h.compartment.name }}
+        </td>
+
+  </tr>
+{% endfor %}
+
+
+</table>
+{% endif %}
+
+
+{% if hsmbackupunits %}
+
+  <h2> HSM Backup Units </h2>
+
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Serial')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('HSM Domain')}}</td>
+      <td>{{_('Service')}}</td>
+    </tr>
+
+
+{% for b in hsmbackupunits %}
+
+
+  <tr>
+      <td>  {{ b.inventory_id() }} </td>
+      <td>
+          <A HREF="{{url_for('main.hsm_backupunit_edit', id=b.id)}}">
+            {{ b.serial }}
+          </A>
+        </td>
+        <td>
+          {{ b.name }}
+        </td>
+        <td>
+          {{ b.hsmdomain.name }}
+        </td>
+        <td>
+          {{ b.hsmdomain.service.name }}
+        </td>
+
+  </tr>
+{% endfor %}
+
+</table>
+{% endif %}
+
+
+{% if compartments %}
+
+  <h2> Compartments </h2>
+
+  <table class="table table-hover">
+    <tr>
+      {% if order == "desc" %}
+        {% set order %}asc{% endset %}
+      {% else %}
+        {% set order %}desc{% endset %}
+      {% endif %}
+
+      <td><A HREF="{{url_for('main.compartment_list', sort='id',   order=order)}}">{{_('Inventory ID')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='name', order=order)}}">{{_('Name')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='safe_id', order=order)}}">{{_('Safe')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='user_id', order=order)}}">{{_('Owner')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='audit_date',    order=order)}}">{{_('Audit Date')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='audit_status',  order=order)}}">{{_('Audit Status')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='auditor_id',    order=order)}}">{{_('Auditor')}}</A></td>
+      <td><A HREF="{{url_for('main.compartment_list', sort='audit_comment', order=order)}}">{{_('Audit Comment')}}</A></td>
+    </tr>
+
+{% for c in compartments %}
+
+  <tr>
+      <td>
+          {{ c.inventory_id() }}
+      </td>
+      <td>
+            {{ c.name }} -
+            <A HREF="{{url_for('main.compartment_edit', compartment=c.id)}}"> {{_('Edit')}} </A>
+            <A HREF="{{url_for('main.compartment_audit', compartment=c.id)}}">{{_('Audit Content')}}</A>
+        </td>
+        <td>
+          {{ c.safe.name }}
+        </td>
+        <td>
+          {{ c.user.username }}
+        </td>
+        <td>
+          {% if c.audit_date %}
+            {{ moment(c.audit_date).format('YYYY-MM-DD HH:mm') }}
+          {% endif %}
+        </td>
+        <td>
+          {{ c.audit_status }}
+        </td>
+        <td>
+          {{ c.auditor.username }}
+        </td>
+        <td>
+          {{ c.audit_comment }}
+        </td>
+
+
+  </tr>
+{% endfor %}
+
+</table>
+{% endif %}
+
+
+{% if hsmpeds %}
+  <h2> HSM Ped </h2>
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Key No')}}</td>
+      <td>{{_('Key S/N')}}</td>
+      <td>{{_('HSM Domain')}}</td>
+      <td>{{_('Safe')}}</td>
+      <td>{{_('Owner')}}</td>
+    </tr>
+
+    {% for p in hsmpeds %}
+
+      <tr>
+        <td>  {{ p.inventory_id() }} </td>
+        <td>
+              <A HREF="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
+                {{ p.keyno }}
               </A>
         </td>
         <td>
-                {{ s.location.longName() }}
+                {{ p.keysn }}
         </td>
+        <td>
+                {{ p.hsmdomain.name }}
+        </td>
+        <td>
+                {{ p.compartment.name }}
+        </td>
+        <td>
+                {{ p.user.username }}
+        </td>
+        {% if p.requested_by %}
+        <td>
+            {{ p.requested_by.username }}
+        </td>
+        {% endif %}
 
       </tr>
     {% endfor %}
@@ -32,28 +226,41 @@
 {% endif %}
 
 
-{% if compartments %}
+{% if hsmpins %}
+
+  <h2> HSM PIN </h2>
 
   <table class="table table-hover">
     <tr>
-      <td>{{_('Name')}}</td>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Key No')}}</td>
+      <td>{{_('Key S/N')}}</td>
+      <td>{{_('HSM Domain')}}</td>
       <td>{{_('Safe')}}</td>
       <td>{{_('Owner')}}</td>
     </tr>
 
-{% for c in compartments %}
+
+{% for i in hsmpins %}
 
   <tr>
+      <td>  {{ i.inventory_id() }} </td>
       <td>
-          <A HREF="{{url_for('main.compartment_edit', compartment=c.id)}}">
-            {{ c.name }}
+          <A HREF="{{url_for('main.hsm_pin_edit', pin=i.id)}}">
+            {{ i.id }}
           </A>
         </td>
         <td>
-          {{ c.safe.name }}
+          {{ i.ped.keysn }}
         </td>
         <td>
-          {{ c.user.username }}
+          {{ i.ped.hsmdomain.name }}
+        </td>
+        <td>
+          {{i.compartment.name}}
+        </td>
+        <td>
+          {{i.ped.user.username}}
         </td>
 
   </tr>
