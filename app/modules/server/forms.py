@@ -13,6 +13,7 @@ class ServerForm(FlaskForm):
     ipaddress = StringField(_l('IP Address'), validators=[DataRequired()])
     netmask = StringField(_l('Netmask'), validators=[DataRequired()])
     gateway = StringField(_l('Gateway'), validators=[DataRequired()])
+    role = StringField(_l('Host Role (FE1)'))
     memory = StringField(_l('Memory'))
     cpu = StringField(_l('CPU'))
     psu = StringField(_l('PSU'))

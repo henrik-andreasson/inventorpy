@@ -6,6 +6,7 @@ class Server(db.Model):
     __tablename__ = "server"
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(140), unique=True)
+    role = db.Column(db.String(140))
     status = db.Column(db.String(140))
     ipaddress = db.Column(db.String(140))
     netmask = db.Column(db.String(140))
@@ -29,6 +30,7 @@ class Server(db.Model):
     support_start = db.Column(db.DateTime)
     support_end = db.Column(db.DateTime)
     rack_position = db.Column(db.String(10))
+    environment = db.Column(db.String(140))
 
     def __repr__(self):
         return '<Server {}>'.format(self.hostname)
@@ -40,6 +42,7 @@ class Server(db.Model):
         data = {
             'id': self.id,
             'hostname': self.hostname,
+            'role': self.role,
             'ipaddress': self.ipaddress,
             'netmask': self.netmask,
             'gateway': self.gateway,
@@ -67,7 +70,7 @@ class Server(db.Model):
         for field in ['hostname', 'ipaddress', 'netmask', 'gateway', 'memory',
                       'cpu', 'psu', 'hd', 'os_name', 'os_version', 'serial',
                       'model', 'manufacturer', 'status', 'comment',
-                      'support_start', 'support_end']:
+                      'support_start', 'support_end', 'role']:
             if field == "support_start" or field == "support_end":
                 date = datetime.strptime(data[field], "%Y-%m-%d")
                 setattr(self, field, date)
