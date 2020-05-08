@@ -6,6 +6,7 @@ class Server(db.Model):
     __tablename__ = "server"
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(140), unique=True)
+    alias = db.Column(db.String(140))
     status = db.Column(db.String(140))
     ipaddress = db.Column(db.String(140))
     netmask = db.Column(db.String(140))
@@ -29,6 +30,7 @@ class Server(db.Model):
     support_start = db.Column(db.DateTime)
     support_end = db.Column(db.DateTime)
     rack_position = db.Column(db.String(10))
+    environment = db.Column(db.String(140))
 
     def __repr__(self):
         return '<Server {}>'.format(self.hostname)

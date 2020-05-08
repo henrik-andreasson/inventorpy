@@ -32,6 +32,7 @@ def server_add():
         rack = Rack.query.get(form.rack.data)
 
         server = Server(hostname=form.hostname.data,
+                        role=form.role.data,
                         ipaddress=form.ipaddress.data,
                         status=form.status.data,
                         netmask=form.netmask.data,
@@ -94,6 +95,7 @@ def server_edit():
     if request.method == 'POST' and form.validate_on_submit():
 
         server.hostname = form.hostname.data
+        server.role = form.role.data
         server.ipaddress = form.ipaddress.data
         server.netmask = form.netmask.data
         server.gateway = form.gateway.data
@@ -138,7 +140,7 @@ def server_copy():
 
     if 'selected_service' in session:
         service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.di, service.name)]
+        form.service.choices = [(service.id, service.name)]
 
     else:
         form.service.choices = [(s.id, s.name) for s in Service.query.all()]
@@ -154,6 +156,7 @@ def server_copy():
 
     if request.method == 'POST' and form.validate_on_submit():
         server = Server(hostname=form.hostname.data,
+                        role=form.role.data,
                         ipaddress=form.ipaddress.data,
                         status=form.status.data,
                         netmask=form.netmask.data,
@@ -181,8 +184,21 @@ def server_copy():
 def server_list():
 
     page = request.args.get('page', 1, type=int)
+    service_name = request.args.get('service')
+    environment = request.args.get('environment')
+    service = Service.query.filter_by(name=service_name).first()
 
-    servers = Server.query.order_by(Server.hostname).paginate(
+    if environment is not None and service is not None:
+        servers = Server.query.filter((Server.environment == environment) & (Server.service_id == service.id)).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    elif service is not None:
+        servers = Server.query.filter_by(service_id=service.id).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    elif environment is not None:
+        servers = Server.query.filter_by(environment=environment).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    else:
+        servers = Server.query.order_by(Server.hostname).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.server_list', page=servers.next_num) \
