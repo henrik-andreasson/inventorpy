@@ -50,6 +50,7 @@ class ServerForm(FlaskForm):
     delete = SubmitField(_l('Delete'))
     copy = SubmitField(_l('Copy'))
     logs = SubmitField(_l('Logs'))
+    hsm = SubmitField(_l('HSM'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

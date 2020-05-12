@@ -24,6 +24,12 @@ class HsmDomainForm(FlaskForm):
 
 
 class HsmPedForm(FlaskForm):
+    type = SelectField(_l('PED Type'), choices=[('blue', 'HSM Admin (BLUE)'),
+                                                ('red', 'Partition Admin (RED)'),
+                                                ('black', 'User (BLACK)'),
+                                                ('orange', 'Remote PED (ORANGE)'),
+                                                ('red2', 'HSM Domain (RED2)'),
+                                                ('grey', 'User (GREY)')])
     keyno = StringField(_l('Key No.'), validators=[DataRequired()])
     keysn = StringField(_l('Key S/N'), validators=[DataRequired()])
     hsmdomain = SelectField(_l('HSM Domain'), coerce=int)

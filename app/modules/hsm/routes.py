@@ -20,13 +20,6 @@ def hsm_domain_add():
         return redirect(request.referrer)
 
     form = HsmDomainForm(formdata=request.form)
-    #
-    # if 'selected_service' in session:
-    #     service = Service.query.filter_by(name=session['selected_service']).first()
-    #     form.service.choices = [(service.name, service.name)]
-    #
-    # else:
-    #     form.service.choices = [(s.name, s.name) for s in Service.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.filter_by(id=form.service.data).first()
@@ -62,13 +55,6 @@ def hsm_domain_edit():
     original_data = hsmdomain.to_dict()
 
     form = HsmDomainForm(obj=hsmdomain)
-
-    # if 'selected_service' in session:
-    #     service = Service.query.filter_by(name=session['selected_service']).first()
-    #     form.service.choices = [(service.name, service.name)]
-    #
-    # else:
-    #     form.service.choices = [(s.name, s.name) for s in Service.query.all()]
 
     if hsmdomain is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
@@ -137,10 +123,6 @@ def hsm_ped_add():
         return redirect(request.referrer)
 
     form = HsmPedForm()
-
-    # form.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    # form.user.choices = [(u.id, u.username) for u in User.query.all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmped = HsmPed(keyno=form.keyno.data,
@@ -311,9 +293,6 @@ def hsm_pin_add():
         return redirect(request.referrer)
 
     form = HsmPinForm()
-    # form.ped.choices = [(p.id, '{}-{} ({})'.format(p.keyno, p.keysn, p.user.username)) for p in HsmPed.query.all()]
-    # form.compartment.choices = [(c.id, '{} - {}'.format(c.name, c.user.username)) for c in Compartment.query.all()]
-    # form.compartment.choices.insert(0, (0, 'None'))
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmpin = HsmPin()
@@ -445,7 +424,6 @@ def hsm_pcicard_add():
 
     else:
 
-#        hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id.desc()).limit(10)
         return render_template('hsm.html', title=_('HSM'),
                                form=form)
 
@@ -465,9 +443,6 @@ def hsm_pcicard_edit():
     original_data = hsmpcicard.to_dict()
 
     form = HsmPciCardForm(obj=hsmpcicard)
-    # form.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-    # form.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
-    # form.compartment.choices = [(c.id, c.name) for c in Compartment.query.all()]
 
     if hsmpcicard is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
@@ -505,8 +480,13 @@ def hsm_pcicard_edit():
 def hsm_pcicard_list():
 
     page = request.args.get('page', 1, type=int)
+    serverid = request.args.get('serverid')
 
-    hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id).paginate(
+    if serverid is not None:
+        hsmpcicards = HsmPciCard.query.filter_by(server_id=serverid).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    else:
+        hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.hsm_domain_list', page=hsmpcicards.next_num) \

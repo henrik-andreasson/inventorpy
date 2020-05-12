@@ -31,6 +31,7 @@ class HsmDomain(db.Model):
 class HsmPed(db.Model):
     __tablename__ = "hsm_ped"
     id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(140))
     keyno = db.Column(db.String(140))
     keysn = db.Column(db.String(140), unique=True)
     hsmdomain = db.relationship('HsmDomain')
@@ -46,6 +47,7 @@ class HsmPed(db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
+            'type': self.type,
             'keyno': self.keyno,
             'keysn': self.keysn,
             'compartment_id': self.compartment_id,
@@ -55,7 +57,7 @@ class HsmPed(db.Model):
         return data
 
     def from_dict(self, data):
-        for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id']:
+        for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id', 'type']:
             setattr(self, field, data[field])
 
     def inventory_id(self):
@@ -65,6 +67,7 @@ class HsmPed(db.Model):
 class HsmPedUpdates(db.Model):
     __tablename__ = "hsm_ped_updates"
     id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(140))
     keyno = db.Column(db.String(140))
     keysn = db.Column(db.String(140), unique=True)
     hsmdomain = db.relationship('HsmDomain')
@@ -82,6 +85,7 @@ class HsmPedUpdates(db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
+            'type': self.name,
             'keyno': self.keyno,
             'keysn': self.keysn,
             'compartment_id': self.compartment_id,
@@ -91,7 +95,7 @@ class HsmPedUpdates(db.Model):
         return data
 
     def from_dict(self, data):
-        for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id']:
+        for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id', 'type']:
             setattr(self, field, data[field])
 
 
@@ -125,6 +129,7 @@ class HsmPin(db.Model):
 class HsmPciCard(db.Model):
     __tablename__ = "hsm_pci_card"
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(140))
     serial = db.Column(db.String(140), unique=True)
     fbno = db.Column(db.String(140), unique=True)
     model = db.Column(db.String(140))
@@ -142,6 +147,7 @@ class HsmPciCard(db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
+            'name': self.name,
             'serial': self.serial,
             'fbno': self.fbno,
             'model': self.model,
@@ -153,7 +159,7 @@ class HsmPciCard(db.Model):
         return data
 
     def from_dict(self, data, new_work=False):
-        for field in ['serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'server_id', 'compartment_id']:
+        for field in ['serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'server_id', 'compartment_id', 'name']:
             setattr(self, field, data[field])
             if field == "manufacturedate":
                 date = datetime.strptime(data[field], "%Y-%m-%d")
