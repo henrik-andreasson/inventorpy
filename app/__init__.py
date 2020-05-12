@@ -40,6 +40,9 @@ def create_app(config_class=Config):
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
+    from app.modules.switch import bp as switch_bp
+    app.register_blueprint(switch_bp, url_prefix='/switch')
+
     from app.modules.server import bp as server_bp
     app.register_blueprint(server_bp, url_prefix='/server')
 

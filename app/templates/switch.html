@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+
+{% if switchs %}
+<table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('Location')}}</td>
+      <td>{{_('Service')}}</td>
+      <td>{{_('Rack')}}</td>
+    </tr>
+
+    {% for s in switchs %}
+
+      <tr>
+        <td>
+              {{ s.inventory_id() }}
+        </td>
+        <td>
+              <A HREF="{{url_for('main.switch_edit', switch=s.id)}}">
+                {{ s.name }}
+              </A>
+        </td>
+        <td>
+                {{s.ipaddress}}
+        </td>
+        <td>
+            {% if s.location %}
+                {{s.location.longName()}}
+            {% endif %}
+        </td>
+        <td>
+          {% if s.service %}
+              {{s.service.name}}
+          {% endif %}
+        </td>
+        <td>
+          {% if s.rack %}
+                {{s.rack.name}}
+          {% endif %}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </table>
+
+
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    {% endif %}
+
+    {% if form %}
+      {{ wtf.quick_form(form) }}
+    {% endif %}
+{% endblock %}
