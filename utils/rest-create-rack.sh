@@ -32,7 +32,7 @@ for row in $(cat "${csvfile}") ; do
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
-  http --verbose POST "${API_URL}/rack" \
+  http --verify cacerts.pem --verbose POST "${API_URL}/rack" \
     "name=${name}" \
     "location_id=${location_id}" \
     "Authorization:Bearer $token"
