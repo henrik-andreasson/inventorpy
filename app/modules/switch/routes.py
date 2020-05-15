@@ -4,9 +4,10 @@ from flask_login import login_required
 from app import db, audit
 from app.main import bp
 from app.models import Service, Location
-from app.modules.switch.models import Switch
+from app.modules.switch.models import Switch, SwitchPort
 from app.modules.rack.models import Rack
-from app.modules.switch.forms import SwitchForm
+from app.modules.server.models import Server
+from app.modules.switch.forms import SwitchForm, SwitchPortForm
 from flask_babel import _
 
 
@@ -28,10 +29,10 @@ def switch_add():
         if service is None:
             flash('Service is required')
             return redirect(request.referrer)
-        location = Location.query.get(form.location.data)
         rack = Rack.query.get(form.rack.data)
 
         switch = Switch(name=form.name.data,
+                        alias=form.alias.data,
                         ipaddress=form.ipaddress.data,
                         status=form.status.data,
                         serial=form.serial.data,
@@ -44,7 +45,6 @@ def switch_add():
                         )
 
         switch.service = service
-        switch.location = location
         switch.rack = rack
         db.session.add(switch)
         db.session.commit()
@@ -85,8 +85,8 @@ def switch_edit():
     if request.method == 'POST' and form.validate_on_submit():
 
         switch.name = form.name.data
+        switch.alias = form.alias.data
         switch.ipaddress = form.ipaddress.data
-        switch.location_id = form.location.data
         switch.service_id = form.service.data
         switch.rack_id = form.rack.data
         switch.comment = form.comment.data
@@ -101,58 +101,8 @@ def switch_edit():
         return redirect(url_for('main.index'))
 
     else:
-        form.location.data = switch.location_id
         form.service.data = switch.service_id
         form.rack.data = switch.rack_id
-        return render_template('switch.html', title=_('Edit Switch'),
-                               form=form)
-
-
-@bp.route('/switch/copy/', methods=['GET', 'POST'])
-@login_required
-def switch_copy():
-
-    switchid = request.args.get('copy_from_switch')
-
-    if 'cancel' in request.form:
-        return redirect(request.referrer)
-
-    copy_from_switch = Switch.query.get(switchid)
-
-    form = SwitchForm(obj=copy_from_switch)
-    form.service.data = copy_from_switch.service_id
-
-    if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
-        form.service.choices = [(service.id, service.name)]
-
-    else:
-        form.service.choices = [(s.id, s.name) for s in Service.query.all()]
-
-    location_choices = []
-    for l in Location.query.all():
-        newloc = (l.id, l.longName())
-        location_choices.append(newloc)
-    form.location.choices = location_choices
-
-    if copy_from_switch is None:
-        render_template('service.html', title=_('Switch is not defined'))
-
-    if request.method == 'POST' and form.validate_on_submit():
-        switch = Switch(name=form.name.data,
-                        status=form.status.data,
-                        location=form.location.data)
-        service = Service.query.get(form.service.data)
-        switch.service = service
-        db.session.add(switch)
-
-        db.session.commit()
-        audit.auditlog_new_post('switch', original_data=switch.to_dict(), record_name=switch.name)
-        flash(_('Copied values from switch %s to %s.' % (copy_from_switch.name, switch.name)))
-
-        return redirect(url_for('main.index'))
-
-    else:
         return render_template('switch.html', title=_('Edit Switch'),
                                form=form)
 
@@ -198,5 +148,146 @@ def switch_delete():
     db.session.delete(switch)
     db.session.commit()
     audit.auditlog_delete_post('switch', data=switch.to_dict(), record_name=switch.name)
+
+    return redirect(url_for('main.index'))
+
+
+@bp.route('/switch/port/add/', methods=['GET', 'POST'])
+@login_required
+def switch_port_add():
+    form = SwitchPortForm()
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+
+    form = SwitchPortForm(formdata=request.form)
+
+    ip = request.args.get('ip')
+    if ip:
+        form.ipaddress.data = ip
+
+    if request.method == 'POST' and form.validate_on_submit():
+        switch = Switch.query.get(form.switch.data)
+        switchport = SwitchPort(name=form.name.data,
+                                comment=form.comment.data
+                                )
+
+        if switch is not None:
+            switchport.switch = switch
+        else:
+            flash(_('Switch is mandatory!'))
+            return redirect(request.referrer)
+
+        if form.server.data is not None:
+            server = Server.query.get(form.server.data)
+            switchport.server = server
+        db.session.add(switchport)
+        db.session.commit()
+        audit.auditlog_new_post('switchport', original_data=switchport.to_dict(), record_name=switchport.name)
+        flash(_('New switchport is now posted!'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+
+        return render_template('switch.html', title=_('Add SwitchPort'),
+                               form=form)
+
+
+@bp.route('/switch/port/edit/', methods=['GET', 'POST'])
+@login_required
+def switch_port_edit():
+
+    switchportid = request.args.get('switchport')
+
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+    if 'delete' in request.form:
+        return redirect(url_for('main.switchport_delete', switchport=switchportid))
+    if 'copy' in request.form:
+        return redirect(url_for('main.switchport_copy', copy_from_switchport=switchportid))
+    if 'logs' in request.form:
+        return redirect(url_for('main.logs_list', module='switchport', module_id=switchportid))
+
+    switchport = SwitchPort.query.get(switchportid)
+    original_data = switchport.to_dict()
+
+    if switchport is None:
+        flash(_('SwitchPort is not defined'))
+        redirect(request.referrer)
+
+    form = SwitchPortForm(formdata=request.form, obj=switchport)
+
+    if request.method == 'POST' and form.validate_on_submit():
+
+        switchport.name = form.name.data
+        switchport.switch.data = form.switch_id.data
+        switchport.server.data = form.server_id.data
+        switchport.comment = form.comment.data
+
+        db.session.commit()
+        audit.auditlog_update_post('switchport', original_data=original_data, updated_data=switchport.to_dict(), record_name=switchport.name)
+        flash(_('Your changes have been saved.'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+        form.switch.data = switchport.switch_id
+        form.server.data = switchport.server_id
+
+        return render_template('switch.html', title=_('Edit SwitchPort'),
+                               form=form)
+
+
+@bp.route('/switch/port/list/', methods=['GET', 'POST'])
+@login_required
+def switch_port_list():
+
+    page = request.args.get('page', 1, type=int)
+    switchid = request.args.get('switchid')
+    serverid = request.args.get('serverid')
+
+    server = Server.query.get(serverid)
+    switch = Switch.query.get(switchid)
+
+    if server is not None and switch is not None:
+        switchports = SwitchPort.query.filter((SwitchPort.server_id == server.id),
+                                              (SwitchPort.switch_id == switch.id)).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    elif server is not None:
+        switchports = SwitchPort.query.filter_by(server_id=server.id).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    elif switch is not None:
+        switchports = SwitchPort.query.filter_by(switch_id=switch.id).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+    else:
+        switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+
+    next_url = url_for('main.switchport_list', page=switchports.next_num) \
+        if switchports.has_next else None
+    prev_url = url_for('main.switchport_list', page=switchports.prev_num) \
+        if switchports.has_prev else None
+
+    return render_template('switch.html', title=_('SwitchPort'),
+                           switchports=switchports.items, next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/switch/port/delete/', methods=['GET', 'POST'])
+@login_required
+def switch_port_delete():
+
+    switchportid = request.args.get('switchport')
+    switchport = SwitchPort.query.get(switchportid)
+
+    if switchport is None:
+        flash(_('SwitchPort was not deleted, id not found!'))
+        return redirect(url_for('main.index'))
+
+    deleted_msg = 'SwitchPort deleted: %s\n' % (switchport.name)
+    flash(deleted_msg)
+    db.session.delete(switchport)
+    db.session.commit()
+    audit.auditlog_delete_post('switchport', data=switchport.to_dict(), record_name=switchport.name)
 
     return redirect(url_for('main.index'))

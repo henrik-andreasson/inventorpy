@@ -50,10 +50,11 @@ class ServerForm(FlaskForm):
     delete = SubmitField(_l('Delete'))
     copy = SubmitField(_l('Copy'))
     logs = SubmitField(_l('Logs'))
-    hsm = SubmitField(_l('HSM'))
+    hsm = SubmitField(_l('HSMs'))
+    switchport = SubmitField(_l('Switch ports'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.location.choices = [(l.id, '{} / {} / {} / {}'.format(l.place, l.facillity, l.area, l.position)) for l in Location.query.order_by(Location.id).all()]
         self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
-        self.rack.choices = [(r.id, r.name) for r in Rack.query.order_by(Rack.name).all()]
+        self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]

@@ -85,6 +85,8 @@ def server_edit():
         return redirect(url_for('main.logs_list', module='server', module_id=serverid))
     if 'hsm' in request.form:
         return redirect(url_for('main.hsm_pcicard_list', serverid=serverid))
+    if 'switchport' in request.form:
+        return redirect(url_for('main.switch_port_list', serverid=serverid))
 
     server = Server.query.get(serverid)
     original_data = server.to_dict()

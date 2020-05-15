@@ -6,11 +6,7 @@ class Server(db.Model):
     __tablename__ = "server"
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(140), unique=True)
-<<<<<<< HEAD
     role = db.Column(db.String(140))
-=======
-    alias = db.Column(db.String(140))
->>>>>>> 9daf8f1d5beb93acb1609c90fdf2ecb0be22b16e
     status = db.Column(db.String(140))
     ipaddress = db.Column(db.String(140))
     netmask = db.Column(db.String(140))
@@ -35,6 +31,7 @@ class Server(db.Model):
     support_end = db.Column(db.DateTime)
     rack_position = db.Column(db.String(10))
     environment = db.Column(db.String(140))
+    switch_ports = db.relationship("SwitchPort", back_populates="server")
 
     def __repr__(self):
         return '<Server {}>'.format(self.hostname)

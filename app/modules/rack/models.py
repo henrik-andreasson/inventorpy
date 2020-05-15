@@ -25,3 +25,6 @@ class Rack(db.Model):
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
+    def name_with_location(self):
+        return '{} ({})'.format(self.name, self.location.longName())

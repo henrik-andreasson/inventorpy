@@ -9,7 +9,7 @@
     <tr>
       <td>{{_('Inventory id')}}</td>
       <td>{{_('Name')}}</td>
-      <td>{{_('Location')}}</td>
+      <td>{{_('Alias')}}</td>
       <td>{{_('Service')}}</td>
       <td>{{_('Rack')}}</td>
     </tr>
@@ -26,12 +26,10 @@
               </A>
         </td>
         <td>
-                {{s.ipaddress}}
+                {{s.alias}}
         </td>
         <td>
-            {% if s.location %}
-                {{s.location.longName()}}
-            {% endif %}
+                {{s.ipaddress}}
         </td>
         <td>
           {% if s.service %}
@@ -46,6 +44,7 @@
 
       </tr>
     {% endfor %}
+
 
     </table>
 
@@ -66,6 +65,59 @@
     </nav>
 
     {% endif %}
+
+    {% if switchports %}
+    <table class="table table-hover">
+        <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Name')}}</td>
+          <td>{{_('Switch')}}</td>
+          <td>{{_('Server')}}</td>
+        </tr>
+
+        {% for sp in switchports %}
+
+          <tr>
+            <td>
+                  {{ sp.inventory_id() }}
+            </td>
+            <td>
+                  <A HREF="{{url_for('main.switch_port_edit', switchport=sp.id)}}">
+                    {{ sp.name }}
+                  </A>
+            </td>
+            <td>
+                    {{sp.switch.name}}
+            </td>
+            <td>
+              {% if sp.server %}
+                  {{sp.server.hostname}}
+              {% endif %}
+            </td>
+
+          </tr>
+        {% endfor %}
+
+      </table>
+
+
+      <nav aria-label="...">
+          <ul class="pager">
+              <li class="previous{% if not prev_url %} disabled{% endif %}">
+                  <a href="{{ prev_url or '#' }}">
+                      <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+                  </a>
+              </li>
+              <li class="next{% if not next_url %} disabled{% endif %}">
+                  <a href="{{ next_url or '#' }}">
+                      {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+                  </a>
+              </li>
+          </ul>
+      </nav>
+
+    {% endif %}
+
 
     {% if form %}
       {{ wtf.quick_form(form) }}

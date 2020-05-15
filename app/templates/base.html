@@ -50,51 +50,25 @@
          <ul class="dropdown-menu">
            <li class="nav-item"><a href="{{ url_for('main.network_list') }}">{{ _('List Network') }}</a></li>
            <li class="nav-item"><a href="{{ url_for('main.network_add') }}">{{ _('Add Network') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.switch_list') }}">{{ _('List Swiches') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.switch_add') }}">{{ _('Add Swich') }}</a></li>
          </ul>
      </li>
 
      <li class="dropdown">
-         <a class="dropdown-toggle" data-toggle="dropdown" href="#">HSM Domain
+         <a class="dropdown-toggle" data-toggle="dropdown" href="#">HSM
          <span class="caret"></span></a>
          <ul class="dropdown-menu">
-           <li class="nav-item"><a href="{{ url_for('main.hsm_domain_list') }}">{{ _('List HSM Domain') }}</a></li>
-           <li class="nav-item"><a href="{{ url_for('main.hsm_domain_add') }}">{{ _('Add HSM Domain') }}</a></li>
-         </ul>
-     </li>
-
-     <li class="dropdown">
-         <a class="dropdown-toggle" data-toggle="dropdown" href="#">HSM PCI Card
-         <span class="caret"></span></a>
-         <ul class="dropdown-menu">
-           <li class="nav-item"><a href="{{ url_for('main.hsm_pcicard_list') }}">{{ _('List HSM PCI Card') }}</a></li>
-           <li class="nav-item"><a href="{{ url_for('main.hsm_pcicard_add') }}">{{ _('Add HSM PCI Card') }}</a></li>
-         </ul>
-     </li>
-
-     <li class="dropdown">
-         <a class="dropdown-toggle" data-toggle="dropdown" href="#">HSM Backup Unit
-         <span class="caret"></span></a>
-         <ul class="dropdown-menu">
-           <li class="nav-item"><a href="{{ url_for('main.hsm_backupunit_list') }}">{{ _('List HSM Backup Unit') }}</a></li>
-           <li class="nav-item"><a href="{{ url_for('main.hsm_backupunit_add') }}">{{ _('Add HSM Backup Unit') }}</a></li>
-         </ul>
-     </li>
-
-     <li class="dropdown">
-         <a class="dropdown-toggle" data-toggle="dropdown" href="#">PED
-         <span class="caret"></span></a>
-         <ul class="dropdown-menu">
-           <li class="nav-item"><a href="{{ url_for('main.hsm_ped_list') }}">{{ _('List Ped') }}</a></li>
-           <li class="nav-item"><a href="{{ url_for('main.hsm_ped_add') }}">{{ _('Add Ped') }}</a></li>
-         </ul>
-     </li>
-
-     <li class="dropdown">
-         <a class="dropdown-toggle" data-toggle="dropdown" href="#">PIN
-         <span class="caret"></span></a>
-         <ul class="dropdown-menu">
-           <li class="nav-item"><a href="{{ url_for('main.hsm_pin_list') }}">{{ _('List Pin') }}</a></li>
-           <li class="nav-item"><a href="{{ url_for('main.hsm_pin_add') }}">{{ _('Add Pin') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_domain_list') }}">{{ _('HSM Domain List') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_domain_add') }}">{{ _('HSM Domain Add') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_pcicard_list') }}">{{ _('HSM PCI Card List') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_pcicard_add') }}">{{ _('HSM PCI Card Add') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_backupunit_list') }}">{{ _('HSM Backup Unit List') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_backupunit_add') }}">{{ _('HSM Backup Unit Add') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_ped_list') }}">{{ _('HSM Ped List') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_ped_add') }}">{{ _('HSM Ped Add') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_pin_list') }}">{{ _('HSM Ped Pin List') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.hsm_pin_add') }}">{{ _('HSM Ped Pin Add') }}</a></li>
          </ul>
      </li>
 
