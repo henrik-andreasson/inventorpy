@@ -4,7 +4,7 @@ from wtforms.fields.html5 import DateTimeField
 from wtforms.validators import DataRequired
 from flask_babel import lazy_gettext as _l
 from datetime import datetime
-from app.models import Location, Service
+from app.models import Service
 from app.modules.rack.models import Rack
 from app.modules.switch.models import Switch
 from app.modules.server.models import Server
@@ -34,11 +34,28 @@ class SwitchForm(FlaskForm):
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
     logs = SubmitField(_l('Logs'))
+    ports = SubmitField(_l('SwitchPorts'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
         self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
+
+
+class FilterSwitchListForm(FlaskForm):
+    rack = SelectField(_l('Rack'), coerce=int)
+    service = SelectField(_l('Service'), coerce=int)
+    server = SelectField(_l('Server'), coerce=int)
+    submit = SubmitField(_l('Filter List'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.service.choices.insert(0, (-1, _l('None')))
+        self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
+        self.rack.choices.insert(0, (-1, _l('None')))
+        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.location.longName())) for s in Server.query.order_by(Server.id).all()]
+        self.server.choices.insert(0, (-1, _l('None')))
 
 
 class SwitchPortForm(FlaskForm):

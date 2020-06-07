@@ -1,20 +1,19 @@
 from flask import render_template, flash, redirect, url_for, request, \
-    current_app, session
+    current_app
 from flask_login import login_required
 from app import db, audit
 from app.main import bp
-from app.models import Service, Location
+from app.models import Service
 from app.modules.switch.models import Switch, SwitchPort
 from app.modules.rack.models import Rack
 from app.modules.server.models import Server
-from app.modules.switch.forms import SwitchForm, SwitchPortForm
+from app.modules.switch.forms import SwitchForm, SwitchPortForm, FilterSwitchListForm
 from flask_babel import _
 
 
 @bp.route('/switch/add', methods=['GET', 'POST'])
 @login_required
 def switch_add():
-    form = SwitchForm()
     if 'cancel' in request.form:
         return redirect(request.referrer)
 
@@ -73,6 +72,8 @@ def switch_edit():
         return redirect(url_for('main.switch_copy', copy_from_switch=switchid))
     if 'logs' in request.form:
         return redirect(url_for('main.logs_list', module='switch', module_id=switchid))
+    if 'ports' in request.form:
+        return redirect(url_for('main.switch_port_list', switch=switchid))
 
     switch = Switch.query.get(switchid)
     original_data = switch.to_dict()
@@ -115,12 +116,34 @@ def switch_list():
     service_name = request.args.get('service')
     service = Service.query.filter_by(name=service_name).first()
 
-    if service is not None:
-        switchs = Switch.query.filter_by(service_id=service.id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+    form = FilterSwitchListForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        server = Server.query.get(form.server.data)
+        service = Service.query.get(form.service.data)
+        rack = Rack.query.get(form.rack.data)
+
+        if server is not None:
+            # a server is connected to a switch port not a switch thus:
+            # TODO
+            switch_ports = SwitchPort.query.filter_by(server_id=server.id).all()
+        elif service is not None:
+            switchs = Switch.query.filter_by(service_id=service.id).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        elif rack is not None:
+            switchs = Switch.query.filter_by(rack_id=rack.id).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        else:
+            switchs = Switch.query.order_by(Switch.name).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
+
     else:
-        switchs = Switch.query.order_by(Switch.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+        if service is not None:
+            switchs = Switch.query.filter_by(service_id=service.id).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
+        else:
+            switchs = Switch.query.order_by(Switch.name).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.switch_list', page=switchs.next_num) \
         if switchs.has_next else None
@@ -129,7 +152,7 @@ def switch_list():
 
     return render_template('switch.html', title=_('Switch'),
                            switchs=switchs.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, form=form)
 
 
 @bp.route('/switch/delete/', methods=['GET', 'POST'])
@@ -202,9 +225,7 @@ def switch_port_edit():
     if 'cancel' in request.form:
         return redirect(request.referrer)
     if 'delete' in request.form:
-        return redirect(url_for('main.switchport_delete', switchport=switchportid))
-    if 'copy' in request.form:
-        return redirect(url_for('main.switchport_copy', copy_from_switchport=switchportid))
+        return redirect(url_for('main.switch_port_delete', switchport=switchportid))
     if 'logs' in request.form:
         return redirect(url_for('main.logs_list', module='switchport', module_id=switchportid))
 
@@ -220,8 +241,8 @@ def switch_port_edit():
     if request.method == 'POST' and form.validate_on_submit():
 
         switchport.name = form.name.data
-        switchport.switch.data = form.switch_id.data
-        switchport.server.data = form.server_id.data
+        switchport.switch_id = form.switch.data
+        switchport.server_id = form.server.data
         switchport.comment = form.comment.data
 
         db.session.commit()
@@ -243,7 +264,7 @@ def switch_port_edit():
 def switch_port_list():
 
     page = request.args.get('page', 1, type=int)
-    switchid = request.args.get('switchid')
+    switchid = request.args.get('switch')
     serverid = request.args.get('serverid')
 
     server = Server.query.get(serverid)

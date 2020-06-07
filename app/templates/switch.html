@@ -12,6 +12,7 @@
       <td>{{_('Alias')}}</td>
       <td>{{_('Service')}}</td>
       <td>{{_('Rack')}}</td>
+      <td>{{_('Actions')}}</td>
     </tr>
 
     {% for s in switchs %}
@@ -21,15 +22,10 @@
               {{ s.inventory_id() }}
         </td>
         <td>
-              <A HREF="{{url_for('main.switch_edit', switch=s.id)}}">
                 {{ s.name }}
-              </A>
         </td>
         <td>
                 {{s.alias}}
-        </td>
-        <td>
-                {{s.ipaddress}}
         </td>
         <td>
           {% if s.service %}
@@ -40,6 +36,10 @@
           {% if s.rack %}
                 {{s.rack.name}}
           {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.switch_edit', switch=s.id)}}"> {{ _('Edit') }}</A> <br/>
+          <A HREF="{{url_for('main.switch_port_list', switch=s.id)}}"> {{ _('List Ports') }}</A>
         </td>
 
       </tr>
