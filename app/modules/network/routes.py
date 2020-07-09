@@ -27,6 +27,7 @@ def network_add():
                           network=form.network.data,
                           netmask=form.netmask.data,
                           gateway=form.gateway.data,
+                          vlan=form.vlan.data,
                           location=location)
         db.session.add(network)
 
@@ -66,6 +67,7 @@ def network_edit():
         network.network = form.network.data
         network.netmask = form.netmask.data
         network.gateway = form.gateway.data
+        network.vlan = form.vlan.data
         network.location_id = form.location.data
         network.service_id = form.service.data
 

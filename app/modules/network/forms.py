@@ -12,6 +12,7 @@ class NetworkForm(FlaskForm):
     gateway = StringField(_l('Gateway'), validators=[DataRequired()])
     location = SelectField(_l('Location'), coerce=int)
     service = SelectField(_l('Service'), coerce=int)
+    vlan = StringField(_l('VLAN'))
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
