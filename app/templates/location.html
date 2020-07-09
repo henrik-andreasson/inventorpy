@@ -13,6 +13,7 @@
       <td>{{_('Area (Room/Rack/Safe)')}}</td>
       <td>{{_('Position')}}</td>
       <td>{{_('Type of Facillity')}}</td>
+      <td>{{_('long name')}}</td>
     </tr>
 
     {% for l in locations %}
@@ -36,6 +37,9 @@
         </td>
         <td>
                 {{ l.type }}
+        </td>
+        <td>
+                {{ l.longName() }}
         </td>
 
       </tr>
