@@ -7,6 +7,7 @@ from app.models import Service
 from app.modules.switch.models import Switch, SwitchPort
 from app.modules.rack.models import Rack
 from app.modules.server.models import Server
+from app.modules.network.models import Network
 from app.modules.switch.forms import SwitchForm, SwitchPortForm, FilterSwitchListForm
 from flask_babel import _
 
@@ -189,16 +190,21 @@ def switch_port_add():
         form.ipaddress.data = ip
 
     if request.method == 'POST' and form.validate_on_submit():
-        switch = Switch.query.get(form.switch.data)
+
         switchport = SwitchPort(name=form.name.data,
+                                server_if=form.server_if.data,
                                 comment=form.comment.data
                                 )
-
+        switch = Switch.query.get(form.switch.data)
         if switch is not None:
             switchport.switch = switch
         else:
             flash(_('Switch is mandatory!'))
             return redirect(request.referrer)
+
+        network = Network.query.get(form.network.data)
+        if network is not None:
+            switchport.network = network
 
         if form.server.data is not None:
             server = Server.query.get(form.server.data)
@@ -243,6 +249,8 @@ def switch_port_edit():
         switchport.name = form.name.data
         switchport.switch_id = form.switch.data
         switchport.server_id = form.server.data
+        switchport.server_if = form.server_if.data
+        switchport.network_id = form.network.data
         switchport.comment = form.comment.data
 
         db.session.commit()
@@ -284,9 +292,9 @@ def switch_port_list():
         switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
-    next_url = url_for('main.switchport_list', page=switchports.next_num) \
+    next_url = url_for('main.switch_port_list', page=switchports.next_num) \
         if switchports.has_next else None
-    prev_url = url_for('main.switchport_list', page=switchports.prev_num) \
+    prev_url = url_for('main.switch_port_list', page=switchports.prev_num) \
         if switchports.has_prev else None
 
     return render_template('switch.html', title=_('SwitchPort'),

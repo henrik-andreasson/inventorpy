@@ -65,6 +65,9 @@ class SwitchPort(db.Model):
     switch_id = db.Column(db.Integer, db.ForeignKey('switch.id'))
     server = db.relationship('Server', back_populates="switch_ports")
     server_id = db.Column(db.Integer, db.ForeignKey('server.id'))
+    server_if = db.Column(db.String(140))
+    network = db.relationship('Network', back_populates="switch_ports")
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
     comment = db.Column(db.String(255))
 
     def __repr__(self):

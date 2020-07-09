@@ -6,6 +6,7 @@ from flask_babel import lazy_gettext as _l
 from datetime import datetime
 from app.models import Service
 from app.modules.rack.models import Rack
+from app.modules.network.models import Network
 from app.modules.switch.models import Switch
 from app.modules.server.models import Server
 
@@ -46,6 +47,7 @@ class FilterSwitchListForm(FlaskForm):
     rack = SelectField(_l('Rack'), coerce=int)
     service = SelectField(_l('Service'), coerce=int)
     server = SelectField(_l('Server'), coerce=int)
+    network = SelectField(_l('Network'), coerce=int)
     submit = SubmitField(_l('Filter List'))
 
     def __init__(self, *args, **kwargs):
@@ -54,14 +56,18 @@ class FilterSwitchListForm(FlaskForm):
         self.service.choices.insert(0, (-1, _l('None')))
         self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
         self.rack.choices.insert(0, (-1, _l('None')))
-        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.location.longName())) for s in Server.query.order_by(Server.id).all()]
+        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.order_by(Server.id).all()]
         self.server.choices.insert(0, (-1, _l('None')))
+        self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
+        self.network.choices.insert(0, (-1, _l('None')))
 
 
 class SwitchPortForm(FlaskForm):
     name = StringField(_l('Name'), validators=[DataRequired()])
-    switch = SelectField(_l('Rack'), coerce=int)
+    switch = SelectField(_l('Switch'), coerce=int)
     server = SelectField(_l('Server'), coerce=int)
+    server_if = StringField(_l('Server Interface'))
+    network = SelectField(_l('Network'), coerce=int)
     comment = TextAreaField(_l('Comment'))
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
@@ -70,6 +76,8 @@ class SwitchPortForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.switch.choices = [(s.id, '{} {} ({})'.format(s.name, s.alias, s.rack.location.longName())) for s in Switch.query.order_by(Switch.id).all()]
-        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.location.longName())) for s in Server.query.order_by(Server.id).all()]
+        self.switch.choices = [(s.id, '{} {}'.format(s.name, s.alias)) for s in Switch.query.order_by(Switch.id).all()]
+        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.order_by(Server.id).all()]
         self.server.choices.insert(0, (-1, _l('Not Connected')))
+        self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
+        self.network.choices.insert(0, (-1, _l('None')))
