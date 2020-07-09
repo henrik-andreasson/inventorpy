@@ -9,8 +9,8 @@ class Server(db.Model):
     role = db.Column(db.String(140))
     status = db.Column(db.String(140))
     ipaddress = db.Column(db.String(140))
-    netmask = db.Column(db.String(140))
-    gateway = db.Column(db.String(140))
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
+    network = db.relationship('Network')
     memory = db.Column(db.String(140))
     cpu = db.Column(db.String(140))
     psu = db.Column(db.String(140))
@@ -44,9 +44,7 @@ class Server(db.Model):
             'id': self.id,
             'hostname': self.hostname,
             'role': self.role,
-            'ipaddress': self.ipaddress,
-            'netmask': self.netmask,
-            'gateway': self.gateway,
+            'network_id': self.network_id,
             'memory': self.memory,
             'cpu': self.cpu,
             'psu': self.psu,
@@ -68,7 +66,7 @@ class Server(db.Model):
         return data
 
     def from_dict(self, data, new_work=False):
-        for field in ['hostname', 'ipaddress', 'netmask', 'gateway', 'memory',
+        for field in ['hostname', 'ipaddress',  'memory',
                       'cpu', 'psu', 'hd', 'os_name', 'os_version', 'serial',
                       'model', 'manufacturer', 'status', 'comment',
                       'support_start', 'support_end', 'role']:

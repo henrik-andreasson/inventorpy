@@ -35,8 +35,7 @@ def server_add():
                         role=form.role.data,
                         ipaddress=form.ipaddress.data,
                         status=form.status.data,
-                        netmask=form.netmask.data,
-                        gateway=form.gateway.data,
+                        network_id=form.network.data,
                         memory=form.memory.data,
                         cpu=form.cpu.data,
                         psu=form.psu.data,
@@ -101,8 +100,7 @@ def server_edit():
         server.hostname = form.hostname.data
         server.role = form.role.data
         server.ipaddress = form.ipaddress.data
-        server.netmask = form.netmask.data
-        server.gateway = form.gateway.data
+        server.network_id = form.network.data
         server.memory = form.memory.data
         server.cpu = form.cpu.data
         server.location_id = form.location.data
@@ -121,6 +119,7 @@ def server_edit():
         return redirect(url_for('main.index'))
 
     else:
+        form.network.data = server.network_id
         form.location.data = server.location_id
         form.service.data = server.service_id
         form.rack.data = server.rack_id
@@ -163,8 +162,7 @@ def server_copy():
                         role=form.role.data,
                         ipaddress=form.ipaddress.data,
                         status=form.status.data,
-                        netmask=form.netmask.data,
-                        gateway=form.gateway.data,
+                        network_id=form.network.data,
                         memory=form.memory.data,
                         cpu=form.cpu.data,
                         location=form.location.data)

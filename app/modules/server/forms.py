@@ -6,14 +6,14 @@ from flask_babel import lazy_gettext as _l
 from datetime import datetime
 from app.models import Location, Service
 from app.modules.rack.models import Rack
+from app.modules.network.models import Network
 
 
 class ServerForm(FlaskForm):
     hostname = StringField(_l('Hostname'), validators=[DataRequired()])
-    ipaddress = StringField(_l('IP Address'), validators=[DataRequired()])
-    netmask = StringField(_l('Netmask'), validators=[DataRequired()])
-    gateway = StringField(_l('Gateway'), validators=[DataRequired()])
     role = StringField(_l('Host Role (FE1)'))
+    ipaddress = StringField(_l('IP Address'), validators=[DataRequired()])
+    network = SelectField(_l('Network'), coerce=int)
     memory = StringField(_l('Memory'))
     cpu = StringField(_l('CPU'))
     psu = StringField(_l('PSU'))
@@ -58,3 +58,5 @@ class ServerForm(FlaskForm):
         self.location.choices = [(l.id, '{} / {} / {} / {}'.format(l.place, l.facillity, l.area, l.position)) for l in Location.query.order_by(Location.id).all()]
         self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
         self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
+        self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
+        self.network.choices.insert(0, (-1, _l('None')))
