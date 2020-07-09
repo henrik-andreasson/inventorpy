@@ -58,6 +58,9 @@ def create_app(config_class=Config):
     from app.modules.hsm import bp as hsm_bp
     app.register_blueprint(hsm_bp, url_prefix='/hsm')
 
+    from app.modules.switch import bp as sw_bp
+    app.register_blueprint(sw_bp, url_prefix='/switch')
+
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
