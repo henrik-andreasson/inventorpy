@@ -1,6 +1,7 @@
 from app.api import bp
 from flask import jsonify
 from app.modules.network.models import Network
+from app.models import Location, Service
 from flask import url_for
 from app import db, audit
 from app.api.errors import bad_request
@@ -12,12 +13,31 @@ from app.api.auth import token_auth
 @token_auth.login_required
 def create_network():
     data = request.get_json() or {}
-    for field in ['name', 'network', 'netmask', 'gateway', 'location_id', 'service_id']:
+    for field in ['name', 'network', 'netmask', 'gateway', 'vlan']:
         if field not in data:
             return bad_request('must include %s fields' % field)
 
+    net_check = Network.query.filter_by(name=data['name']).first()
+    if net_check is not None:
+        return bad_request('Network name is alredy registered at: {} / {}'.format(net_check.id, net_check.name))
+
     network = Network()
     network.from_dict(data)
+
+    if 'location_id' in data:
+        location = Location.query.get(data['location_id'])
+        network.location = location
+    else:
+        return bad_request('must include location_id')
+
+    if 'service_id' in data:
+        service = Service.query.get(data['service_id'])
+        network.service = service
+    elif 'service_name' in data:
+        service = Service.query.filter_by(name=data['service_name']).first()
+        network.service = service
+    else:
+        return bad_request('must include service_name OR service_id')
 
     db.session.add(network)
     db.session.commit()
