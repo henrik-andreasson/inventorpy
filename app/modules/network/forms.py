@@ -28,3 +28,22 @@ class NetworkForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.location.choices = [(l.id, '{} / {} / {} / {}'.format(l.place, l.facillity, l.area, l.position)) for l in Location.query.order_by(Location.id).all()]
         self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+
+
+class FilterNetworkListForm(FlaskForm):
+    service = SelectField(_l('Service'), coerce=int)
+    environment = SelectField(_l('Environment'))
+    submit = SubmitField(_l('Filter List'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.service.choices.insert(0, (-1, _l('None')))
+        self.environment.choices = [('all', 'All'),
+                                    ('dev', 'Development'),
+                                    ('tools', 'Tools'),
+                                    ('cicd', 'CI/CD'),
+                                    ('st', 'System Testing'),
+                                    ('at', 'Acceptance Testing'),
+                                    ('prod', 'Production'),
+                                    ]

@@ -4,22 +4,30 @@
 {% block app_content %}
 
 {% if networks %}
+  
+  {% if order == "desc" %}
+    {% set order %}asc{% endset %}
+  {% else %}
+    {% set order %}desc{% endset %}
+  {% endif %}
+
 <table class="table table-hover">
     <tr>
-      <td>{{_('Inventory id')}}</td>
-      <td>{{_('Name')}}</td>
-      <td>{{_('IP Network')}}</td>
-      <td>{{_('IP Netmask')}}</td>
-      <td>{{_('IP Gateway')}}</td>
-      <td>{{_('Location')}}</td>
-      <td>{{_('Service')}}</td>
+      <td><A HREF="{{url_for('main.network_list', sort='id',          order=order)}}">{{_('Inventory id')}}</td>
+      <td><A HREF="{{url_for('main.network_list', sort='name',        order=order)}}">{{_('Name')}}        </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='network',     order=order)}}">{{_('IP Network')}}  </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='netmask',     order=order)}}">{{_('IP Netmask')}}  </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='gateway',     order=order)}}">{{_('IP Gateway')}}  </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='vlan',        order=order)}}">{{_('VLAN')}}        </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='service_id',  order=order)}}">{{_('Service')}}     </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='environment', order=order)}}">{{_('Environment')}} </A></td>
     </tr>
 
     {% for n in networks %}
 
       <tr>
         <td>  {{ n.inventory_id() }} </td>
-      
+
         <td>
               {{ n.name }}
               <A HREF="{{url_for('main.network_view', network=n.id)}}">
@@ -39,7 +47,13 @@
                 {{ n.gateway }}
         </td>
         <td>
+                {{ n.vlan }}
+        </td>
+        <td>
                 {{ n.service.name }}
+        </td>
+        <td>
+                {{ n.environment }}
         </td>
 
       </tr>
@@ -68,12 +82,12 @@
 <table class="table table-hover">
 
   <tr>
-    <td>{{_('Name')}}</td>
-    <td>{{_('IP Network')}}</td>
-    <td>{{_('IP Netmask')}}</td>
-    <td>{{_('IP Gateway')}}</td>
-    <td>{{_('Location')}}</td>
-    <td>{{_('Service')}}</td>
+    <td><A HREF="{{url_for('main.network_list', sort='name',     order=order)}}">{{_('Name')}}      </A></td>
+    <td><A HREF="{{url_for('main.network_list', sort='network',  order=order)}}">{{_('IP Network')}}</A></td>
+    <td><A HREF="{{url_for('main.network_list', sort='netmask',  order=order)}}">{{_('IP Netmask')}}</A></td>
+    <td><A HREF="{{url_for('main.network_list', sort='gatewy',   order=order)}}">{{_('IP Gateway')}}</A></td>
+    <td><A HREF="{{url_for('main.network_list', sort='location', order=order)}}">{{_('Location')}}  </A></td>
+    <td><A HREF="{{url_for('main.network_list', sort='service',  order=order)}}">{{_('Service')}}   </A></td>
   </tr>
   <tr>
     <td>{{network.name}}</td>

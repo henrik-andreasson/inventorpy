@@ -5,10 +5,11 @@ from app import db, audit
 from app.main import bp
 from app.models import Service, Location
 from app.modules.network.models import Network
-from app.modules.network.forms import NetworkForm
+from app.modules.network.forms import NetworkForm, FilterNetworkListForm
 from app.modules.server.models import Server
 from flask_babel import _
 import ipcalc
+from sqlalchemy import desc, asc
 
 
 @bp.route('/network/add', methods=['GET', 'POST'])
@@ -92,18 +93,45 @@ def network_edit():
 def network_list():
 
     page = request.args.get('page', 1, type=int)
+    sort = request.args.get('sort', 'name')
+    order = request.args.get('order', 'desc')
 
-    networks = Network.query.order_by(Network.name).paginate(
+    form = FilterNetworkListForm()
+
+    sortstr = "{}(Network.{})".format(order, sort)
+    if request.method == 'POST' and form.validate_on_submit():
+
+        service = Service.query.get(form.service.data)
+        environment = form.environment.data
+
+        print("env: {} service: {}".format(environment, service))
+
+        if service is not None and environment is not None and environment != "all":
+            networks = Network.query.filter_by(service_id=service.id, environment=environment).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        elif service is not None:
+            networks = Network.query.filter_by(service_id=service.id).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
+
+        elif environment is not None and environment != "all":
+            networks = Network.query.filter_by(environment=environment).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        else:
+            networks = Network.query.order_by(eval(sortstr)).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
+    else:
+        networks = Network.query.order_by(eval(sortstr)).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.network_list', page=networks.next_num) \
         if networks.has_next else None
+
     prev_url = url_for('main.network_list', page=networks.prev_num) \
         if networks.has_prev else None
 
     return render_template('network.html', title=_('Network'),
                            networks=networks.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, order=order, form=form)
 
 
 @bp.route('/network/delete/', methods=['GET', 'POST'])
