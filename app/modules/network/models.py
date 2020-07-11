@@ -14,6 +14,7 @@ class Network(db.Model):
     service = db.relationship('Service')
     vlan = db.Column(db.String(140))
     switch_ports = db.relationship("SwitchPort", back_populates="network")
+    environment = db.Column(db.String(140))
 
     def __repr__(self):
         return '<Network {}>'.format(self.name)
@@ -28,11 +29,12 @@ class Network(db.Model):
             'location_id': self.location_id,
             'service_id': self.service_id,
             'vlan': self.vlan,
+            'environment': self.environment,
             }
         return data
 
     def from_dict(self, data):
-        for field in ['name', 'network', 'netmask', 'gateway', 'vlan']:
+        for field in ['name', 'network', 'netmask', 'gateway', 'vlan', 'environment']:
             setattr(self, field, data[field])
 
     def inventory_id(self):

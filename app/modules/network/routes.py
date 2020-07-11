@@ -29,6 +29,8 @@ def network_add():
                           gateway=form.gateway.data,
                           vlan=form.vlan.data,
                           location=location)
+        network.environment = form.environment.data
+
         db.session.add(network)
 
         db.session.commit()

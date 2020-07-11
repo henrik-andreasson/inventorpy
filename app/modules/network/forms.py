@@ -13,6 +13,13 @@ class NetworkForm(FlaskForm):
     location = SelectField(_l('Location'), coerce=int)
     service = SelectField(_l('Service'), coerce=int)
     vlan = StringField(_l('VLAN'))
+    environment = SelectField(_l('Environment'), choices=[('dev', 'Development'),
+                                                          ('tools', 'Tools'),
+                                                          ('cicd', 'CI/CD'),
+                                                          ('st', 'System Testing'),
+                                                          ('at', 'Acceptance Testing'),
+                                                          ('prod', 'Production'),
+                                                          ])
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
