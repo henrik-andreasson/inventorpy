@@ -79,12 +79,14 @@ class SwitchPort(db.Model):
             'name': self.name,
             'switch_id': self.switch_id,
             'server_id': self.server_id,
+            'server_if': self.server_if,
+            'network_id': self.network_id,
             'comment': self.comment,
             }
         return data
 
     def from_dict(self, data):
-        for field in ['name', 'user_id', 'switch_id', 'server_id', 'comment']:
+        for field in ['name', 'switch_id', 'server_id', 'server_if', 'network_id', 'comment']:
             if field in data:
                 setattr(self, field, data[field])
 

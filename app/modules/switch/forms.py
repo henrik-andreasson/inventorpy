@@ -45,15 +45,12 @@ class SwitchForm(FlaskForm):
 
 class FilterSwitchListForm(FlaskForm):
     rack = SelectField(_l('Rack'), coerce=int)
-    service = SelectField(_l('Service'), coerce=int)
     server = SelectField(_l('Server'), coerce=int)
     network = SelectField(_l('Network'), coerce=int)
     submit = SubmitField(_l('Filter List'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
-        self.service.choices.insert(0, (-1, _l('None')))
         self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
         self.rack.choices.insert(0, (-1, _l('None')))
         self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.order_by(Server.id).all()]

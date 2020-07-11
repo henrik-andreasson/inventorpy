@@ -121,7 +121,6 @@ def switch_list():
 
     if request.method == 'POST' and form.validate_on_submit():
         server = Server.query.get(form.server.data)
-        service = Service.query.get(form.service.data)
         rack = Rack.query.get(form.rack.data)
 
         if server is not None:
@@ -278,19 +277,39 @@ def switch_port_list():
     server = Server.query.get(serverid)
     switch = Switch.query.get(switchid)
 
-    if server is not None and switch is not None:
-        switchports = SwitchPort.query.filter((SwitchPort.server_id == server.id),
-                                              (SwitchPort.switch_id == switch.id)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
-    elif server is not None:
-        switchports = SwitchPort.query.filter_by(server_id=server.id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
-    elif switch is not None:
-        switchports = SwitchPort.query.filter_by(switch_id=switch.id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+    form = FilterSwitchListForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        server = Server.query.get(form.server.data)
+        rack = Rack.query.get(form.rack.data)
+        network = Rack.query.get(form.network.data)
+
+        if server is not None:
+            switchports = SwitchPort.query.filter_by(server_id=server.id).all()
+        elif rack is not None:
+            switchports = SwitchPort.query.filter_by(rack_id=rack).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        elif network is not None:
+            switchports = SwitchPort.query.filter_by(netowrk_id=network).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        else:
+            switchports = SwitchPort.query.order_by(Switch.name).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
     else:
-        switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+
+        if server is not None and switch is not None:
+            switchports = SwitchPort.query.filter((SwitchPort.server_id == server.id),
+                                                  (SwitchPort.switch_id == switch.id)).paginate(
+                                                  page, current_app.config['POSTS_PER_PAGE'], False)
+        elif server is not None:
+            switchports = SwitchPort.query.filter_by(server_id=server.id).paginate(
+                    page, current_app.config['POSTS_PER_PAGE'], False)
+        elif switch is not None:
+            switchports = SwitchPort.query.filter_by(switch_id=switch.id).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
+        else:
+            switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
+                page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.switch_port_list', page=switchports.next_num) \
         if switchports.has_next else None
@@ -299,7 +318,7 @@ def switch_port_list():
 
     return render_template('switch.html', title=_('SwitchPort'),
                            switchports=switchports.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, form=form)
 
 
 @bp.route('/switch/port/delete/', methods=['GET', 'POST'])
