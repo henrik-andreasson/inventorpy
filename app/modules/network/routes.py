@@ -6,7 +6,7 @@ from app.main import bp
 from app.models import Service, Location
 from app.modules.network.models import Network
 from app.modules.network.forms import NetworkForm, FilterNetworkListForm
-from app.modules.server.models import Server
+# from app.modules.server.models import Server
 from flask_babel import _
 import ipcalc
 from sqlalchemy import desc, asc
@@ -167,10 +167,10 @@ def network_view():
     network = network
     networkview = []
     netstr = "%s/%s" % (network.network, network.netmask)
-    for x in ipcalc.Network(netstr):
-        s = Server.query.filter_by(ipaddress=str(x)).first()
-        server_net_tuple = (x, s)
-        networkview.append(server_net_tuple)
+    # for x in ipcalc.Network(netstr):
+    #     s = Server.query.filter_by(ipaddress=str(x)).first()
+    #     server_net_tuple = (x, s)
+    #     networkview.append(server_net_tuple)
 
     return render_template('network.html', title=_('Network'),
                            networkview=networkview,
