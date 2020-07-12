@@ -1,9 +1,6 @@
 from app.api import bp
 from flask import jsonify
 from app.modules.server.models import Server
-from app.modules.rack.models import Rack
-from app.modules.network.models import Network
-from app.models import Service
 from flask import url_for
 from app import db, audit
 from app.api.errors import bad_request
@@ -15,51 +12,18 @@ from app.api.auth import token_auth
 @token_auth.login_required
 def create_server():
     data = request.get_json() or {}
-    for field in ['hostname', 'status', 'ipaddress', 'memory', 'cpu',
-                  'psu', 'hd', 'serial', 'model', 'os_name',
-                  'os_version', 'manufacturer', 'role']:
-        if field not in data:
-            return bad_request('must include %s fields' % field)
+
+    if 'hostname' not in data:
+        return bad_request('Hostname field is mandatory')
 
     check_server = Server.query.filter_by(hostname=data['hostname']).first()
     if check_server is not None:
         return bad_request('Host already exist with id: %s' % check_server.id)
 
     server = Server()
-    server.from_dict(data)
-
-    if 'service_id' in data:
-        service = Service.query.get(data['service_id'])
-        server.service = service
-    elif 'service_name' in data:
-        service = Service.query.filter_by(name=data['service_name']).first()
-        if server is None:
-            return bad_request('No such service: %s' % data['service_name'])
-
-        server.service = service
-    else:
-        return bad_request('must include service_name OR service_id')
-
-    if 'network_id' in data:
-        network = Network.query.get_or_404(data['network_id'])
-        server.network = network
-    elif 'network_name' in data:
-        network = Network.query.filter_by(name=data['network_name']).first()
-        if network is None:
-            return bad_request('No such service: %s' % data['network_name'])
-
-        server.network = network
-    else:
-        return bad_request('must include network_name OR network_id')
-
-    if 'rack_id' in data:
-        rack = Rack.query.get(data['rack_id'])
-        server.rack = rack
-    elif 'rack_name' in data:
-        rack = Rack.query.filter_by(name=data['rack_id']).first()
-        server.rack = rack
-    else:
-        return bad_request('must include rack_name OR rack_id')
+    status = server.from_dict(data)
+    if status['success'] is False:
+        return bad_request(status['msg'])
 
     db.session.add(server)
     db.session.commit()
