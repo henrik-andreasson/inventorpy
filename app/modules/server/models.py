@@ -1,5 +1,8 @@
 from app import db
 from datetime import datetime
+from app.modules.rack.models import Rack
+from app.models import Service
+from app.modules.network.models import Network
 
 
 class Server(db.Model):
@@ -22,8 +25,6 @@ class Server(db.Model):
     manufacturer = db.Column(db.String(140))
     rack_id = db.Column(db.Integer, db.ForeignKey('rack.id'))
     rack = db.relationship('Rack')
-    location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
-    location = db.relationship('Location')
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
     service = db.relationship('Service')
     comment = db.Column(db.String(2000))
@@ -56,22 +57,57 @@ class Server(db.Model):
             'manufacturer': self.manufacturer,
             'rack_id': self.rack_id,
             'rack_position': self.rack_position,
-            'location_id': self.location_id,
             'service_id': self.service_id,
             'status': self.status,
             'comment': self.comment,
             'support_start': self.support_start,
             'support_end': self.support_end,
+            'environment': self.environment
             }
         return data
 
-    def from_dict(self, data, new_work=False):
-        for field in ['hostname', 'ipaddress',  'memory',
-                      'cpu', 'psu', 'hd', 'os_name', 'os_version', 'serial',
-                      'model', 'manufacturer', 'status', 'comment',
-                      'support_start', 'support_end', 'role']:
-            if field == "support_start" or field == "support_end":
-                date = datetime.strptime(data[field], "%Y-%m-%d")
-                setattr(self, field, date)
+    def from_dict(self, data):
+
+        for field in ['hostname', 'ipaddress',  'memory', 'cpu', 'psu', 'hd', 'os_name', 'os_version', 'serial',
+                      'model', 'manufacturer', 'status', 'comment', 'role', 'environment']:
+            if field not in data:
+                return {'msg': "must include field: %s" % field, 'success': False}
             else:
                 setattr(self, field, data[field])
+
+        for field in ['support_start', 'support_end']:
+            date = datetime.strptime(data[field], "%Y-%m-%d")
+            setattr(self, field, date)
+
+        if 'rack_id' in data:
+            rack = Rack.query.get(data['rack_id'])
+        elif 'rack_name' in data:
+            rack = Rack.query.filter_by(name=data['rack_name']).first()
+
+        if rack is None:
+            return {'msg': "no rack found via rack_name nor id", 'success': False}
+        else:
+            setattr(self, 'rack_id', rack.id)
+
+        if 'service_id' in data:
+            service = Service.query.get(data['service_id'])
+        elif 'service_name' in data:
+            service = Service.query.filter_by(name=data['service_name']).first()
+
+        if service is None:
+            return {'msg': "no service found via service_name nor id", 'success': False}
+        else:
+            setattr(self, 'service_id', service.id)
+
+        if 'network_id' in data:
+            network = Network.query.get(data['network_id'])
+        elif 'network_name' in data:
+            network = Network.query.filter_by(name=data['network_name']).first()
+            if network is None:
+                return {'msg': "no network found via network_name nor id", 'success': False}
+        else:
+            setattr(self, 'network_id', network.id)
+
+
+
+        return {'msg': "object loaded ok", 'success': True}
