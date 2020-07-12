@@ -12,16 +12,15 @@ from app.api.auth import token_auth
 @token_auth.login_required
 def create_hsmpcicard():
     data = request.get_json() or {}
-    for field in ['model', 'serial', 'fbno', 'manufacturedate', 'hsmdomain_id']:
-        if field not in data:
-            return bad_request('must include field: %s' % field)
-
-    if 'server_id' not in data and 'compartment_id' not in data:
-        return bad_request('must include server_id or compartment_id')
+    hsm_pci_card = HsmPciCard.query.filter_by(serial=data['serial']).first()
+    if hsm_pci_card is not None:
+        msg = 'Card already exist: %s' % hsm_pci_card.id
+        return bad_request(msg)
 
     hsmpcicard = HsmPciCard()
-
-    hsmpcicard.from_dict(data)
+    status = hsmpcicard.from_dict(data)
+    if status['success'] is False:
+        return bad_request(status['msg'])
 
     db.session.add(hsmpcicard)
     db.session.commit()
