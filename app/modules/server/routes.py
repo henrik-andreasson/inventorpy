@@ -6,9 +6,11 @@ from app.main import bp
 from app.models import Service, Location
 from app.modules.server.models import Server
 from app.modules.rack.models import Rack
-from app.modules.server.forms import ServerForm
+from app.modules.server.forms import ServerForm, FilterServerListForm
 from flask_babel import _
-
+from sqlalchemy import desc, asc
+from app.api.errors import bad_request
+import pprint
 
 @bp.route('/server/add', methods=['GET', 'POST'])
 @login_required
@@ -48,10 +50,10 @@ def server_add():
                         comment=form.comment.data,
                         support_start=form.support_start.data,
                         support_end=form.support_end.data,
-                        rack_position=form.rack_position.data
+                        rack_position=form.rack_position.data,
+                        environment=form.environment.data
                         )
 
-        server.environment = form.environment.data
         server.service = service
         server.location = location
         server.rack = rack
@@ -184,23 +186,58 @@ def server_copy():
 @bp.route('/server/list/', methods=['GET', 'POST'])
 @login_required
 def server_list():
-
+ 
     page = request.args.get('page', 1, type=int)
-    service_name = request.args.get('service')
-    environment = request.args.get('environment')
-    service = Service.query.filter_by(name=service_name).first()
+    sort = request.args.get('sort', 'hostname')
+    order = request.args.get('order', 'asc')
+    server_vars = list(vars(Server).keys())
 
-    if environment is not None and service is not None:
-        servers = Server.query.filter((Server.environment == environment) & (Server.service_id == service.id)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
-    elif service is not None:
-        servers = Server.query.filter_by(service_id=service.id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
-    elif environment is not None:
-        servers = Server.query.filter_by(environment=environment).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+    if sort not in server_vars:
+        flash(_('No such varibale to sort by %s' % sort))
+        return redirect(url_for('main.index'))
+
+    if order not in ['asc', 'desc']:
+        flash(_('Bad order to sort by'))
+        return redirect(url_for('main.index'))
+
+    sortstr = "{}(Server.{})".format(order, sort)
+    form = FilterServerListForm()
+
+    environment = None
+    service = None
+
+    if request.method == 'POST' and form.validate_on_submit():
+        service_id = form.service.data
+        rack_id = form.rack.data
+        environment = form.environment.data
+        service = Service.query.filter_by(id=service_id).first()
+        rack = Rack.query.get(rack_id)
     else:
-        servers = Server.query.order_by(Server.hostname).paginate(
+        service_name = request.args.get('service')
+        service = Service.query.filter_by(name=service_name).first()
+        environment = request.args.get('environment')
+        rack_id = request.args.get('rack_id')
+        rack = Rack.query.get(rack_id)
+
+    input_search_query = []
+    if service is not None:
+        print("service: {}".format(service.name))
+        input_search_query.append('(Server.service_id == service.id)')
+    if environment is not None and environment != "all":
+        print("env: {}".format(environment))
+        input_search_query.append('(Server.environment == environment)')
+    if rack is not None:
+        print("env: {}".format(rack.name))
+        input_search_query.append('(Server.rack_id == rack.id)')
+
+    if len(input_search_query) < 1:
+        servers = Server.query.order_by(eval(sortstr)).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+
+    else:
+        query = " & ".join(input_search_query)
+        print("query: {}".format(query))
+        servers = Server.query.filter(eval(query)).order_by(eval(sortstr)).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
     next_url = url_for('main.server_list', page=servers.next_num) \
@@ -210,7 +247,7 @@ def server_list():
 
     return render_template('server.html', title=_('Server'),
                            servers=servers.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, form=form)
 
 
 @bp.route('/server/delete/', methods=['GET', 'POST'])

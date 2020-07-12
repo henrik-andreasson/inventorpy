@@ -60,3 +60,25 @@ class ServerForm(FlaskForm):
         self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
         self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
         self.network.choices.insert(0, (-1, _l('None')))
+
+
+class FilterServerListForm(FlaskForm):
+    service = SelectField(_l('Service'), coerce=int)
+    rack = SelectField(_l('Rack'), coerce=int)
+    environment = SelectField(_l('Environment'))
+    submit = SubmitField(_l('Filter List'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.rack.choices = [(r.id, r.name) for r in Rack.query.order_by(Rack.name).all()]
+        self.rack.choices.insert(0, (-1, _l('All')))
+        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.service.choices.insert(0, (-1, _l('All')))
+        self.environment.choices = [('all', 'All'),
+                                    ('dev', 'Development'),
+                                    ('tools', 'Tools'),
+                                    ('cicd', 'CI/CD'),
+                                    ('st', 'System Testing'),
+                                    ('at', 'Acceptance Testing'),
+                                    ('prod', 'Production'),
+                                    ]
