@@ -1,5 +1,7 @@
 from app import db
 from datetime import datetime
+from app.modules.server.models import Server
+from app.modules.safe.models import Compartment
 
 
 class HsmDomain(db.Model):
@@ -158,14 +160,58 @@ class HsmPciCard(db.Model):
             }
         return data
 
-    def from_dict(self, data, new_work=False):
-        for field in ['serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'server_id', 'compartment_id', 'name']:
-            setattr(self, field, data[field])
+    def from_dict(self, data):
+
+        for field in ['serial', 'model', 'manufacturedate', 'fbno', 'name']:
+            if field not in data:
+                msg = 'must include field: %s' % field
+                return {'msg': msg, 'success': False}
+
             if field == "manufacturedate":
                 date = datetime.strptime(data[field], "%Y-%m-%d")
                 setattr(self, field, date)
             else:
                 setattr(self, field, data[field])
+
+# a hsm can be inside a server or a compartment
+        if 'server_id' in data:
+            server = Server.query.get(data['server_id'])
+            if server is None:
+                return {'msg': "no server found via server_id", 'success': False}
+            else:
+                setattr(self, 'server_id', server.id)
+
+        elif 'server_name' in data:
+            server = Server.query.filter_by(hostname=data['server_name']).first()
+            if server is None:
+                return {'msg': "no server found via server_name nor id", 'success': False}
+            else:
+                setattr(self, 'server_id', server.id)
+
+        elif 'compartment_id' in data:
+            compartment = Compartment.query.get(data['compartment_id']).first()
+            if compartment is None:
+                return {'msg': "no compartment found via compartment_id", 'success': False}
+            else:
+                setattr(self, 'compartment_id', data['compartment_id'])
+        else:
+            return {'msg': "must supply valid compartment_id", 'success': False}
+
+        if 'hsmdomain_id' in data:
+            hsmdomain = HsmDomain.query.get(data['hsmdomain_id'])
+            if hsmdomain is None:
+                return {'msg': "no HSM Domain found via hsmdomain_id", 'success': False}
+            else:
+                setattr(self, 'hsmdomain_id', hsmdomain.id)
+
+        elif 'hsmdomain_name' in data:
+            hsmdomain = HsmDomain.query.filter_by(name=data['hsmdomain_name']).first()
+            if hsmdomain is None:
+                return {'msg': "no HSM Domain found via hsmdomain_id nor hsmdomain_name", 'success': False}
+            else:
+                setattr(self, 'hsmdomain_id', hsmdomain.id)
+
+        return {'msg': "object loaded ok", 'success': True}
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
@@ -205,6 +251,32 @@ class HsmBackupUnit(db.Model):
     def from_dict(self, data):
         for field in ['name', 'serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'safe_id']:
             setattr(self, field, data[field])
+
+        if 'safe_id' in data:
+            compartment = Compartment.query.get(data['safe_id']).first()
+            if compartment is None:
+                return {'msg': "no compartment found via compartment_id", 'success': False}
+            else:
+                setattr(self, 'compartment_id', data['compartment_id'])
+        else:
+            return {'msg': "must supply valid compartment_id", 'success': False}
+
+        if 'hsmdomain_id' in data:
+            hsmdomain = HsmDomain.query.get(data['hsmdomain_id'])
+            if hsmdomain is None:
+                return {'msg': "no HSM Domain found via hsmdomain_id", 'success': False}
+            else:
+                setattr(self, 'hsmdomain_id', hsmdomain.id)
+
+        elif 'hsmdomain_name' in data:
+            hsmdomain = HsmDomain.query.filter_by(name=data['hsmdomain_name']).first()
+            if hsmdomain is None:
+                return {'msg': "no HSM Domain found via hsmdomain_id nor hsmdomain_name", 'success': False}
+            else:
+                setattr(self, 'hsmdomain_id', hsmdomain.id)
+
+        return {'msg': "object loaded ok", 'success': True}
+
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

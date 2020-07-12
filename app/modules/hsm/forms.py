@@ -24,6 +24,7 @@ class HsmDomainForm(FlaskForm):
 
 
 class HsmPedForm(FlaskForm):
+    # todo: move ped_types to global definition
     type = SelectField(_l('PED Type'), choices=[('blue', 'HSM Admin (BLUE)'),
                                                 ('red', 'Partition Admin (RED)'),
                                                 ('black', 'User (BLACK)'),
