@@ -126,6 +126,7 @@
     <tr>
       <td>{{_('Inventory id')}}</td>
       <td>{{_('Serial')}}</td>
+      <td>{{_('Name')}}</td>
       <td>{{_('HSM Domain')}}</td>
       <td>{{_('Server')}}</td>
       <td>{{_('Compartment')}}</td>
@@ -140,6 +141,9 @@
           <A HREF="{{url_for('main.hsm_pcicard_edit', pcicard=h.id)}}">
             {{ h.serial }}
           </A>
+        </td>
+        <td>
+          {{ h.name }}
         </td>
         <td>
           {{ h.hsmdomain.name }}
