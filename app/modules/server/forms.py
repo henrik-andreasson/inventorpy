@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, TextAreaField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField, BooleanField
 from wtforms.fields.html5 import DateTimeField
 from wtforms.validators import DataRequired
 from flask_babel import lazy_gettext as _l
@@ -7,6 +7,7 @@ from datetime import datetime
 from app.models import Location, Service
 from app.modules.rack.models import Rack
 from app.modules.network.models import Network
+from app.modules.server.models import Server
 
 
 class ServerForm(FlaskForm):
@@ -45,6 +46,10 @@ class ServerForm(FlaskForm):
                                 validators=[DataRequired()], format='%Y-%m-%d',
                                 default=datetime.now())
     comment = TextAreaField(_l('Comment'))
+    virtual_host = SelectField(_l('Virtual Host'), choices=[('no', 'No'),
+                                                            ('proxmox', 'Proxmox'),
+                                                            ('esxi', 'ESXi')
+                                                            ])
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
@@ -72,6 +77,66 @@ class FilterServerListForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.rack.choices = [(r.id, r.name) for r in Rack.query.order_by(Rack.name).all()]
         self.rack.choices.insert(0, (-1, _l('All')))
+        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.service.choices.insert(0, (-1, _l('All')))
+        self.environment.choices = [('all', 'All'),
+                                    ('dev', 'Development'),
+                                    ('tools', 'Tools'),
+                                    ('cicd', 'CI/CD'),
+                                    ('st', 'System Testing'),
+                                    ('at', 'Acceptance Testing'),
+                                    ('prod', 'Production'),
+                                    ]
+
+
+class VirtualServerForm(FlaskForm):
+    hostname = StringField(_l('Hostname'), validators=[DataRequired()])
+    role = StringField(_l('Host Role (FE1)'))
+    ipaddress = StringField(_l('IP Address'), validators=[DataRequired()])
+    network = SelectField(_l('Network'), coerce=int)
+    memory = StringField(_l('Memory'))
+    cpu = StringField(_l('CPU'))
+    hd = StringField(_l('Hard drive'))
+    os_name = StringField(_l('OS Name'))
+    os_version = StringField(_l('OS Version'))
+    model = StringField(_l('Model'))
+    service = SelectField(_l('Service'), coerce=int)
+    environment = SelectField(_l('Environment'), choices=[('dev', 'Development'),
+                                                          ('tools', 'Tools'),
+                                                          ('cicd', 'CI/CD'),
+                                                          ('st', 'System Testing'),
+                                                          ('at', 'Acceptance Testing'),
+                                                          ('prod', 'Production'),
+                                                          ])
+
+    status = SelectField(_l('Status'), choices=[('pre-op', 'Pre Operation'),
+                                                ('operation', 'Operation'),
+                                                ('post-op', 'Post Operation'),
+                                                ('removed', 'Removed')])
+    hosting_server = SelectField(_l('Hosting Server'), coerce=int)
+    comment = TextAreaField(_l('Comment'))
+    submit = SubmitField(_l('Submit'))
+    cancel = SubmitField(_l('Cancel'))
+    delete = SubmitField(_l('Delete'))
+    copy = SubmitField(_l('Copy'))
+    logs = SubmitField(_l('Logs'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
+        self.network.choices.insert(0, (-1, _l('None')))
+        self.hosting_server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.filter((Server.virtual_host != 'no')).all()]
+        self.hosting_server.choices.insert(0, (-1, _l('None')))
+
+
+class FilterVirtualServerListForm(FlaskForm):
+    service = SelectField(_l('Service'), coerce=int)
+    environment = SelectField(_l('Environment'))
+    submit = SubmitField(_l('Filter List'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
         self.service.choices.insert(0, (-1, _l('All')))
         self.environment.choices = [('all', 'All'),

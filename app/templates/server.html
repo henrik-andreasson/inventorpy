@@ -65,9 +65,67 @@
         </ul>
     </nav>
 
-    {% endif %}
+{% endif %}
 
-    {% if form %}
+
+{% if virtual_servers %}
+<table class="table table-hover">
+    <tr>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='id',             order=order)}}">{{_('Inventory ID')}}</A></td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='hostname',       order=order)}}">{{_('Hostname')}}</td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='ipaddress',      order=order)}}">{{_('IP Address')}}</td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='service_id',     order=order)}}">{{_('Service')}}</td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='hosting_server', order=order)}}">{{_('Hosting Server')}}</td>
+    </tr>
+
+    {% for vs in virtual_servers %}
+
+      <tr>
+        <td>
+              {{ vs.inventory_id() }}
+        </td>
+        <td>
+              <A HREF="{{url_for('main.virtual_server_edit', virtual_server=vs.id)}}">
+                {{ vs.hostname }}
+              </A>
+        </td>
+        <td>
+                {{vs.ipaddress}}
+        </td>
+        <td>
+          {% if vs.service %}
+              {{vs.service.name}}
+          {% endif %}
+        </td>
+        <td>
+            {{vs.hosting_server.hostname}}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </table>
+
+
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+{% endif %}
+
+
+{% if form %}
       {{ wtf.quick_form(form) }}
-    {% endif %}
+{% endif %}
 {% endblock %}
