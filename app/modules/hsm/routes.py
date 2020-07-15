@@ -4,7 +4,6 @@ from flask_login import login_required, current_user
 from app import db, audit
 from app.main import bp
 from app.models import Service, User
-from app.modules.server.models import Server
 from app.modules.safe.models import Compartment, Safe
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmBackupUnit, \
     HsmPciCard, HsmPedUpdates
@@ -393,6 +392,8 @@ def hsm_pin_delete():
 @bp.route('/hsm/pcicard/add', methods=['GET', 'POST'])
 @login_required
 def hsm_pcicard_add():
+    from app.modules.server.models import Server
+
     if 'cancel' in request.form:
         return redirect(request.referrer)
 
@@ -431,6 +432,8 @@ def hsm_pcicard_add():
 @bp.route('/hsm/pcicard/edit/', methods=['GET', 'POST'])
 @login_required
 def hsm_pcicard_edit():
+
+    from app.modules.server.models import Server
 
     pcicardid = request.args.get('pcicard')
 

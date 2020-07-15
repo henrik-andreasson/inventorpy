@@ -6,7 +6,6 @@ from app.main import bp
 from app.models import Service, Location
 from app.modules.network.models import Network
 from app.modules.network.forms import NetworkForm, FilterNetworkListForm
-# from app.modules.server.models import Server
 from flask_babel import _
 import ipcalc
 from sqlalchemy import desc, asc
@@ -157,20 +156,27 @@ def network_delete():
 @bp.route('/network/view/', methods=['GET', 'POST'])
 @login_required
 def network_view():
-
+    from app.modules.server.models import Server, VirtualServer
     networkid = request.args.get('network')
     network = Network.query.get(networkid)
 
     if network is None:
         flash(_('Network was not found, id not found!'))
         return redirect(url_for('main.index'))
-    network = network
+
     networkview = []
     netstr = "%s/%s" % (network.network, network.netmask)
-    # for x in ipcalc.Network(netstr):
-    #     s = Server.query.filter_by(ipaddress=str(x)).first()
-    #     server_net_tuple = (x, s)
-    #     networkview.append(server_net_tuple)
+    for x in ipcalc.Network(netstr):
+        server_net_tuple = (x, '')
+        s = Server.query.filter_by(ipaddress=str(x)).first()
+        if s is not None:
+            server_net_tuple = (x, s)
+            networkview.append(server_net_tuple)
+        vs = VirtualServer.query.filter_by(ipaddress=str(x)).first()
+        if vs is not None:
+            server_net_tuple = (x, vs)
+
+        networkview.append(server_net_tuple)
 
     return render_template('network.html', title=_('Network'),
                            networkview=networkview,

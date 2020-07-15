@@ -6,6 +6,7 @@ from app.models import Location
 from app.modules.rack.models import Rack
 from app.modules.rack.forms import RackForm
 from flask_babel import _
+from app.modules.switch.models import Switch
 
 
 @bp.route('/rack/add', methods=['GET', 'POST'])
@@ -94,6 +95,27 @@ def rack_list():
     return render_template('rack.html', title=_('Rack'),
                            racks=racks.items, next_url=next_url,
                            prev_url=prev_url)
+
+
+@bp.route('/rack/content/', methods=['GET', 'POST'])
+@login_required
+def rack_content():
+
+    rack_id = request.args.get('rack_id')
+    rack = Rack.query.get(rack_id)
+    if rack is None:
+        flash(_('Rack not found'))
+        return redirect(request.referrer)
+
+    from app.modules.server.models import Server
+
+    servers = Server.query.filter_by(rack_id=rack.id)
+    switchs = Switch.query.filter_by(rack_id=rack.id)
+
+    return render_template('rack.html', title=_('Rack contents'),
+                           server_title=_('Servers'),
+                           switch_title=_('Switches'),
+                           servers=servers, switchs=switchs)
 
 
 @bp.route('/rack/delete/', methods=['GET', 'POST'])

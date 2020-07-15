@@ -6,7 +6,6 @@ from app.main import bp
 from app.models import Service
 from app.modules.switch.models import Switch, SwitchPort
 from app.modules.rack.models import Rack
-from app.modules.server.models import Server
 from app.modules.network.models import Network
 from app.modules.switch.forms import SwitchForm, SwitchPortForm, FilterSwitchListForm
 from flask_babel import _
@@ -112,6 +111,7 @@ def switch_edit():
 @bp.route('/switch/list/', methods=['GET', 'POST'])
 @login_required
 def switch_list():
+    from app.modules.server.models import Server
 
     page = request.args.get('page', 1, type=int)
     service_name = request.args.get('service')
@@ -178,6 +178,8 @@ def switch_delete():
 @bp.route('/switch/port/add/', methods=['GET', 'POST'])
 @login_required
 def switch_port_add():
+    from app.modules.server.models import Server
+
     form = SwitchPortForm()
     if 'cancel' in request.form:
         return redirect(request.referrer)
@@ -269,6 +271,7 @@ def switch_port_edit():
 @bp.route('/switch/port/list/', methods=['GET', 'POST'])
 @login_required
 def switch_port_list():
+    from app.modules.server.models import Server
 
     page = request.args.get('page', 1, type=int)
     switchid = request.args.get('switch')
