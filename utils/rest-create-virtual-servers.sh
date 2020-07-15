@@ -44,7 +44,7 @@ for row in $(cat "${csvfile}") ; do
   status=$(echo $row | cut -f11 -d,)
   environment=$(echo $row | cut -f12 -d,)
   comment=$(echo $row | cut -f13 -d,)
-  hosting_server_name=$(echo $row | cut -f14 -d,)
+  hosting_server_name=$(echo $row | cut -f14 r-d,)
 
 
   iscomment=$(echo $row | grep "#" )

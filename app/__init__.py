@@ -61,6 +61,9 @@ def create_app(config_class=Config):
     from app.modules.switch import bp as sw_bp
     app.register_blueprint(sw_bp, url_prefix='/switch')
 
+    from app.modules.firewall import bp as fw_bp
+    app.register_blueprint(fw_bp, url_prefix='/firewall')
+
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
