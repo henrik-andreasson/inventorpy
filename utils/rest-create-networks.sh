@@ -40,6 +40,8 @@ for row in $(cat "${csvfile}") ; do
   gateway=$(echo $row | cut -f4 -d,)
   location=$(echo $row | cut -f5 -d,)
   service=$(echo $row | cut -f6 -d,)
+  vlan=$(echo $row | cut -f7 -d,)
+  environment=$(echo $row | cut -f8 -d,)
   iscomment=$(echo $row | grep "#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
@@ -50,7 +52,9 @@ for row in $(cat "${csvfile}") ; do
     "netmask=${netmask}" \
     "gateway=${gateway}" \
     "location_id=${location}" \
-    "service_id=${service}" \
+    "service_name=${service}" \
+    "vlan=${vlan}" \
+    "environment=${environment}" \
      "Authorization:Bearer $token"
 
 

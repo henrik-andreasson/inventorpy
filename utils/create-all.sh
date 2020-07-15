@@ -10,5 +10,5 @@
 ./rest-create-servers.sh import-server-cs.csv
 ./rest-create-hsm-domain.sh import-hsm-domain-cs.csv
 ./rest-create-hsm-pcicard.sh import-hsm-pcicard-cs.csv
-./rest-create-hsm-ped.sh import-hsm-ped-cs.csv
-./rest-create-hsm-pin.sh import-hsm-pin-cs.csv
+#./rest-create-hsm-ped.sh import-hsm-ped-cs.csv
+#./rest-create-hsm-pin.sh import-hsm-pin-cs.csv

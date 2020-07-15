@@ -37,22 +37,14 @@ for row in $(cat "${csvfile}") ; do
   network=$(echo $row | cut -f4 -d,)
   memory=$(echo $row | cut -f5 -d,)
   cpu=$(echo $row | cut -f6 -d,)
-  psu=$(echo $row | cut -f7 -d,)
-  hd=$(echo $row | cut -f8 -d,)
-  os_name=$(echo $row | cut -f9 -d,)
-  os_version=$(echo $row | cut -f10 -d,)
-  serial=$(echo $row | cut -f11 -d,)
-  manufacturer=$(echo $row | cut -f12 -d,)
-  model=$(echo $row | cut -f13 -d,)
-  rack_name=$(echo $row | cut -f14 -d,)
-  service_name=$(echo $row | cut -f15 -d,)
-  status=$(echo $row | cut -f16 -d,)
-  support_start=$(echo $row | cut -f17 -d,)
-  support_end=$(echo $row | cut -f18 -d,)
-  rack_position=$(echo $row | cut -f19 -d,)
-  environment=$(echo $row | cut -f20 -d,)
-  comment=$(echo $row | cut -f21 -d,)
-  virtual_host=$(echo $row | cut -f22 -d,)
+  hd=$(echo $row | cut -f7 -d,)
+  os_name=$(echo $row | cut -f8 -d,)
+  os_version=$(echo $row | cut -f9 -d,)
+  service_name=$(echo $row | cut -f10 -d,)
+  status=$(echo $row | cut -f11 -d,)
+  environment=$(echo $row | cut -f12 -d,)
+  comment=$(echo $row | cut -f13 -d,)
+  hosting_server_name=$(echo $row | cut -f14 -d,)
 
 
   iscomment=$(echo $row | grep "#" )
@@ -60,7 +52,7 @@ for row in $(cat "${csvfile}") ; do
     continue
   fi
 
-   http --verify cacerts.pem --verbose POST "${API_URL}/server/add" \
+   http --verify cacerts.pem --verbose POST "${API_URL}/virtual_server/add" \
     "hostname=${hostname}" \
     "role=${role}" \
     "ipaddress=${ipaddress}" \
@@ -82,7 +74,7 @@ for row in $(cat "${csvfile}") ; do
     "environment=${environment}" \
     "comment=${comment}" \
     "rack_position=${rack_position}" \
-    "virtual_host=${virtual_host}" \
+    "hosting_server_name=${hosting_server_name}" \
      "Authorization:Bearer $token"
 
 done
