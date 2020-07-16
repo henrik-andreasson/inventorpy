@@ -12,12 +12,18 @@ from app.api.auth import token_auth
 @token_auth.login_required
 def create_rack():
     data = request.get_json() or {}
-    for field in ['name', 'location_id']:
-        if field not in data:
-            return bad_request('must include field: %s' % field)
+
+    if 'name' not in data:
+        return bad_request('Name field is mandatory')
+
+    check_rack = Rack.query.filter_by(name=data['name']).first()
+    if check_rack is not None:
+        return bad_request('Rack already exist with id: %s' % check_rack.id)
 
     rack = Rack()
-    rack.from_dict(data)
+    status = rack.from_dict(data)
+    if status['success'] is False:
+        return bad_request(status['msg'])
 
     db.session.add(rack)
     db.session.commit()

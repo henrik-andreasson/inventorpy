@@ -19,9 +19,29 @@ class Rack(db.Model):
             }
         return data
 
-    def from_dict(self, data, new_work=False):
-        for field in ['name', 'location_id']:
-            setattr(self, field, data[field])
+    def from_dict(self, data):
+        from app.models import Location
+        for field in ['name']:
+            if field not in data:
+                return {'msg': "must include field: %s" % field, 'success': False}
+            else:
+                setattr(self, field, data[field])
+
+        if 'location_id' in data:
+            location = Location.query.get(data['location_id'])
+            if location is not None:
+                setattr(self, 'location_id', location.id)
+            else:
+                return {'msg': "location not found via id", 'success': False}
+
+        elif 'location_long_name' in data:
+            for loc in Location.query.order_by(Location.id):
+                if data['location_long_name'] == loc.longName():
+                    setattr(self, 'location_id', loc.id)
+        else:
+            return {'msg': "location not set", 'success': False}
+
+        return {'msg': "object loaded ok", 'success': True}
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
