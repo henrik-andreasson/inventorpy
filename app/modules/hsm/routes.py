@@ -407,13 +407,13 @@ def hsm_pcicard_add():
 
         hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
         server = Server.query.get(form.server.data)
-        compartment = Compartment.query.get(form.compartment.data)
+        safe = Safe.query.get(form.safe.data)
         hsmpcicard = HsmPciCard(serial=form.serial.data,
                                 model=form.model.data,
                                 manufacturedate=form.manufacturedate.data,
                                 fbno=form.fbno.data)
         hsmpcicard.hsmdomain = hsmdomain
-        hsmpcicard.compartment = compartment
+        hsmpcicard.safe = safe
         hsmpcicard.server = server
         db.session.add(hsmpcicard)
         db.session.commit()
@@ -453,13 +453,13 @@ def hsm_pcicard_edit():
     if request.method == 'POST' and form.validate_on_submit():
         hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
         server = Server.query.get(form.server.data)
-        compartment = Compartment.query.get(form.compartment.data)
+        safe = Safe.query.get(form.safe.data)
         hsmpcicard.fbno = form.fbno.data
         hsmpcicard.serial = form.serial.data
         hsmpcicard.model = form.model.data
         hsmpcicard.manufacturedate = form.manufacturedate.data
         hsmpcicard.hsmdomain = hsmdomain
-        hsmpcicard.compartment = compartment
+        hsmpcicard.safe = safe
         hsmpcicard.server = server
 
         db.session.commit()
@@ -471,7 +471,7 @@ def hsm_pcicard_edit():
     else:
 
         form.hsmdomain.data = hsmpcicard.hsmdomain_id
-        form.compartment.data = hsmpcicard.compartment_id
+        form.safe.data = hsmpcicard.safe_id
         form.server.data = hsmpcicard.server_id
 
         return render_template('hsm.html', title=_('Edit HSM Domain'),

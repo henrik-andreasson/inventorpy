@@ -129,7 +129,7 @@
       <td>{{_('Name')}}</td>
       <td>{{_('HSM Domain')}}</td>
       <td>{{_('Server')}}</td>
-      <td>{{_('Compartment')}}</td>
+      <td>{{_('Safe')}}</td>
     </tr>
 
 
@@ -149,10 +149,14 @@
           {{ h.hsmdomain.name }}
         </td>
         <td>
-          {{ h.server.hostname }}
+          {% if h.server %}
+            {{ h.server.hostname }}
+          {% endif %}
         </td>
         <td>
-          {{ h.compartment.name }}
+          {% if h.safe %}
+            {{ h.safe.name }}
+          {% endif %}
         </td>
 
   </tr>

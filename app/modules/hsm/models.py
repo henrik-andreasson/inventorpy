@@ -136,12 +136,17 @@ class HsmPciCard(db.Model):
     fbno = db.Column(db.String(140), unique=True)
     model = db.Column(db.String(140))
     manufacturedate = db.Column(db.DateTime)
-    compartment = db.relationship('Compartment')
-    compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
+    safe = db.relationship('Safe')
+    safe_id = db.Column(db.Integer, db.ForeignKey('safe.id'))
     hsmdomain = db.relationship('HsmDomain')
     hsmdomain_id = db.Column(db.Integer, db.ForeignKey('hsm_domain.id'))
     server = db.relationship('Server')
     server_id = db.Column(db.Integer, db.ForeignKey('server.id'))
+    status = db.Column(db.String(140))
+    support_start = db.Column(db.DateTime)
+    support_end = db.Column(db.DateTime)
+    contract = db.Column(db.String(140))
+    comment = db.Column(db.String(255))
 
     def __repr__(self):
         return '<HsmPciCard {}>'.format(self.serial)
@@ -156,24 +161,32 @@ class HsmPciCard(db.Model):
             'manufacturedate': self.manufacturedate,
             'hsmdomain_id': self.hsmdomain_id,
             'server_id': self.server_id,
-            'compartment_id': self.compartment_id
+            'safe_id': self.safe_id,
+            'status': self.status,
+            'support_start': self.support_start,
+            'support_end': self.support_end,
+            'contract': self.contract,
+            'comment': self.comment
             }
         return data
 
     def from_dict(self, data):
-
-        for field in ['serial', 'model', 'manufacturedate', 'fbno', 'name']:
+        from app.modules.safe.models import Safe
+        for field in ['serial', 'model', 'fbno', 'name', 'status',
+                      'contract', 'comment']:
             if field not in data:
                 msg = 'must include field: %s' % field
                 return {'msg': msg, 'success': False}
+            setattr(self, field, data[field])
 
-            if field == "manufacturedate":
-                date = datetime.strptime(data[field], "%Y-%m-%d")
-                setattr(self, field, date)
+        for field in ['support_start', 'support_end', 'manufacturedate']:
+            if field in data:
+                date = datetime.strptime(data['manufacturedate'], "%Y-%m-%d")
+                setattr(self, 'manufacturedate', date)
             else:
-                setattr(self, field, data[field])
+                msg = 'must include field: manufacturedate'
+                return {'msg': msg, 'success': False}
 
-# a hsm can be inside a server or a compartment
         if 'server_id' in data:
             server = Server.query.get(data['server_id'])
             if server is None:
@@ -181,21 +194,28 @@ class HsmPciCard(db.Model):
             else:
                 setattr(self, 'server_id', server.id)
 
-        elif 'server_name' in data:
+        elif 'server_name' in data and data['server_name'] != "":
             server = Server.query.filter_by(hostname=data['server_name']).first()
             if server is None:
                 return {'msg': "no server found via server_name nor id", 'success': False}
             else:
                 setattr(self, 'server_id', server.id)
 
-        elif 'compartment_id' in data:
-            compartment = Compartment.query.get(data['compartment_id']).first()
-            if compartment is None:
-                return {'msg': "no compartment found via compartment_id", 'success': False}
+        elif 'safe_name' in data and data['safe_name'] != "":
+            safe = Safe.query.filter_by(name=data['safe_name']).first()
+            if safe is None:
+                return {'msg': "no safe found via safe_name", 'success': False}
             else:
-                setattr(self, 'compartment_id', data['compartment_id'])
+                setattr(self, 'safe_id', safe.id)
+
+        elif 'safe_id' in data:
+            safe = Safe.query.get(data['safe_id'])
+            if safe is None:
+                return {'msg': "no safe found via safe_id", 'success': False}
+            else:
+                setattr(self, 'safe_id', safe.id)
         else:
-            return {'msg': "must supply valid compartment_id", 'success': False}
+            return {'msg': "must supply valid physical location", 'success': False}
 
         if 'hsmdomain_id' in data:
             hsmdomain = HsmDomain.query.get(data['hsmdomain_id'])

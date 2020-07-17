@@ -89,18 +89,29 @@ class HsmPciCardForm(FlaskForm):
                                                   ('luna7', 'Luna 7')])
     hsmdomain = SelectField(_l('HSM Domain'), coerce=int)
     server = SelectField(_l('Server'), coerce=int)
-    compartment = SelectField(_l('Compartment'), coerce=int)
+    safe = SelectField(_l('Safe'), coerce=int)
+    status = SelectField(_l('Status'), choices=[('pre-op', 'Pre Operation'),
+                                                ('operation', 'Operation'),
+                                                ('post-op', 'Post Operation'),
+                                                ('removed', 'Removed')])
+    support_start = DateTimeField(_l('Start support'), validators=[DataRequired()],
+                                  format='%Y-%m-%d', default=datetime.now())
+    support_end = DateTimeField(_l('End of support'),
+                                validators=[DataRequired()], format='%Y-%m-%d',
+                                default=datetime.now())
+    comment = TextAreaField(_l('Comment'))
+
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.compartment.choices = [(c.id, c.name) for c in Compartment.query.order_by(Compartment.id).all()]
+        self.safe.choices = [(s.id, s.name) for s in Safe.query.order_by(Safe.id).all()]
         self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
         self.server.choices = [(s.id, s.hostname) for s in Server.query.all()]
         self.server.choices.insert(0, (0, 'None'))
-        self.compartment.choices.insert(0, (0, 'None'))
+        self.safe.choices.insert(0, (0, 'None'))
 
 
 class HsmBackupUnitForm(FlaskForm):
