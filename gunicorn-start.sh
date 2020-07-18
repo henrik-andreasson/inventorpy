@@ -27,7 +27,7 @@ fi
 
 if [ $USE_CERT -gt 1 ] ; then
 
-    gunicorn teamplan:app -b 0.0.0.0:443 \
+    gunicorn inventorpy:app -b 0.0.0.0:443 \
          --pid /inventorpy/teamplan.pid \
          --keyfile /inventorpy/key.pem  \
          --certfile  /inventorpy/cert.pem ${EXTRA_OPTIONS}
