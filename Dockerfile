@@ -2,7 +2,9 @@
 FROM centos:latest
 
 # Set the working directory to /app
-WORKDIR /inventorpy
+#DEV: WORKDIR /inventorpy
+
+COPY . /inventorpy
 
 # Install any needed packages
 RUN yum install -y python3 sqlite
@@ -18,4 +20,4 @@ EXPOSE 8080
 ENV FLASK_APP=inventorpy.py
 
 # Run flask when the container launches
-CMD [ "./gunicorn-start.sh"]
+CMD [ "/inventorpy/gunicorn-start.sh"]
