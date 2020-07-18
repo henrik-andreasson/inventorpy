@@ -12,9 +12,10 @@ RUN pip3 install flask-sqlalchemy flask-migrate flask-login flask-mail \
   WTForms-Components flask-httpauth rocketchat_API icalendar gunicorn \
   ipcalc
 
-# Make port 8000 available to the world outside this container
-EXPOSE 5000
+# Make port available to the world outside this container
+EXPOSE 8080
 
 ENV FLASK_APP=inventorpy.py
+
 # Run flask when the container launches
-CMD [ "flask run --reload"]
+CMD [ "/usr/local/bin/flask run --reload"]
