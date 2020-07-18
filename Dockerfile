@@ -18,4 +18,4 @@ EXPOSE 8080
 ENV FLASK_APP=inventorpy.py
 
 # Run flask when the container launches
-CMD [ "/inventorpy/gunicorn-start.sh"]
+CMD [ "./gunicorn-start.sh"]
