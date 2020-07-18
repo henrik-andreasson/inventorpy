@@ -34,6 +34,6 @@ if [ $USE_CERT -gt 1 ] ; then
 else
 
 
-    gunicorn inventorpy:app -b 0.0.0.0:80 ${EXTRA_OPTIONS}
+    gunicorn inventorpy:app -b 0.0.0.0:8080 ${EXTRA_OPTIONS}
 
 fi
