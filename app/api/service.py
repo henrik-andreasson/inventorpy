@@ -16,6 +16,10 @@ def create_service():
     if 'name' not in data or 'color' not in data:
         return bad_request('must include name and color fields')
 
+    check_service = Service.query.filter_by(name=data['name']).first()
+    if check_service is not None:
+        return bad_request('Service already exist with id: %s' % check_service.id)
+
     service = Service()
     service.from_dict(data, new_service=True)
 

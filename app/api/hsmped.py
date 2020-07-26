@@ -16,6 +16,10 @@ def create_hsmped():
         if field not in data:
             return bad_request('must include field: %s' % field)
 
+    check_hsm_ped = HsmPed.query.filter_by(keyno=data['keyno'], keysn=data['keysn'], hsmdomain_id=data['hsmdomain_id']).first()
+    if check_hsm_ped is not None:
+        return bad_request('HSM PED already exist with id: %s' % check_hsm_ped.id)
+
     hsmped = HsmPed()
     hsmped.from_dict(data)
 

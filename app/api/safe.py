@@ -16,6 +16,10 @@ def create_safe():
         if field not in data:
             return bad_request('must include field: %s' % field)
 
+    check_safe = Safe.query.filter_by(name=data['name']).first()
+    if check_safe is not None:
+        return bad_request('Safe already exist with id: %s' % check_safe.id)
+
     safe = Safe()
     safe.from_dict(data)
 

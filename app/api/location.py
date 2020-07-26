@@ -16,6 +16,10 @@ def create_location():
         if field not in data:
             return bad_request('must include field: %s' % field)
 
+    check_loc = Location.query.filter_by(place=data['place'], facillity=data['facillity'], area=data['area'], position=data['position'], type=data['type']).first()
+    if check_loc is not None:
+        return bad_request('Location already exist with id: %s' % check_loc.id)
+
     location = Location()
     location.from_dict(data)
 

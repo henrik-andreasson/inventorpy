@@ -12,6 +12,10 @@ from app.api.auth import token_auth
 @token_auth.login_required
 def create_hsmpcicard():
     data = request.get_json() or {}
+
+    if 'serial' not in data:
+        return bad_request('must include field: serial')
+
     hsm_pci_card = HsmPciCard.query.filter_by(serial=data['serial']).first()
     if hsm_pci_card is not None:
         msg = 'Card already exist: %s' % hsm_pci_card.id

@@ -16,6 +16,10 @@ def create_hsmdomain():
         if field not in data:
             return bad_request('must include field: %s' % field)
 
+    check_hsmdomain = HsmDomain.query.filter_by(name=data['name']).first()
+    if check_hsmdomain is not None:
+        return bad_request('HSM Domain already exist with id: %s' % check_hsmdomain.id)
+
     hsmdomain = HsmDomain()
     hsmdomain.from_dict(data)
 

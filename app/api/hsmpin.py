@@ -16,6 +16,10 @@ def create_hsmpin():
         if field not in data:
             return bad_request('must include field: %s' % field)
 
+    check_hsm_pin = HsmPin.query.filter_by(ped_id=data['ped_id']).first()
+    if check_hsm_pin is not None:
+        return bad_request('HSM PIN already exist with id: %s' % check_hsm_pin.id)
+
     hsmpin = HsmPin()
     hsmpin.from_dict(data)
 
