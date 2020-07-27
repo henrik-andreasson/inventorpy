@@ -14,7 +14,9 @@ Heavily based on the excellent tutorial  [Flask Mega Tutorial](https://blog.migu
 
 Big Thanks to Miguel!
 
-# Run on CentOS
+# Running
+
+## Running on CentOS
 
 Install python3 and sqlite
 
@@ -39,7 +41,7 @@ start
 
 See also the systemd service file inventorpy.service to run with gunicorn
 
-# Run in Docker
+## Running in Docker
 
 build docker:
 
@@ -54,42 +56,137 @@ Run flask
     docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy flask run --host=0.0.0.0 --reload
 
 
+# Getting started
+
+* Start as described above.
+* Register first user (currently there is no admin, all users can to everything, but everything is logged through audit log)
+* Optionally turn off Open registration (then an existing user must create new users)
+* First create the objects used by lots of other objects
+  * Services
+  * Locations
+  * Racks
+  * Network
+* Now regular object can be creates, such as:
+  * servers
+  * firewalls
+  * switches
+* Optionally create physical security objects:
+  * Safe
+  * Compartment (locked box dedicated to one person inside a safe)
+* Hardware Security Modules (HSMs)
+  * HSM Domain a virtual object but all other objects belong to one of these
+  * HSM PCI Card
+  * HSM Backup Unit
+  * HSM PED Key
+  * HSM PIN
+
+
+## turn off open registration
+
+Inventorpy needs to be configured whether to allow open registration.
+The default is in config.py and the setting can be changed via environment variables.
+
+Eg, in bash:
+
+    export OPEN_REGISTRATION = "False"
+
+
+
+## All config
+
+```
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'app.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    ADMINS = ['your-email@example.com']
+    POSTS_PER_PAGE = 25
+    ROCKET_ENABLED = os.environ.get('ROCKET_ENABLED') or False
+    ROCKET_USER = os.environ.get('ROCKET_USER') or 'inventory'
+    ROCKET_PASS = os.environ.get('ROCKET_PASS') or 'foo123'
+    ROCKET_URL = os.environ.get('ROCKET_URL') or 'http://172.17.0.4:3000'
+    ROCKET_CHANNEL = os.environ.get('ROCKET_CHANNEL') or 'general'
+    OPEN_REGISTRATION = os.environ.get('OPEN_REGISTRATION') or True
+    INVENTORPY_TZ = os.environ.get('TEAMPLAN_TZ') or "Europe/Stockholm"
+```
+
+
 # Modules in inventorpy
 
+![module overview](doc/module_overview.png)
 
-## Server
 
+## server
+
+![add server](doc/server_add.png)
+
+
+## service
+
+![add service](doc/service_add.png)
+
+## location
+
+![add location](doc/location_add.png)
+
+
+## network
+
+![add network](doc/network_add.png)
+
+## switch
+
+![add switch](doc/switch_add.png)
+
+
+## switch port
+
+![add switch port](doc/switch_port_add.png)
+
+## firewall
+
+![add firewall](doc/firewall_add.png)
+
+
+## firewall port
+
+![add firewall port](doc/firewall_port_add.png)
+
+
+## rack
+
+![add rack](doc/rack_add.png)
+
+
+## safe
+
+![add safe](doc/safe_add.png)
+
+
+## compartment
+
+![add compartment](doc/compartment_add.png)
+
+# REST API
+
+to use the REST API there is new login step, get a jwt token first
 
 ```
-
-class Server(db.Model):
-    __tablename__ = "server"
-    id = db.Column(db.Integer, primary_key=True)
-    hostname = db.Column(db.String(140), unique=True)
-    role = db.Column(db.String(140))
-    status = db.Column(db.String(140))
-    ipaddress = db.Column(db.String(140))
-    network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
-    network = db.relationship('Network')
-    memory = db.Column(db.String(140))
-    cpu = db.Column(db.String(140))
-    psu = db.Column(db.String(140))
-    hd = db.Column(db.String(140))
-    serial = db.Column(db.String(140))
-    model = db.Column(db.String(140))
-    os_name = db.Column(db.String(140))
-    os_version = db.Column(db.String(140))
-    manufacturer = db.Column(db.String(140))
-    rack_id = db.Column(db.Integer, db.ForeignKey('rack.id'))
-    rack = db.relationship('Rack')
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
-    service = db.relationship('Service')
-    comment = db.Column(db.String(2000))
-    support_start = db.Column(db.DateTime)
-    support_end = db.Column(db.DateTime)
-    rack_position = db.Column(db.String(10))
-    environment = db.Column(db.String(140))
-    switch_ports = db.relationship("SwitchPort", back_populates="server")
-    virtual_guests = db.relationship("VirtualServer", back_populates="hosting_server")
-    virtual_host = db.Column(db.String(10))
+token=$(http --verify cacerts.pem --auth "$username:$password" POST "${apiserverurl}/tokens" | jq ".token" | sed 's/\"//g')
 ```
+
+then you can create a new service:
+
+```
+http --verify cacerts.pem --verbose POST "${API_URL}/service" \
+  "name=${name}" \
+  "color=${color}" \
+  "Authorization:Bearer $token"
+```
+
+to help with getting started with the REST API there are scripts for all API:s in utils/
