@@ -35,6 +35,7 @@ install source
     unzip inventorpy-x.y.z.zip
 
 start
+
     export FLASK_APP=inventorpy.py
     cd /opt/inventorpy
     flask run --host=0.0.0.0
@@ -221,7 +222,7 @@ Eg, in bash:
 ![add hsm backup unit](doc/hsm_pin_add.png)
 
 # REST API
- 
+
 to use the REST API there is new login step, get a jwt token first
 
 ```
