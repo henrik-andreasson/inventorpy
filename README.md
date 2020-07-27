@@ -123,57 +123,105 @@ Eg, in bash:
 
 ## server
 
+![class server](doc/classes_server.png)
+
 ![add server](doc/server_add.png)
 
 
-## service
+## main - service, location, user and audit
+
+![class service](doc/classes_main.png)
+
+**service**
 
 ![add service](doc/service_add.png)
 
-## location
+**location**
 
 ![add location](doc/location_add.png)
+
+**user**
+
+![add user](doc/user_add.png)
 
 
 ## network
 
+![class network](doc/classes_network.png)
+
 ![add network](doc/network_add.png)
 
-## switch
+## switch / port
+
+![class switch](doc/classes_switch.png)
+
+**switch**
 
 ![add switch](doc/switch_add.png)
 
-
-## switch port
+**switch port**
 
 ![add switch port](doc/switch_port_add.png)
 
-## firewall
+## firewall / port
+
+![class firewall](doc/classes_firewall.png)
+
+**fireall**
 
 ![add firewall](doc/firewall_add.png)
 
-
-## firewall port
+**firewall port**
 
 ![add firewall port](doc/firewall_port_add.png)
 
 
 ## rack
 
+![class rack](doc/classes_rack.png)
+
 ![add rack](doc/rack_add.png)
 
 
-## safe
+## safe / compartment
+
+![class rack](doc/classes_safe.png)
+
+**safe**
 
 ![add safe](doc/safe_add.png)
 
-
-## compartment
+**compartment**
 
 ![add compartment](doc/compartment_add.png)
 
-# REST API
 
+## HSM
+
+![class hsm domain](doc/classes_hsm.png)
+
+**HSM Domain**
+
+![add hsm domain](doc/hsm_domain_add.png)
+
+**HSM PCI Card**
+
+![add hsm pci card](doc/hsm_pci_card_add.png)
+
+**HSM Backup Unit**
+
+![add hsm backup unit](doc/hsm_backup_unit_add.png)
+
+**HSM PED**
+
+![add hsm ped](doc/hsm_ped_add.png)
+
+**HSM PIN**
+
+![add hsm backup unit](doc/hsm_pin_add.png)
+
+# REST API
+ 
 to use the REST API there is new login step, get a jwt token first
 
 ```
