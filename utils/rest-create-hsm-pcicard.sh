@@ -35,11 +35,15 @@ for row in $(cat "${csvfile}") ; do
   fbno=$(echo $row | cut -f2 -d,)
   model=$(echo $row | cut -f3 -d,)
   manufacturedate=$(echo $row | cut -f4 -d,)
-  compartment_id=$(echo $row | cut -f5 -d,)
+  safe_name=$(echo $row | cut -f5 -d,)
   hsmdomain_name=$(echo $row | cut -f6 -d,)
   server_name=$(echo $row | cut -f7 -d,)
   name=$(echo $row | cut -f8 -d,)
-
+  contract=$(echo $row | cut -f9 -d\,)
+  support_start=$(echo $row | cut -f10 -d\,)
+  support_end=$(echo $row | cut -f11 -d\,)
+  status=$(echo $row | cut -f12 -d\,)
+  comment=$(echo $row | cut -f13 -d\,)
   iscomment=$(echo $row | grep "#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
@@ -52,8 +56,13 @@ for row in $(cat "${csvfile}") ; do
    "manufacturedate=${manufacturedate}" \
    "hsmdomain_name=${hsmdomain_name}" \
    "server_name=${server_name}" \
-   "compartment_id=${compartment_id}" \
+   "safe_name=${safe_name}" \
    "name=${name}" \
+   "contract=${contract}" \
+   "support_start=${support_start}" \
+   "support_end=${support_end}" \
+   "status=${status}" \
+   "comment=${comment}" \
    "Authorization:Bearer $token"
 
 done

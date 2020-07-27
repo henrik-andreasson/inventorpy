@@ -1,0 +1,7 @@
+#name,switch,server,server_if,network,comment,not used column
+1/2,SWITCH-1,server1.tld,eth0,NETWORK1-TEST,"LINK UP ORDERED, REQ1234"
+1/2,SWITCH-2,server2.tld,eth0,NETWORK2-TEST,"LINK UP OK"
+1/2,SWITCH-3,server3.tld,eth0,NETWORK3-TEST,"LINK UP OK"
+1/2,SWITCH-4,server4.tld,eth0,NETWORK4-TEST,"LINK UP OK"
+1/2,SWITCH-5,server5.tld,eth0,NETWORK5-TEST,"LINK UP OK"
+1/2,SWITCH-6,server6.tld,eth0,NETWORK6-TEST,"LINK UP OK"

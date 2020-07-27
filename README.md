@@ -14,6 +14,15 @@ Heavily based on the excellent tutorial  [Flask Mega Tutorial](https://blog.migu
 
 Big Thanks to Miguel!
 
+# demo
+
+login with:
+
+    user: admin
+    pass: foo123
+
+[inventorpy demo](https://inventorpydemo-hlvrh7b52a-lz.a.run.app/)
+
 # Running
 
 ## Running on CentOS

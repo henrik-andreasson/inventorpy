@@ -1,0 +1,7 @@
+#name, alias,
+SWITCH-1,SWITCH-1,127.0.0.1,0,cisco,xyz,RACK-1,1,service1,operation,2020-01-01,2025-01-01,managed by dudetts
+SWITCH-2,SWITCH-2,127.0.0.1,0,cisco,xyz,RACK-2,1,service2,operation,2020-01-01,2025-01-01,managed by dudetts
+SWITCH-3,SWITCH-3,127.0.0.1,0,cisco,xyz,RACK-3,1,service3,operation,2020-01-01,2025-01-01,managed by dudetts
+SWITCH-4,SWITCH-4,127.0.0.1,0,cisco,xyz,RACK-4,1,service4,operation,2020-01-01,2025-01-01,managed by dudetts
+SWITCH-5,SWITCH-5,127.0.0.1,0,cisco,xyz,RACK-5,1,service5,operation,2020-01-01,2025-01-01,managed by dudetts
+SWITCH-6,SWITCH-6,127.0.0.1,0,cisco,xyz,RACK-6,1,service6,operation,2020-01-01,2025-01-01,managed by dudetts

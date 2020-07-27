@@ -27,14 +27,14 @@ IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
 
   name=$(echo $row | cut -f1 -d\,)
-  location_id=$(echo $row | cut -f2 -d\,)
+  location_long_name=$(echo $row | cut -f2 -d\,)
   iscomment=$(echo $row | grep "^#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
   http --verify cacerts.pem --verbose POST "${API_URL}/rack" \
     "name=${name}" \
-    "location_id=${location_id}" \
+    "location_long_name=${location_long_name}" \
     "Authorization:Bearer $token"
 
 done
