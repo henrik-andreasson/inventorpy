@@ -1,7 +1,18 @@
 # todo
 
+## via browser
 * sorting and filtering
 * search
+* make input safe for sorting lists
+
+## via rest api
+* when server is sent in with incomplete data it does not work very well
+* improve audit log, id:s do not explain very well ...
+* switch do not set rack, service in model
+* UNIQUE constraint failed: firewall.alias
+
+## common
+
 * environment list should be global ..
 environment = SelectField(_l('Environment'), choices=[('dev', 'Development'),
                                                       ('tools', 'Tools'),
@@ -10,9 +21,3 @@ environment = SelectField(_l('Environment'), choices=[('dev', 'Development'),
                                                       ('at', 'Acceptance Testing'),
                                                       ('prod', 'Production'),
                                                       ]) #_
-
-* make input safe for sorting lists
-
-## via rest api
-* when server is sent in with incomplete data it does not work very well
-* improve audit log, id:s do not explain very well ...
