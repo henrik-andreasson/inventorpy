@@ -90,7 +90,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     api_key = db.Column(db.String(32), index=True, unique=True)
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
-    service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
+    service = db.relationship('Service')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
