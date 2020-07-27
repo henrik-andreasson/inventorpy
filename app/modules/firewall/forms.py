@@ -33,7 +33,7 @@ class FirewallForm(FlaskForm):
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
     logs = SubmitField(_l('Logs'))
-    ports = SubmitField(_l('SwitchPorts'))
+    ports = SubmitField(_l('Firewall Ports'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
