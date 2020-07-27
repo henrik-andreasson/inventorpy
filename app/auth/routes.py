@@ -38,10 +38,7 @@ def logout():
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
 
-    if current_app.config['OPEN_REGISTRATION'] is True:
-        if current_user.is_authenticated:
-            return redirect(url_for('main.index'))
-    else:
+    if current_app.config['OPEN_REGISTRATION'] is False:
         if not current_user.is_authenticated:
             flash(_('Registration is not open, contact admin to get an account'))
             return redirect(url_for('main.index'))
