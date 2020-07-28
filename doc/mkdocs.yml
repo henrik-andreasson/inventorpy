@@ -1,0 +1,27 @@
+site_name: Inventorpy
+nav:
+    - Home: index.md
+    - Demo: demo.md
+    - Getting Started: getting-started.md
+    - Modules: moduled.md
+    - REST API: rest-api.md
+    - Running: running.md
+
+theme: material
+repo_url: https://github.com/henrik-andreasson/inventorpy
+repo_name: Inventorpy
+copyright: "&copy 2020 Henrik Andreasson"
+markdown_extensions:
+    - admonition
+    - smarty
+    - abbr
+    - attr_list
+    - fenced_code
+    - footnotes
+    - tables
+    - codehilite
+    - meta
+    - toc:
+        title: title
+        permalink: True
+    - sane_lists
