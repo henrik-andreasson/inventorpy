@@ -1,59 +1,41 @@
+# Running
 
-# Getting started
+## Running on CentOS
 
-* Start as described above.
-* Register first user (currently there is no admin, all users can to everything, but everything is logged through audit log)
-* Optionally turn off Open registration (then an existing user must create new users)
-* First create the objects used by lots of other objects
-  * Services
-  * Locations
-  * Racks
-  * Network
-* Now regular object can be creates, such as:
-  * servers
-  * firewalls
-  * switches
-* Optionally create physical security objects:
-  * Safe
-  * Compartment (locked box dedicated to one person inside a safe)
-* Hardware Security Modules (HSMs)
-  * HSM Domain a virtual object but all other objects belong to one of these
-  * HSM PCI Card
-  * HSM Backup Unit
-  * HSM PED Key
-  * HSM PIN
+Install python3 and sqlite
 
+    yum install -y python3 sqlite
 
-## turn off open registration
+Used modules
 
-Inventorpy needs to be configured whether to allow open registration.
-The default is in config.py and the setting can be changed via environment variables.
+    pip3 install flask-sqlalchemy flask-migrate flask-login flask-mail \
+      flask-bootstrap flask-moment flask-babel python-dotenv jwt flask-wtf \
+      WTForms-Components flask-httpauth rocketchat_API
 
-Eg, in bash:
+install source
 
-    export OPEN_REGISTRATION = "False"
+    mkdir /opt/inventorpy
+    cd /opt/inventorpy
+    unzip inventorpy-x.y.z.zip
 
+start
 
+    export FLASK_APP=inventorpy.py
+    cd /opt/inventorpy
+    flask run --host=0.0.0.0
 
-## All config
+See also the systemd service file inventorpy.service to run with gunicorn
 
-```
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAIL_SERVER = os.environ.get('MAIL_SERVER')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    ADMINS = ['your-email@example.com']
-    POSTS_PER_PAGE = 25
-    ROCKET_ENABLED = os.environ.get('ROCKET_ENABLED') or False
-    ROCKET_USER = os.environ.get('ROCKET_USER') or 'inventory'
-    ROCKET_PASS = os.environ.get('ROCKET_PASS') or 'foo123'
-    ROCKET_URL = os.environ.get('ROCKET_URL') or 'http://172.17.0.4:3000'
-    ROCKET_CHANNEL = os.environ.get('ROCKET_CHANNEL') or 'general'
-    OPEN_REGISTRATION = os.environ.get('OPEN_REGISTRATION') or True
-    INVENTORPY_TZ = os.environ.get('TEAMPLAN_TZ') or "Europe/Stockholm"
-```
+## Running in Docker
+
+build docker:
+
+    docker build -t inventorpy  .
+
+Run bash in docker:
+
+    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy bash
+
+Run flask
+
+    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy flask run --host=0.0.0.0 --reload

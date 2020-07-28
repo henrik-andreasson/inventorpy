@@ -2,10 +2,10 @@ site_name: Inventorpy
 nav:
     - Home: index.md
     - Demo: demo.md
-    - Getting Started: getting-started.md
-    - Modules: moduled.md
-    - REST API: rest-api.md
     - Running: running.md
+    - Getting Started: getting-started.md
+    - Modules: modules.md
+    - REST API: rest-api.md
 
 theme: material
 repo_url: https://github.com/henrik-andreasson/inventorpy
