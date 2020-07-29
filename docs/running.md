@@ -32,10 +32,10 @@ build docker:
 
     docker build -t inventorpy  .
 
-Run bash in docker:
+Run the app
 
-    docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy bash
+    docker run -it -p8080:8080 inventorpy
 
-Run flask
+Developer mode, ie mount the current directory into the docker container and have it self reload when python files are written
 
     docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy flask run --host=0.0.0.0 --reload
