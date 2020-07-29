@@ -16,6 +16,8 @@ Big Thanks to Miguel!
 
 # demo
 
+![animation](docs/pics/inventorpy.gif)
+
 login with:
 
     user: admin
