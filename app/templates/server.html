@@ -13,10 +13,10 @@
 <table class="table table-hover">
     <tr>
       <td><A HREF="{{url_for('main.server_list', sort='id',         order=order)}}">{{_('Inventory ID')}}</A></td>
-      <td><A HREF="{{url_for('main.server_list', sort='hostname',   order=order)}}">{{_('Hostname')}}</td>
-      <td><A HREF="{{url_for('main.server_list', sort='ipaddress',  order=order)}}">{{_('IP Address')}}</td>
-      <td><A HREF="{{url_for('main.server_list', sort='service_id', order=order)}}">{{_('Service')}}</td>
-      <td><A HREF="{{url_for('main.server_list', sort='rack_id',    order=order)}}">{{_('Rack')}}</td>
+      <td><A HREF="{{url_for('main.server_list', sort='hostname',   order=order)}}">{{_('Hostname')}}    </A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='ipaddress',  order=order)}}">{{_('IP Address')}}  </A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='service_id', order=order)}}">{{_('Service')}}     </A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='rack_id',    order=order)}}">{{_('Rack')}}        </A></td>
     </tr>
 
     {% for s in servers %}
