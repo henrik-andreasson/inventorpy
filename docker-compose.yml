@@ -1,0 +1,29 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: foo123
+      MYSQL_DATABASE: inventorpy
+      MYSQL_USER: inventorpy
+      MYSQL_PASSWORD: foo123
+
+  inventorpy:
+    build: .
+    ports:
+      - "7000:8080"
+    links:
+      - db
+    environment:
+      DATABASE_URL: 'mysql+pymysql://inventorpy:foo123@db/inventorpy'
+      SECRET_KEY: 'sdfkjsdfkjhsdkjfhsdfjkh'
+      FLASK_ENV: development
+      SQLALCHEMY_ECHO: "True"
+      TEMPLATES_AUTO_RELOAD: "True"
+      OPTIONS: "--reload"
+    volumes:
+      - .:/inventorpy

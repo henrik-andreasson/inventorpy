@@ -1,12 +1,15 @@
 from flask import render_template, flash, redirect, url_for, request, current_app
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app import db, audit
 from app.main import bp
 from app.models import Location
 from app.modules.rack.models import Rack
-from app.modules.rack.forms import RackForm
+from app.modules.rack.forms import RackForm, AuditRackForm
 from flask_babel import _
 from app.modules.switch.models import Switch
+from app.modules.firewall.models import Firewall
+from app.models import User
+from datetime import datetime
 
 
 @bp.route('/rack/add', methods=['GET', 'POST'])
@@ -101,7 +104,7 @@ def rack_list():
 @login_required
 def rack_content():
 
-    rack_id = request.args.get('rack_id')
+    rack_id = request.args.get('rack')
     rack = Rack.query.get(rack_id)
     if rack is None:
         flash(_('Rack not found'))
@@ -111,11 +114,14 @@ def rack_content():
 
     servers = Server.query.filter_by(rack_id=rack.id)
     switchs = Switch.query.filter_by(rack_id=rack.id)
+    fws = Firewall.query.filter(Firewall.rack_id == rack.id)
 
     return render_template('rack.html', title=_('Rack contents'),
                            server_title=_('Servers'),
+                           firewall_title=_('Firewalls'),
                            switch_title=_('Switches'),
-                           servers=servers, switchs=switchs)
+                           servers=servers, switchs=switchs,
+                           firewalls=fws)
 
 
 @bp.route('/rack/delete/', methods=['GET', 'POST'])
@@ -138,3 +144,55 @@ def rack_delete():
     audit.auditlog_delete_post('rack', data=rack.to_dict(), record_name=rack.name)
 
     return redirect(url_for('main.index'))
+
+
+@bp.route('/rack/audit/', methods=['GET', 'POST'])
+@login_required
+def rack_audit():
+
+    rackid = request.args.get('rack')
+
+    rack = Rack.query.get(rackid)
+    original_data = rack.to_dict()
+
+    form = AuditRackForm(obj=rack)
+
+    if rack is None:
+        flash(_('Rack not found'))
+        return redirect(request.referrer)
+
+    if request.method == 'POST' and form.validate_on_submit():
+        auditor = User.query.filter_by(username=current_user.username).first_or_404()
+
+        if 'approved' in request.form:
+            rack.audit_status = "approved"
+        elif 'failed' in request.form:
+            rack.audit_status = "failed"
+        else:
+            flash(_('Unknown auditor status'))
+            return redirect(request.referrer)
+
+        rack.audit_date = datetime.utcnow()
+        rack.audit_comment = form.comment.data
+        rack.auditor_id = auditor.id
+        db.session.commit()
+        audit.auditlog_update_post('compartment', original_data=original_data, updated_data=rack.to_dict(), record_name=rack.name)
+
+        flash(_(f'Your audit of rack {rack.name} have been saved.'))
+
+        return redirect(url_for('main.rack_list'))
+
+    else:
+        print("hello")
+        from app.modules.server.models import Server
+
+        servers = Server.query.filter(Server.rack_id == rack.id)
+        switchs = Switch.query.filter(Switch.rack_id == rack.id)
+        fws = Firewall.query.filter(Firewall.rack_id == rack.id)
+
+        return render_template('rack.html', title=_(f'Audit Rack contents, {rack.name}'),
+                               server_title=_('Servers'),
+                               firewall_title=_('Firewalls'),
+                               switch_title=_('Switches'),
+                               form=form, servers=servers,
+                               switchs=switchs, firewalls=fws)
