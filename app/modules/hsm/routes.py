@@ -125,7 +125,9 @@ def hsm_ped_add():
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmped = HsmPed(keyno=form.keyno.data,
-                        keysn=form.keysn.data)
+                        keysn=form.keysn.data,
+                        type=form.type.data,
+                        comment=form.comment.data)
         hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
         hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
         hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
@@ -164,7 +166,9 @@ def hsm_ped_edit():
     if request.method == 'POST' and form.validate_on_submit():
 
         hsmpedupdate = HsmPedUpdates(keyno=form.keyno.data,
-                                     keysn=form.keysn.data)
+                                     keysn=form.keysn.data,
+                                     type=form.type.data,
+                                     comment=form.comment.data)
         hsmpedupdate.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
         hsmpedupdate.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
         hsmpedupdate.user = User.query.filter_by(id=form.user.data).first_or_404()

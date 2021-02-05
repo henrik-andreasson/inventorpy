@@ -24,7 +24,7 @@ class HsmDomainForm(FlaskForm):
 
 
 class HsmPedForm(FlaskForm):
-    # todo: move ped_types to global definition
+    # TODO: move ped_types to global definition
     type = SelectField(_l('PED Type'), choices=[('blue', 'HSM Admin (BLUE)'),
                                                 ('red', 'Partition Admin (RED)'),
                                                 ('black', 'User (BLACK)'),
@@ -36,6 +36,8 @@ class HsmPedForm(FlaskForm):
     hsmdomain = SelectField(_l('HSM Domain'), coerce=int)
     compartment = SelectField(_l('Compartment'), coerce=int)
     user = SelectField(_l('User'), coerce=int)
+    duplicate_of = SelectField(_l('Duplicate of key s/n'), coerce=int)
+    comment = StringField(_l('Comment'))
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
@@ -45,6 +47,8 @@ class HsmPedForm(FlaskForm):
         self.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
         self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
         self.user.choices = [(u.id, u.username) for u in User.query.all()]
+        self.duplicate_of.choices = [(p.id, f"{p.keysn}/{p.type}/{p.user.username}") for p in HsmPed.query.all()]
+        self.duplicate_of.choices.insert(0, (0, 'None'))
 
 
 class HsmPedUpdateForm(FlaskForm):

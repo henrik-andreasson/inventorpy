@@ -42,6 +42,8 @@ class HsmPed(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     compartment = db.relationship('Compartment')
     compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
+    comment = db.Column(db.String(255))
+    duplicate_of = db.Column(db.Integer, db.ForeignKey('hsm_ped.id'))
 
     def __repr__(self):
         return '<HsmPed {}>'.format(self.keyno)
