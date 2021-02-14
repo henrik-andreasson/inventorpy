@@ -57,6 +57,19 @@ def user(username):
     return render_template('user.html', user=user)
 
 
+@bp.route('/user/list')
+@login_required
+def user_list():
+    page = request.args.get('page', 1, type=int)
+    users = User.query.order_by(User.username).paginate(page, current_app.config['POSTS_PER_PAGE'], False)
+    services = Service.query.all()
+
+    next_url = url_for('main.user_list', page=users.next_num) if users.has_next else None
+    prev_url = url_for('main.user_list', page=users.prev_num) if users.has_prev else None
+    return render_template('users.html', users=users.items, services=services,
+                           next_url=next_url, prev_url=prev_url)
+
+
 @bp.route('/service/add', methods=['GET', 'POST'])
 @login_required
 def service_add():

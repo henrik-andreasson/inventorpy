@@ -26,6 +26,9 @@
          <ul class="dropdown-menu">
            <li class="nav-item"><a href="{{ url_for('main.service_list') }}">{{ _('List Service') }}</a></li>
            <li class="nav-item"><a href="{{ url_for('main.service_add') }}">{{ _('Add Service') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.user_list') }}">{{ _('List Users') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('auth.register') }}">{{ _('Add User') }}</a></li>
+
          </ul>
      </li>
      <li class="dropdown">
