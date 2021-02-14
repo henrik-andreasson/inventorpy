@@ -17,6 +17,7 @@
       <td><A HREF="{{url_for('main.server_list', sort='ipaddress',  order=order)}}">{{_('IP Address')}}  </A></td>
       <td><A HREF="{{url_for('main.server_list', sort='service_id', order=order)}}">{{_('Service')}}     </A></td>
       <td><A HREF="{{url_for('main.server_list', sort='rack_id',    order=order)}}">{{_('Rack')}}        </A></td>
+      <td>{{_('Actions')}}        </A></td>
     </tr>
 
     {% for s in servers %}
@@ -26,9 +27,9 @@
               {{ s.inventory_id() }}
         </td>
         <td>
-              <A HREF="{{url_for('main.server_edit', server=s.id)}}">
-                {{ s.hostname }}
-              </A>
+          <A HREF="{{url_for('main.server_edit', server=s.id)}}">
+            {{ s.hostname }}
+          </A>
         </td>
         <td>
                 {{s.ipaddress}}
@@ -41,6 +42,20 @@
         <td>
           {% if s.rack %}
                 {{s.rack.name}}
+          {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.server_edit', server=s.id)}}">
+            {{ _('Edit') }}
+          </A> -
+          <A HREF="{{url_for('main.server_copy', copy_from_server=s.id)}}">
+            {{ _('Copy') }}
+          </A>
+          {% if s.manufacturer.lower()  == "dell" %}
+            -
+            <A HREF="https://www.dell.com/support/home/en-us/product-support/servicetag/{{s.serial}}">
+              {{ _('Dell support') }}
+            </A>
           {% endif %}
         </td>
 

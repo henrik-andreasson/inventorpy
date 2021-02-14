@@ -104,7 +104,7 @@ def server_edit():
         return redirect(url_for('main.switch_port_list', serverid=serverid))
     if 'switchport_add' in request.form:
         return redirect(url_for('main.switch_port_add', serverid=serverid))
-
+# TODO: fix the link where these are going
     server = Server.query.get(serverid)
     original_data = server.to_dict()
 
@@ -209,7 +209,7 @@ def server_copy():
         return redirect(url_for('main.index'))
 
     else:
-        return render_template('server.html', title=_('Edit Server'),
+        return render_template('server.html', title=_('Copy Server'),
                                form=form)
 
 
