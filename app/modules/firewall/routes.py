@@ -37,14 +37,14 @@ def firewall_add():
         firewall = Firewall(name=form.name.data,
                             alias=form.alias.data,
                             ipaddress=form.ipaddress.data,
-                            status=form.status.data,
                             serial=form.serial.data,
-                            model=form.model.data,
                             manufacturer=form.manufacturer.data,
-                            comment=form.comment.data,
+                            model=form.model.data,
+                            status=form.status.data,
                             support_start=form.support_start.data,
                             support_end=form.support_end.data,
-                            rack_position=form.rack_position.data
+                            rack_position=form.rack_position.data,
+                            comment=form.comment.data,
                             )
 
         firewall.service = service
@@ -92,13 +92,16 @@ def firewall_edit():
         firewall.name = form.name.data
         firewall.alias = form.alias.data
         firewall.ipaddress = form.ipaddress.data
-        firewall.service_id = form.service.data
+        firewall.serial = form.serial.data
+        firewall.manufacturer = form.manufacturer.data
+        firewall.model = form.model.data
         firewall.rack_id = form.rack.data
-        firewall.comment = form.comment.data
+        firewall.service_id = form.service.data
+        firewall.status = form.status.data
         firewall.support_start = form.support_start.data
         firewall.support_end = form.support_end.data
         firewall.rack_position = form.rack_position.data
-
+        firewall.comment = form.comment.data
         db.session.commit()
         audit.auditlog_update_post('firewall', original_data=original_data, updated_data=firewall.to_dict(), record_name=firewall.name)
         flash(_('Your changes have been saved.'))
