@@ -21,17 +21,18 @@ def server_add():
 
     form = ServerForm(formdata=request.form)
 
-    ip = request.args.get('ip')
-    if ip:
-        form.ipaddress.data = ip
-
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.get(form.service.data)
+
+        server_checker = Server.query.filter_by(hostname=form.hostname.data).first()
+        if server_checker is not None:
+            flash(_(f'Server {server_checker.hostname} is already registered, enter a different hostname!'))
+            return render_template('server.html', title=_('Add Server'),
+                                   form=form)
+
         if service is None:
             flash('Service is required')
             return redirect(request.referrer)
-        location = Location.query.get(form.location.data)
-        rack = Rack.query.get(form.rack.data)
 
         server = Server(hostname=form.hostname.data,
                         role=form.role.data,
@@ -51,11 +52,13 @@ def server_add():
                         support_start=form.support_start.data,
                         support_end=form.support_end.data,
                         rack_position=form.rack_position.data,
-                        environment=form.environment.data
+                        environment=form.environment.data,
+                        virtual_host=form.virtual_host.data,
+
                         )
 
         server.service = service
-        server.location = location
+        rack = Rack.query.get(form.rack.data)
         server.rack = rack
         db.session.add(server)
         db.session.commit()
@@ -66,6 +69,15 @@ def server_add():
 
     else:
 
+        ip = request.args.get('ip')
+        if ip:
+            form.ipaddress.default = ip
+
+        net_id = request.args.get('net')
+        if net_id:
+            form.network.default = net_id
+
+        form.process()
         return render_template('server.html', title=_('Add Server'),
                                form=form)
 
@@ -84,10 +96,14 @@ def server_edit():
         return redirect(url_for('main.server_copy', copy_from_server=serverid))
     if 'logs' in request.form:
         return redirect(url_for('main.logs_list', module='server', module_id=serverid))
-    if 'hsm' in request.form:
+    if 'hsm_list' in request.form:
         return redirect(url_for('main.hsm_pcicard_list', serverid=serverid))
-    if 'switchport' in request.form:
+    if 'hsm_add' in request.form:
+        return redirect(url_for('main.hsm_pcicard_add', serverid=serverid))
+    if 'switchport_list' in request.form:
         return redirect(url_for('main.switch_port_list', serverid=serverid))
+    if 'switchport_add' in request.form:
+        return redirect(url_for('main.switch_port_add', serverid=serverid))
 
     server = Server.query.get(serverid)
     original_data = server.to_dict()
@@ -101,10 +117,18 @@ def server_edit():
 
         server.hostname = form.hostname.data
         server.role = form.role.data
+        server.status = form.status.data
         server.ipaddress = form.ipaddress.data
         server.network_id = form.network.data
         server.memory = form.memory.data
         server.cpu = form.cpu.data
+        server.psu = form.psu.data
+        server.hd = form.hd.data
+        server.serial = form.serial.data
+        server.os_name = form.os_name.data
+        server.os_version = form.os_version.data
+        server.model = form.model.data
+        server.manufacturer = form.manufacturer.data
         server.service_id = form.service.data
         server.rack_id = form.rack.data
         server.comment = form.comment.data
@@ -149,12 +173,6 @@ def server_copy():
     else:
         form.service.choices = [(s.id, s.name) for s in Service.query.all()]
 
-    location_choices = []
-    for l in Location.query.all():
-        newloc = (l.id, l.longName())
-        location_choices.append(newloc)
-    form.location.choices = location_choices
-
     if copy_from_server is None:
         render_template('service.html', title=_('Server is not defined'))
 
@@ -166,16 +184,28 @@ def server_copy():
                         network_id=form.network.data,
                         memory=form.memory.data,
                         cpu=form.cpu.data,
+                        psu=form.psu.data,
+                        hd=form.hd.data,
+                        os_name=form.os_name.data,
+                        os_version=form.os_version.data,
+                        serial=form.serial.data,
+                        model=form.model.data,
+                        manufacturer=form.manufacturer.data,
+                        comment=form.comment.data,
+                        support_start=form.support_start.data,
+                        support_end=form.support_end.data,
+                        rack_position=form.rack_position.data,
+                        environment=form.environment.data,
                         virtual_host=form.virtual_host.data,
-                        location=form.location.data)
+
+                        )
         service = Service.query.get(form.service.data)
         server.service = service
         db.session.add(server)
 
         db.session.commit()
         audit.auditlog_new_post('server', original_data=server.to_dict(), record_name=server.hostname)
-        flash(_('Copied values from server %s to %s.' % (copy_from_server.hostname, server.hostname)))
-
+        flash(_(f'Created new server: {server.hostname} with vales based on {copy_from_server.hostname}'))
         return redirect(url_for('main.index'))
 
     else:
