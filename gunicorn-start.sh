@@ -11,7 +11,9 @@ fi
 
 cd "${INSTALL_PATH}"
 
-USE_CERT=0
+if [ "x${USE_CERT}" == "x" ] ; then
+	USE_CERT=0
+fi
 
 if [ "x$CERT" != "x" ] ; then
   echo "$CERT" | tr ';' '\n' > "${INSTALL_PATH}/cert.pem"
@@ -41,17 +43,27 @@ else
   EXTRA_OPTIONS=""
 fi
 
+GUNICORN=""
+if [ -f "/usr/bin/gunicorn3" ] ; then
+	GUNICORN="/usr/bin/gunicorn3"
+elif [ -f "/usr/bin/gunicorn" ] ; then
+	GUNICORN="/usr/bin/gunicorn"
+else
+	echo "no gunicorn found"
+	exit -1
+fi
 
-
-if [ $USE_CERT -gt 1 ] ; then
-
-    gunicorn inventorpy:app -b 0.0.0.0:${LISTEN} \
+echo "USE CERT: $USE_CERT"
+if [ $USE_CERT -ge 1 ] ; then
+		echo "SSL... "
+    $GUNICORN inventorpy:app -b 0.0.0.0:${LISTEN} \
          --pid "${INSTALL_PATH}/teamplan.pid" \
          --keyfile "${INSTALL_PATH}/key.pem"  \
-         --certfile  "${INSTALL_PATH}/cert.pem" ${EXTRA_OPTIONS}
+         --certfile  "${INSTALL_PATH}/cert.pem" \
+				 --ca-certs "${INSTALL_PATH}/ca.pem" ${EXTRA_OPTIONS}
 
 else
 
-    gunicorn inventorpy:app -b 0.0.0.0:${LISTEN} ${EXTRA_OPTIONS}
+    $GUNICORN inventorpy:app -b 0.0.0.0:${LISTEN} ${EXTRA_OPTIONS}
 
 fi

@@ -176,14 +176,13 @@ def rack_audit():
         rack.audit_comment = form.comment.data
         rack.auditor_id = auditor.id
         db.session.commit()
-        audit.auditlog_update_post('compartment', original_data=original_data, updated_data=rack.to_dict(), record_name=rack.name)
+        audit.auditlog_update_post('rack', original_data=original_data, updated_data=rack.to_dict(), record_name=rack.name)
 
         flash(_(f'Your audit of rack {rack.name} have been saved.'))
 
         return redirect(url_for('main.rack_list'))
 
     else:
-        print("hello")
         from app.modules.server.models import Server
 
         servers = Server.query.filter(Server.rack_id == rack.id)

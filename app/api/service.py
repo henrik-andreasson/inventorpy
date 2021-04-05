@@ -43,6 +43,20 @@ def get_servicelist():
     return jsonify(data)
 
 
+@bp.route('/service/<name>', methods=['GET'])
+@token_auth.login_required
+def get_service_by_name(name):
+
+    if name is None:
+        return bad_request('must include name')
+
+    service = Service.query.filter_by(name=name).first()
+    if service is None:
+        return bad_request('Service with name: %s not found' % name)
+
+    return jsonify(service.to_dict())
+
+
 @bp.route('/service/<int:id>', methods=['GET'])
 @token_auth.login_required
 def get_service(id):

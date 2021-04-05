@@ -36,6 +36,20 @@ def get_user(id):
     return jsonify(User.query.get_or_404(id).to_dict())
 
 
+@bp.route('/users/<username>', methods=['GET'])
+@token_auth.login_required
+def get_user_by_name(username):
+
+    if username is None:
+        return bad_request('must include username')
+
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return bad_request('User with username: %s not found' % username)
+
+    return jsonify(user.to_dict())
+
+
 @bp.route('/users', methods=['GET'])
 @token_auth.login_required
 def get_users():

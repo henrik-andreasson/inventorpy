@@ -7,10 +7,11 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-#    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-#        'sqlite:///' + os.path.join(basedir, 'app.db')
+    PREFERRED_URL_SCHEME = os.environ.get('PREFERRED_URL_SCHEME') or 'http'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'mysql+pymysql://inventorpy:foo123@172.21.0.2/inventorpy'
+        'sqlite:///' + os.path.join(basedir, 'app.db')
+#    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+#        'mysql+pymysql://inventorpy:foo123@172.21.0.2/inventorpy'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
@@ -27,3 +28,5 @@ class Config(object):
     ROCKET_CHANNEL = os.environ.get('ROCKET_CHANNEL') or 'general'
     OPEN_REGISTRATION = os.environ.get('OPEN_REGISTRATION') or True
     INVENTORPY_TZ = os.environ.get('TEAMPLAN_TZ') or "Europe/Stockholm"
+    CERT_LOGIN = os.environ.get('CERT_LOGIN') or False
+    CERT_DN_COMP_IS_USERNAME = os.environ.get('CERT_DN_COMP_IS_USERNAME') or "CN"

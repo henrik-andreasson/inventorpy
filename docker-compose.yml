@@ -3,6 +3,14 @@ version: '3.1'
 
 services:
 
+  web:
+    build: apache-httpd-ssl-proxy
+    restart: always
+    ports:
+      - "9443:443"
+#    environment:
+#      APP_SERVER_NAME: inventorpy
+
   db:
     image: mariadb
     restart: always
@@ -12,12 +20,13 @@ services:
       MYSQL_USER: inventorpy
       MYSQL_PASSWORD: foo123
 
-  inventorpy:
+  app:
     build: .
     ports:
       - "7000:8080"
     links:
       - db
+      - web
     environment:
       DATABASE_URL: 'mysql+pymysql://inventorpy:foo123@db/inventorpy'
       SECRET_KEY: 'sdfkjsdfkjhsdkjfhsdfjkh'
@@ -25,5 +34,6 @@ services:
       SQLALCHEMY_ECHO: "True"
       TEMPLATES_AUTO_RELOAD: "True"
       OPTIONS: "--reload"
+      PREFERRED_URL_SCHEME: "https"
     volumes:
       - .:/inventorpy
