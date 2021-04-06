@@ -33,6 +33,23 @@ def create_location():
     return response
 
 
+@bp.route('/location/get', methods=['POST'])
+@token_auth.login_required
+def get_location():
+    data = request.get_json() or {}
+    for field in ['place', 'facillity', 'area', 'position', 'type']:
+        if field not in data:
+            return bad_request('must include field: %s' % field)
+
+    check_loc = Location.query.filter_by(place=data['place'], facillity=data['facillity'], area=data['area'], position=data['position'], type=data['type']).first()
+    if check_loc is None:
+        return bad_request('Location not found')
+
+    response = jsonify(check_loc.to_dict())
+    response.status_code = 201
+    return response
+
+
 @bp.route('/locationlist', methods=['GET'])
 @token_auth.login_required
 def get_locationlist():
@@ -47,7 +64,7 @@ def get_locationlist():
 
 @bp.route('/location/<int:id>', methods=['GET'])
 @token_auth.login_required
-def get_location(id):
+def get_location_by_id(id):
     return jsonify(Location.query.get_or_404(id).to_dict())
 
 

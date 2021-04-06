@@ -65,6 +65,19 @@ def get_network(id):
     return jsonify(Network.query.get_or_404(id).to_dict())
 
 
+@bp.route('/network/<name>', methods=['GET'])
+@token_auth.login_required
+def get_network_by_name(name):
+    if name is None:
+        return bad_request('must include name')
+
+    net_check = Network.query.filter_by(name=name).first()
+    if net_check is None:
+        return bad_request('Network name do not exist at: {}'.format(name))
+
+    return jsonify(net_check.to_dict())
+
+
 @bp.route('/network/<int:id>', methods=['PUT'])
 @token_auth.login_required
 def update_network(id):

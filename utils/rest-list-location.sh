@@ -1,12 +1,25 @@
 #!/bin/bash
 
-# uses httpie  - pip3 install httpie
 
-read -p "username > " user_name
-read -p "password > " pass_word
-apiserverurl="http://127.0.0.1:5000/api"
+if [ -f variables ] ; then
+  . variables
+  echo "# URL: ${API_URL}"
+  echo "# User: ${API_USER}"
+
+fi
+
+token=""
+if [ -f rest-get-token.sh ] ; then
+  . rest-get-token.sh
+  token=$(get_new_token 2>/dev/null)
+  if [ $? -ne 0 ] ; then
+    echo "failed to get a login token"
+    exit
+  fi
+else
+  echo "login/get token failed"
+  exit
+fi
 
 
-token=$(http --auth "$user_name:$pass_word" POST "${apiserverurl}/tokens" | jq ".token" | sed 's/\"//g')
-
-http --pretty=format --verbose "${apiserverurl}/locationlist"  "Authorization:Bearer $token"
+http --pretty=format --verbose "${API_URL}/locationlist"  "Authorization:Bearer $token"
