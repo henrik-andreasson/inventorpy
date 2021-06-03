@@ -36,6 +36,22 @@ def create_server():
     return response
 
 
+@bp.route('/server/<name>', methods=['GET'])
+@token_auth.login_required
+def get_server_by_name(name):
+
+    if name is None:
+        return bad_request('Hostname is mandatory')
+
+    check_server = Server.query.filter_by(hostname=name).first()
+    if check_server is None:
+        return bad_request('Host dont exist with name: %s' % name)
+
+    response = jsonify(check_server.to_dict())
+    response.status_code = 201
+    return response
+
+
 @bp.route('/serverlist', methods=['GET'])
 @token_auth.login_required
 def get_serverlist():

@@ -15,12 +15,12 @@ RUN apt-get install --no-install-recommends -y python3.7 \
         python3-flask-login python3-flask-mail \
         python3-dotenv python3-jwt \
         python3-flaskext.wtf python3-flask-httpauth \
-        gunicorn3 python3-pymysql
+        gunicorn3 python3-pymysql jq
 
 RUN pip3 install werkzeug==0.16.0
 
 RUN pip3 install  flask-bootstrap  WTForms-Components rocketchat_API \
-  ipcalc email_validator Flask-Moment Flask-Babel werkzeug
+  ipcalc email_validator Flask-Moment Flask-Babel werkzeug httpie
 
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*

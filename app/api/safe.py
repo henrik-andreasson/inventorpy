@@ -1,6 +1,7 @@
 from app.api import bp
 from flask import jsonify
 from app.modules.safe.models import Safe, Compartment
+from app.models import User
 from flask import url_for
 from app import db, audit
 from app.api.errors import bad_request
@@ -31,6 +32,20 @@ def create_safe():
 
     response.status_code = 201
     response.headers['Safe'] = url_for('api.get_safe', id=safe.id)
+    return response
+
+
+@bp.route('/safe/<name>', methods=['GET'])
+@token_auth.login_required
+def get_safe_by_name(name):
+
+    check_safe = Safe.query.filter_by(name=name).first()
+    if check_safe is None:
+        return bad_request('Safe with name %s dont exist' % name)
+
+    response = jsonify(check_safe.to_dict())
+
+    response.status_code = 201
     return response
 
 
@@ -70,9 +85,24 @@ def update_safe(id):
 @token_auth.login_required
 def create_compartment():
     data = request.get_json() or {}
-    for field in ['name', 'safe_id', 'user_id']:
-        if field not in data:
-            return bad_request('must include field: %s' % field)
+    if 'name' not in data:
+        return bad_request('must include field: name')
+
+    safe = 0
+    for field in ['safe_id', 'safe_name']:
+        if field in data:
+            safe = 1
+
+    if safe == 0:
+        return bad_request('must include safe_id or safe_name')
+
+    user = 0
+    for field in ['user_id', 'username']:
+        if field in data:
+            user = 1
+
+    if user == 0:
+        return bad_request('must include field user_id or username')
 
     compartment = Compartment()
     compartment.from_dict(data)
@@ -86,6 +116,38 @@ def create_compartment():
     response.status_code = 201
     response.headers['Compartment'] = url_for('api.get_compartment', id=compartment.id)
     return response
+
+
+@bp.route('/compartment/by-name/<name>', methods=['GET'])
+@token_auth.login_required
+def get_compartment_by_name(name):
+
+    compartment = Compartment.query.filter_by(name=name).first()
+    if compartment is None:
+        return bad_request('Compartment dont exist with name: %s' % name)
+
+    response = jsonify(compartment.to_dict())
+
+    response.status_code = 201
+    return response
+
+
+@bp.route('/compartment/by-user/<username>', methods=['GET'])
+@token_auth.login_required
+def get_compartment_by_user(username):
+
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return bad_request('User dont exist with name: %s' % username)
+
+    compartments = Compartment.query.filter_by(user_id=user.id).all()
+    if compartments is None:
+        return bad_request('User has no compartments username: %s' % username)
+
+    data = {
+        'items': [(item.id,) for item in compartments],
+    }
+    return jsonify(data)
 
 
 @bp.route('/compartmentlist', methods=['GET'])

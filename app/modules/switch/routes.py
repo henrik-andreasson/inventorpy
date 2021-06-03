@@ -277,8 +277,13 @@ def switch_port_list():
     switchid = request.args.get('switch')
     serverid = request.args.get('serverid')
 
-    server = Server.query.get(serverid)
-    switch = Switch.query.get(switchid)
+    server = None
+    if serverid is not None:
+        server = Server.query.get(serverid)
+
+    switch = None
+    if switchid is not None:
+        switch = Switch.query.get(switchid)
 
     form = FilterSwitchListForm()
 
@@ -296,7 +301,7 @@ def switch_port_list():
             switchports = SwitchPort.query.filter_by(netowrk_id=network).paginate(
                     page, current_app.config['POSTS_PER_PAGE'], False)
         else:
-            switchports = SwitchPort.query.order_by(Switch.name).paginate(
+            switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
                 page, current_app.config['POSTS_PER_PAGE'], False)
     else:
 

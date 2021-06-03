@@ -1,4 +1,5 @@
 from app import db
+from app.models import User
 
 
 class Safe(db.Model):
@@ -71,6 +72,12 @@ class Compartment(db.Model):
         for field in ['name', 'user_id', 'safe_id', 'audit_status', 'auditor_id', 'audit_date', 'comment']:
             if field in data:
                 setattr(self, field, data[field])
+        if 'username' in data:
+            u = User.query.filter_by(username=data['username']).first()
+            setattr(self, 'user_id', u.id)
+        if 'safe_name' in data:
+            s = Safe.query.filter_by(name=data['safe_name']).first()
+            setattr(self, 'safe_id', s.id)
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

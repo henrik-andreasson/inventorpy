@@ -36,6 +36,23 @@ def create_rack():
     return response
 
 
+@bp.route('/rack/<name>', methods=['GET'])
+@token_auth.login_required
+def get_rack_by_name(name):
+
+    if name is None:
+        return bad_request('Name field is mandatory')
+
+    check_rack = Rack.query.filter_by(name=name).first()
+    if check_rack is None:
+        return bad_request('Rack dont exist name: %s' % name)
+
+    response = jsonify(check_rack.to_dict())
+    response.status_code = 201
+
+    return response
+
+
 @bp.route('/racklist', methods=['GET'])
 @token_auth.login_required
 def get_racklist():

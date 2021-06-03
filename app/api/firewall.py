@@ -38,6 +38,19 @@ def create_firewall():
     return response
 
 
+@bp.route('/firewall/<name>', methods=['GET'])
+@token_auth.login_required
+def get_firewall_by_name(name):
+
+    check_firewall = Firewall.query.filter_by(name=name).first()
+    if check_firewall is None:
+        return bad_request('Firewall with name %s dont exist' % name)
+
+    response = jsonify(check_firewall.to_dict())
+    response.status_code = 201
+    return response
+
+
 @bp.route('/firewalllist', methods=['GET'])
 @token_auth.login_required
 def get_firewalllist():
