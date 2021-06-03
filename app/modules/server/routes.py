@@ -235,6 +235,7 @@ def server_list():
 
     environment = None
     service = None
+    rack = None
 
     if request.method == 'POST' and form.validate_on_submit():
         service_id = form.service.data
@@ -247,7 +248,8 @@ def server_list():
         service = Service.query.filter_by(name=service_name).first()
         environment = request.args.get('environment')
         rack_id = request.args.get('rack_id')
-        rack = Rack.query.get(rack_id)
+        if rack_id is not None:
+            rack = Rack.query.get(rack_id)
 
     input_search_query = []
     if service is not None:

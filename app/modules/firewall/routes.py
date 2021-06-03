@@ -284,8 +284,14 @@ def firewall_port_list():
     firewallid = request.args.get('firewall')
     serverid = request.args.get('serverid')
 
-    server = Server.query.get(serverid)
-    firewall = Firewall.query.get(firewallid)
+    server = None
+    firewall = None
+
+    if serverid is not None:
+        server = Server.query.get(serverid)
+
+    if firewallid is not None:
+        firewall = Firewall.query.get(firewallid)
 
     form = FilterFirewallListForm()
 

@@ -84,7 +84,7 @@ class FirewallPortForm(FlaskForm):
 
         self.firewall.choices = [(f.id, '{} {}'.format(f.name, f.alias)) for f in Firewall.query.order_by(Firewall.id).all()]
         self.firewall.choices.insert(0, (-1, _l('Not Connected')))
-        self.switch_port.choices = [(s.id, '{} {}'.format(s.name, s.alias)) for s in SwitchPort.query.order_by(SwitchPort.id).all()]
+        self.switch_port.choices = [(s.id, '{} {}'.format(s.name, s.switch.name)) for s in SwitchPort.query.order_by(SwitchPort.id).all()]
         self.switch_port.choices.insert(0, (-1, _l('Not Connected')))
         self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.order_by(Server.id).all()]
         self.server.choices.insert(0, (-1, _l('Not Connected')))
