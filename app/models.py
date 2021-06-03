@@ -109,13 +109,13 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
-            current_app.config['SECRET_KEY'],
+            current_app.config['INVENTORPY_SECRET_KEY'],
             algorithm='HS256').decode('utf-8')
 
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+            id = jwt.decode(token, current_app.config['INVENTORPY_SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
         except:
             return
@@ -191,7 +191,30 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
 
 @login.user_loader
 def load_user(id):
+    print(f'regular user loaded for login userid: {id}')
     return User.query.get(int(id))
+
+#
+# @login.request_loader
+# def load_user_from_request(request):
+#     s_dn = request.environ.get('HTTP_SSL_CLIENT_S_DN')
+#
+#     import pprint
+#     pp = pprint.PrettyPrinter()
+#     print("request dump >>>")
+#     pp.pprint(request)
+#     print("<<< end request dump")
+#     if s_dn:
+#         username_from_cert = dict([x.split('=') for x in s_dn.split(',')[1:]])[current_app.config['CERT_DN_COMP_IS_USERNAME']]
+#         print(f'cert: {username_from_cert}')
+#         user = User.query.filter_by(username=username_from_cert).first()
+#         if user:
+#             print(f'user {user.username} login via cert {s_dn}')
+#             return user
+#     else:
+#         print('did not find cert info for login')
+#
+#     return None
 
 
 class Location(PaginatedAPIMixin, db.Model):
