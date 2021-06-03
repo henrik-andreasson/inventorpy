@@ -29,7 +29,7 @@ services:
       - web
     environment:
       DATABASE_URL: 'mysql+pymysql://inventorpy:foo123@db/inventorpy'
-      SECRET_KEY: 'sdfkjsdfkjhsdkjfhsdfjkh'
+      INVENTORPY_SECRET_KEY: 'sdfkjsdfkjhsdkjfhsdfjkh'
       FLASK_ENV: development
       SQLALCHEMY_ECHO: "True"
       TEMPLATES_AUTO_RELOAD: "True"

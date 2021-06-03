@@ -1,16 +1,14 @@
 
 debug(){
-  echo "# ${lines[0]}" >&3
-  echo "# ${lines[1]}" >&3
-  echo "# ${lines[2]}" >&3
-  echo "# ${lines[3]}" >&3
-  echo "# ${lines[4]}" >&3
+  for lno in "${lines[@]}" ; do
+    echo "# $lno" >&3
+  done
 
 }
 @test "network" {
     cd ../utils/
     run ./rest-verify-network.sh ./test-networks.csv
-#    debug
+    debug
     [ "${lines[2]}" = "ok network NETWORK1" ]
     [ "${lines[3]}" = "ok network NETWORK2" ]
     [ "${lines[4]}" = "ok network NETWORK3" ]

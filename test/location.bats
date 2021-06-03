@@ -1,16 +1,14 @@
 
 debug(){
-  echo "# ${lines[0]}" >&3
-  echo "# ${lines[1]}" >&3
-  echo "# ${lines[2]}" >&3
-  echo "# ${lines[3]}" >&3
-  echo "# ${lines[4]}" >&3
+  for lno in "${lines[@]}" ; do
+    echo "# $lno" >&3
+  done
 
 }
 @test "location" {
     cd ../utils/
     run ./rest-verify-location.sh ./test-location.csv
-#    debug
+    debug
     [ "${lines[2]}" = "ok place Stockholm" ]
     [ "${lines[3]}" = "ok facillity Kista" ]
     [ "${lines[4]}" = "ok area HQ" ]

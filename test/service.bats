@@ -1,9 +1,8 @@
 
 debug(){
-  echo "# ${lines[0]}" >&3
-  echo "# ${lines[1]}" >&3
-  echo "# ${lines[2]}" >&3
-  echo "# ${lines[3]}" >&3
+  for lno in "${lines[@]}" ; do
+    echo "# $lno" >&3
+  done
 
 }
 @test "service" {
