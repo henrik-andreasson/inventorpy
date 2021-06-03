@@ -23,14 +23,14 @@ class Server(db.Model):
     os_name = db.Column(db.String(140))
     os_version = db.Column(db.String(140))
     manufacturer = db.Column(db.String(140))
-    rack_id = db.Column(db.Integer, db.ForeignKey('rack.id'))
     rack = db.relationship('Rack')
+    rack_id = db.Column(db.Integer, db.ForeignKey('rack.id'))
+    rack_position = db.Column(db.String(10))
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
     service = db.relationship('Service')
     comment = db.Column(db.String(2000))
     support_start = db.Column(db.DateTime)
     support_end = db.Column(db.DateTime)
-    rack_position = db.Column(db.String(10))
     environment = db.Column(db.String(140))
     switch_ports = db.relationship("SwitchPort", back_populates="server")
     virtual_guests = db.relationship("VirtualServer", back_populates="hosting_server")
@@ -47,20 +47,21 @@ class Server(db.Model):
             'id': self.id,
             'hostname': self.hostname,
             'role': self.role,
+            'status': self.status,
+            'ipaddress': self.ipaddress,
             'network_id': self.network_id,
             'memory': self.memory,
             'cpu': self.cpu,
             'psu': self.psu,
             'hd': self.hd,
-            'os_name': self.os_name,
-            'os_version': self.os_version,
             'serial': self.serial,
             'model': self.model,
+            'os_name': self.os_name,
+            'os_version': self.os_version,
             'manufacturer': self.manufacturer,
             'rack_id': self.rack_id,
             'rack_position': self.rack_position,
             'service_id': self.service_id,
-            'status': self.status,
             'comment': self.comment,
             'support_start': self.support_start,
             'support_end': self.support_end,
@@ -147,6 +148,8 @@ class VirtualServer(db.Model):
             'id': self.id,
             'hostname': self.hostname,
             'role': self.role,
+            'status': self.status,
+            'ipaddress': self.ipaddress,
             'network_id': self.network_id,
             'memory': self.memory,
             'cpu': self.cpu,
@@ -154,7 +157,6 @@ class VirtualServer(db.Model):
             'os_name': self.os_name,
             'os_version': self.os_version,
             'service_id': self.service_id,
-            'status': self.status,
             'comment': self.comment,
             'environment': self.environment,
             'hsoting_server_id': self.hosting_server_id
