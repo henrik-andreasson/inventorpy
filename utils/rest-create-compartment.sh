@@ -32,16 +32,16 @@ IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
 
   name=$(echo $row | cut -f1 -d\,)
-  safe_id=$(echo $row | cut -f2 -d\,)
-  user_id=$(echo $row | cut -f3 -d\,)
+  safe_name=$(echo $row | cut -f2 -d\,)
+  username=$(echo $row | cut -f3 -d\,)
   iscomment=$(echo $row | grep "^#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
   http --verify cacerts.pem --verbose POST "${API_URL}/compartment" \
     "name=${name}" \
-    "safe_id=${safe_id}" \
-    "user_id=${user_id}" \
+    "safe_name=${safe_name}" \
+    "username=${username}" \
     "Authorization:Bearer $token"
 
 done

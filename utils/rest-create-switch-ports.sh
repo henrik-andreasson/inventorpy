@@ -42,9 +42,9 @@ for row in $(cat "${csvfile}") ; do
   http --verify cacerts.pem --verbose POST "${API_URL}/switch/port/add" \
     "name=${name}" \
     "switch=${switch}" \
-    "server=${server}" \
+    "server_name=${server}" \
     "server_if=${server_if}" \
-    "network=${network}" \
+    "network_name=${network}" \
     "comment=${comment}" \
     "Authorization:Bearer $token"
 
