@@ -29,10 +29,12 @@ audit = Audit()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-#    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+    if app.config['PROXY_FIX'] != 0:
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=app.config['PROXY_FIX'], x_host=app.config['PROXY_FIX'])
 
     db.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, render_as_batch=True)
     login.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
