@@ -9,7 +9,7 @@ Install python3 and sqlite
 Used modules
 
     pip3 install flask-sqlalchemy flask-migrate flask-login flask-mail \
-      flask-bootstrap flask-moment flask-babel python-dotenv jwt flask-wtf \
+      flask-bootstrap flask-moment flask-babel jwt flask-wtf \
       WTForms-Components flask-httpauth rocketchat_API
 
 install source

@@ -1,8 +1,6 @@
 import os
-from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config(object):
@@ -30,3 +28,4 @@ class Config(object):
     INVENTORPY_TZ = os.environ.get('TEAMPLAN_TZ') or "Europe/Stockholm"
     CERT_LOGIN = os.environ.get('CERT_LOGIN') or False
     CERT_DN_COMP_IS_USERNAME = os.environ.get('CERT_DN_COMP_IS_USERNAME') or "CN"
+    PROXY_FIX = os.environ.get('PROXY_FIX') or 0
