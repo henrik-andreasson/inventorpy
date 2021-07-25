@@ -28,7 +28,9 @@ services:
       - db
       - web
     environment:
-      DATABASE_URL: 'mysql+pymysql://inventorpy:foo123@db/inventorpy'
+# mysql or sqlite
+#      DATABASE_URL: 'mysql+pymysql://inventorpy:foo123@db/inventorpy'
+      DATABASE_URL: 'sqlite:///inventorpy/app.db'
       INVENTORPY_SECRET_KEY: 'sdfkjsdfkjhsdkjfhsdfjkh'
       FLASK_ENV: development
       SQLALCHEMY_ECHO: "True"
