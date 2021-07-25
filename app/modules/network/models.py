@@ -3,6 +3,7 @@ from app import db
 
 class Network(db.Model):
     __tablename__ = "network"
+    __searchable__ = ['name', 'network', 'gateway', 'location_id', 'service_id', 'vlan', 'environment']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     network = db.Column(db.String(140))

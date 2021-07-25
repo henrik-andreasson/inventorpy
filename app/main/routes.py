@@ -10,9 +10,10 @@ from app.modules.rack.models import Rack
 from app.modules.server.models import Server
 from app.modules.network.models import Network
 from app.modules.firewall.models import Firewall
+from app.modules.switch.models import Switch
 from app.main import bp
 from datetime import datetime
-from flask_msearch import Search
+# from flask_msearch import Search
 
 
 @bp.before_app_request
@@ -105,7 +106,57 @@ def search():
                    'module': 'HsmPin', 'text': f'{hsmpin.ped.hsmdomain.name} - {hsmpin.ped.type} - {hsmpin.ped.keyno} - {hsmpin.ped.keysn}',
                    'link': url_for('main.hsm_pin_edit', pin=hsmpin.id)}
             hits.append(hit)
- 
+
+        hsmcards = HsmPciCard.query.msearch(keyword, rank_order=False).all()
+        for hsmcard in hsmcards:
+            hit = {'title': f'{hsmcard.hsmdomain.name} - {hsmcard.name}',
+                   'module': 'HsmPciCard', 'text': f'{hsmcard.serial} - {hsmcard.fbno} - {hsmcard.server.hostname} - {hsmcard.status}',
+                   'link': url_for('main.hsm_pci_card_edit', hsm_pci_card=hsmcard.id)}
+            hits.append(hit)
+
+        hsmbackups = HsmBackupUnit.query.msearch(keyword, rank_order=False).all()
+        for hsmbup in hsmbackups:
+            hit = {'title': f'{hsmbup.hsmdomain.name} - {hsmbup.name}',
+                   'module': 'HsmBackupUnit', 'text': f'{hsmbup.serial} - {hsmbup.fbno} - {hsmbup.safe.name} - {hsmbup.comment}',
+                   'link': url_for('main.hsm_backupunit_edit', id=hsmbup.id)}
+            hits.append(hit)
+
+        networks = Network.query.msearch(keyword, rank_order=False).all()
+        for nw in networks:
+            hit = {'title': f'{nw.name} - {nw.service.name}',
+                   'module': 'Network', 'text': f'{nw.gateway} - {nw.netmask}',
+                   'link': url_for('main.network_edit', network=nw.id)}
+            hits.append(hit)
+
+        racks = Rack.query.msearch(keyword, rank_order=False).all()
+        for r in racks:
+            hit = {'title': f'{r.name}',
+                   'module': 'Rack', 'text': f'{r.name}',
+                   'link': url_for('main.rack_edit', rack=r.id)}
+            hits.append(hit)
+
+        safes = Safe.query.msearch(keyword, rank_order=False).all()
+        for s in safes:
+            hit = {'title': f'{s.name}',
+                   'module': 'Safe', 'text': f'{s.name} - {s.location.longName()}',
+                   'link': url_for('main.safe_edit', safe=s.id)}
+            hits.append(hit)
+
+        comps = Compartment.query.msearch(keyword, rank_order=False).all()
+        for c in comps:
+            hit = {'title': f'{c.name}',
+                   'module': 'Compartment', 'text': f'{c.name} - {c.safe.name} - {c.user.username}',
+                   'link': url_for('main.compartment_edit', compartment=c.id)}
+            hits.append(hit)
+
+        sws = Switch.query.msearch(keyword, rank_order=False).all()
+        for sw in sws:
+            hit = {'title': sw.name, 'module': 'Switch', 'text': f'{sw.alias} - {sw.service.name} - {sw.rack.name}',
+                   'link': url_for('main.switch_edit', switch=sw.id)}
+            hits.append(hit)
+
+
+# Switch
     return render_template('search.html', title=_('Search'),
                            hits=hits, form=form)
 

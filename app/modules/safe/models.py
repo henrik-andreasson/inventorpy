@@ -4,6 +4,7 @@ from app.models import User
 
 class Safe(db.Model):
     __tablename__ = "safe"
+    __searchable__ = ['name', 'location_id', 'status', 'comment']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
@@ -39,6 +40,7 @@ class Safe(db.Model):
 
 class Compartment(db.Model):
     __tablename__ = "compartment"
+    __searchable__ = ['name', 'comment', 'audit_status']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     safe = db.relationship('Safe')

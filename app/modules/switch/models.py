@@ -4,6 +4,7 @@ from datetime import datetime
 
 class Switch(db.Model):
     __tablename__ = "switch"
+    __searchable__ = ['name', 'comment', 'status', 'model', 'manufacturer', 'ipaddress', 'alias', 'serial']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     alias = db.Column(db.String(140), unique=True)
@@ -59,6 +60,7 @@ class Switch(db.Model):
 
 class SwitchPort(db.Model):
     __tablename__ = "switch_port"
+    __searchable__ = ['name', 'server.hostname', 'switch.name', 'network.name']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     switch = db.relationship('Switch')

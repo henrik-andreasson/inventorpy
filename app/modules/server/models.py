@@ -7,7 +7,9 @@ from app.modules.network.models import Network
 
 class Server(db.Model):
     __tablename__ = "server"
-    __searchable__ = ['hostname', 'role', 'status', 'ipaddress', 'serial']
+    __searchable__ = ['hostname', 'role', 'status', 'ipaddress', 'serial', 'memory',
+                      'cpu', 'psu', 'model', 'os_name', 'manufacturer', 'comment',
+                      'environment']
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(140), unique=True)
     role = db.Column(db.String(140))
@@ -118,6 +120,9 @@ class Server(db.Model):
 
 class VirtualServer(db.Model):
     __tablename__ = "virtual_server"
+    __searchable__ = ['hostname', 'role', 'status', 'ipaddress', 'memory',
+                      'cpu', 'psu', 'os_name', 'os_version',
+                      'comment', 'environment']
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(140), unique=True)
     role = db.Column(db.String(140))

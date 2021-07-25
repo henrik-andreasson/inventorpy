@@ -3,6 +3,7 @@ from app import db
 
 class Rack(db.Model):
     __tablename__ = "rack"
+    __searchable__ = ['name', 'audit_status', 'location_id', 'audit_comment', 'comment']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
@@ -13,7 +14,6 @@ class Rack(db.Model):
     audit_date = db.Column(db.DateTime)
     auditor = db.relationship('User', foreign_keys='Rack.auditor_id')
     auditor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    comment = db.Column(db.String(255))
 
     def __repr__(self):
         return '<Rack {}>'.format(self.name)
