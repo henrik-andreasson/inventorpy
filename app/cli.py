@@ -55,7 +55,7 @@ def register(app):
     @click.argument('email')
     def new(username, password, email):
         """create new user."""
-        from app.main.models import User
+        from app.models import User
         user = User(username=username, email=email)
         user.set_password(password)
         db.session.add(user)
