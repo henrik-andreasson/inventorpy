@@ -50,6 +50,7 @@ class PaginatedAPIMixin(object):
 
 class Service(PaginatedAPIMixin, db.Model):
     __tablename__ = "service"
+    __searchable__ = ['name']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     updated = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -81,6 +82,7 @@ class Service(PaginatedAPIMixin, db.Model):
 
 class User(PaginatedAPIMixin, UserMixin, db.Model):
     __tablename__ = "user"
+    __searchable__ = ['username', 'email', 'about_me']
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -357,3 +359,8 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
+
+def search():
+    keyword = request.args.get('keyword')
+    results = Post.query.msearch(keyword,fields=['title'],limit=20).filter(...)

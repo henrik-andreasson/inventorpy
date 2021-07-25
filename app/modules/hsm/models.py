@@ -6,6 +6,8 @@ from app.modules.safe.models import Compartment
 
 class HsmDomain(db.Model):
     __tablename__ = "hsm_domain"
+    __searchable__ = ['name']
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
@@ -32,6 +34,7 @@ class HsmDomain(db.Model):
 
 class HsmPed(db.Model):
     __tablename__ = "hsm_ped"
+    __searchable__ = ['type', 'keyno', 'keysn', 'hsmdomain_id', 'user_id', 'compartment_id', 'comment']
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(140))
     keyno = db.Column(db.String(140))
@@ -70,6 +73,7 @@ class HsmPed(db.Model):
 
 class HsmPedUpdates(db.Model):
     __tablename__ = "hsm_ped_updates"
+    __searchable__ = ['type', 'keyno', 'keysn', 'hsmdomain_id', 'user_id', 'compartment_id']
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(140))
     keyno = db.Column(db.String(140))
@@ -105,6 +109,7 @@ class HsmPedUpdates(db.Model):
 
 class HsmPin(db.Model):
     __tablename__ = "hsm_pin"
+    __searchable__ = ['ped_id', 'compartment_id']
     id = db.Column(db.Integer, primary_key=True)
     ped = db.relationship('HsmPed')
     ped_id = db.Column(db.Integer, db.ForeignKey('hsm_ped.id'))
@@ -112,7 +117,7 @@ class HsmPin(db.Model):
     compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
 
     def __repr__(self):
-        return '<HsmPin {}>'.format(self.keyno)
+        return '<HsmPin {}>'.format(self.ped.keyno)
 
     def to_dict(self):
         data = {
@@ -132,6 +137,7 @@ class HsmPin(db.Model):
 
 class HsmPciCard(db.Model):
     __tablename__ = "hsm_pci_card"
+    __searchable__ = ['name', 'serial', 'fbno', 'model', 'manufacturedate', 'safe_id', 'status', 'comment', 'hsmdomain_id', 'server_id']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     serial = db.Column(db.String(140), unique=True)
@@ -241,6 +247,7 @@ class HsmPciCard(db.Model):
 
 class HsmBackupUnit(db.Model):
     __tablename__ = "hsm_backup_unit"
+    __searchable__ = ['name', 'serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'safe_id', 'comment']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     serial = db.Column(db.String(140))
@@ -298,7 +305,6 @@ class HsmBackupUnit(db.Model):
                 setattr(self, 'hsmdomain_id', hsmdomain.id)
 
         return {'msg': "object loaded ok", 'success': True}
-
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

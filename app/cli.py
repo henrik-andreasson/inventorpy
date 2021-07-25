@@ -73,3 +73,15 @@ def register(app):
         else:
             user.set_password(password)
             db.session.commit()
+
+    @app.cli.group()
+    def dbmgmt():
+        """db commands."""
+        pass
+
+    @dbmgmt.command()
+    def reindex():
+        """update index."""
+        from app import search
+        search.delete_index()
+        search.create_index()

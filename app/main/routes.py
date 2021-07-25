@@ -2,15 +2,17 @@ from flask import render_template, flash, redirect, url_for, request, g, current
 from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from app import db, audit
-from app.main.forms import EditProfileForm, ServiceForm, LocationForm
+from app.main.forms import EditProfileForm, ServiceForm, LocationForm, SearchForm
 from app.models import User, Service, Location, Audit
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard, HsmPedUpdates, HsmBackupUnit
 from app.modules.safe.models import Safe, Compartment
 from app.modules.rack.models import Rack
 from app.modules.server.models import Server
 from app.modules.network.models import Network
+from app.modules.firewall.models import Firewall
 from app.main import bp
 from datetime import datetime
+from flask_msearch import Search
 
 
 @bp.before_app_request
@@ -46,6 +48,66 @@ def index():
                            compartments=compartments, hsmpcicards=hsmpcicards,
                            racks=racks, hsmpedupdates=hsmpedupdates,
                            hsmbackupunits=hsmbackupunits)
+
+
+@bp.route('/search', methods=['GET', 'POST'])
+@login_required
+def search():
+    keyword = request.args.get('keyword')
+    form = SearchForm()
+    if keyword is None:
+        if 'keyword' in request.form:
+            keyword = form.keyword.data
+
+    users = []
+    hits = []
+    if keyword is not None:
+        users = User.query.msearch(keyword, rank_order=False).all()
+        for u in users:
+            hit = {'title': u.username, 'module': 'User', 'text': u.about_me,
+                   'link': url_for('main.user', username=u.username)}
+            hits.append(hit)
+
+        services = Service.query.msearch(keyword, rank_order=False).all()
+        for s in services:
+            hit = {'title': s.name, 'module': 'Service', 'text': s.name,
+                   'link': url_for('main.service_get', servicename=s.name)}
+            hits.append(hit)
+
+        servers = Server.query.msearch(keyword, rank_order=False).all()
+        for se in servers:
+            hit = {'title': se.hostname, 'module': 'Server', 'text': f'{se.ipaddress} {se.role}',
+                   'link': url_for('main.server_edit', server=se.id)}
+            hits.append(hit)
+
+        firewalls = Firewall.query.msearch(keyword, rank_order=False).all()
+        for fw in firewalls:
+            hit = {'title': fw.name, 'module': 'Firewall', 'text': f'{fw.ipaddress} {fw.alias}',
+                   'link': url_for('main.firewall_edit', firewall=fw.id)}
+            hits.append(hit)
+
+        hsmdomains = HsmDomain.query.msearch(keyword, rank_order=False).all()
+        for hsmdom in hsmdomains:
+            hit = {'title': hsmdom.name, 'module': 'HsmDomain', 'text': hsmdom.name,
+                   'link': url_for('main.hsm_domain_edit', domain=hsmdom.id)}
+            hits.append(hit)
+
+        hsmpeds = HsmPed.query.msearch(keyword, rank_order=False).all()
+        for hsmped in hsmpeds:
+            hit = {'title': f'{hsmped.hsmdomain.name} - {hsmped.id}',
+                   'module': 'HsmPed', 'text': f'{hsmped.hsmdomain.name} - {hsmped.type} - {hsmped.keyno} - {hsmped.keysn}',
+                   'link': url_for('main.hsm_ped_edit', ped=hsmped.id)}
+            hits.append(hit)
+
+        hsmpins = HsmPin.query.msearch(keyword, rank_order=False).all()
+        for hsmpin in hsmpins:
+            hit = {'title': f'{hsmpin.ped.hsmdomain.name} - {hsmpin.id}',
+                   'module': 'HsmPin', 'text': f'{hsmpin.ped.hsmdomain.name} - {hsmpin.ped.type} - {hsmpin.ped.keyno} - {hsmpin.ped.keysn}',
+                   'link': url_for('main.hsm_pin_edit', pin=hsmpin.id)}
+            hits.append(hit)
+ 
+    return render_template('search.html', title=_('Search'),
+                           hits=hits, form=form)
 
 
 @bp.route('/user/<username>')

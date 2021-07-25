@@ -7,6 +7,7 @@ from app.modules.network.models import Network
 
 class Server(db.Model):
     __tablename__ = "server"
+    __searchable__ = ['hostname', 'role', 'status', 'ipaddress', 'serial']
     id = db.Column(db.Integer, primary_key=True)
     hostname = db.Column(db.String(140), unique=True)
     role = db.Column(db.String(140))

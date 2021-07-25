@@ -4,6 +4,8 @@ from datetime import datetime
 
 class Firewall(db.Model):
     __tablename__ = "firewall"
+    __searchable__ = ['name', 'alias', 'status', 'serial', 'manufacturer', 'model', 'status', 'comment']
+# TODO: add ipaddress
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), unique=True)
     alias = db.Column(db.String(140), unique=True)
@@ -87,9 +89,10 @@ class Firewall(db.Model):
         return {'msg': "object loaded ok", 'success': True}
 
 
-
 class FirewallPort(db.Model):
     __tablename__ = "firewall_port"
+    __searchable__ = ['name', 'firewall_id', 'switch_id', 'server_id', 'network_id', 'comment']
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     firewall = db.relationship('Firewall')

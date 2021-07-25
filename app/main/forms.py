@@ -24,6 +24,11 @@ class EditProfileForm(FlaskForm):
                 raise ValidationError(_('Please use a different username.'))
 
 
+class SearchForm(FlaskForm):
+    keyword = StringField(_l('Search'), validators=[DataRequired()])
+    submit = SubmitField(_l('Submit'))
+
+
 class ServiceForm(FlaskForm):
     name = StringField(_l('name'), validators=[DataRequired()])
     color = StringField(_l('color'), validators=[DataRequired()])

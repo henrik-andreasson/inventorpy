@@ -330,6 +330,9 @@ def hsm_pin_edit():
     original_data = hsmpin.to_dict()
 
     form = HsmPinForm(obj=hsmpin)
+    # for field in form:
+    #     if field.flags.required:
+    #         form.field.label = Label(text=field.label.text + ' *')
 
     if hsmpin is None:
         render_template('hsm.html', title=_('HSM Domain is not defined'))
@@ -347,7 +350,7 @@ def hsm_pin_edit():
     else:
         form.ped.data = hsmpin.ped_id
         form.compartment.data = hsmpin.compartment_id
-        return render_template('hsm.html', title=_('Edit HSM Domain'),
+        return render_template('hsm.html', title=_('Edit HSM PIN'),
                                form=form)
 
 
