@@ -150,6 +150,15 @@ def service_list():
                            next_url=next_url, prev_url=prev_url)
 
 
+@bp.route('/service/<servicename>', methods=['GET'])
+@login_required
+def service_get(servicename):
+    service = Service.query.filter_by(name=servicename).first_or_404()
+    print("service: %s" % (service.name))
+
+    return render_template('service.html', service=service, title=_('Service'))
+
+
 @bp.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
