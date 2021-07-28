@@ -38,8 +38,8 @@ for row in $(cat "${csvfile}") ; do
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
-  http --verify cacerts.pem  "${API_URL}/rack/${name}" \
-    "Authorization:Bearer $token"
+#  http --verify cacerts.pem  "${API_URL}/rack/${name}" \
+#    "Authorization:Bearer $token"
   result=$(http --verify cacerts.pem  "${API_URL}/rack/${name}" \
     "Authorization:Bearer $token")
 
@@ -52,15 +52,15 @@ for row in $(cat "${csvfile}") ; do
 
   result_location_id=$(echo $result | jq '.location_id' | tr -d \")
 
-  http --verify cacerts.pem  "${API_URL}/location/${result_location_id}" \
-    "Authorization:Bearer $token"
-  result_location_=$(http --verify cacerts.pem  "${API_URL}/location/${result_location_id}" \
+#  http --verify cacerts.pem  "${API_URL}/location/${result_location_id}" \
+#    "Authorization:Bearer $token"
+  result_location_json=$(http --verify cacerts.pem  "${API_URL}/location/${result_location_id}" \
     "Authorization:Bearer $token")
-  if [ "${location_long_name}" == "${result_name}" ] ; then
+ result_loc_long="$(echo $result_location_json | jq .place | tr -d '"') / $(echo $result_location_json | jq .facillity | tr -d '"') / $(echo $result_location_json | jq .area | tr -d '"') / $(echo $result_location_json | jq .position | tr -d '"')"
+  if [ "${location_long_name}" == "${result_loc_long}" ] ; then
     echo "ok rack location_long_name ${location_long_name}"
   else
-    echo "fail rack location_long_name <${location_long_name}> != <${result_location_long_name}>"
+    echo "fail rack location_long_name <${location_long_name}> != <${result_loc_long}>"
   fi
-
 
 done
