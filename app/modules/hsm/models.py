@@ -1,10 +1,12 @@
 from app import db
 from datetime import datetime
 from app.modules.server.models import Server
-from app.modules.safe.models import Compartment
+from app.models import Service, User
+from app.modules.safe.models import Safe, Compartment
+from app.models import PaginatedAPIMixin
 
 
-class HsmDomain(db.Model):
+class HsmDomain(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_domain"
     __searchable__ = ['name']
 
@@ -25,20 +27,30 @@ class HsmDomain(db.Model):
         return data
 
     def from_dict(self, data, new_work=False):
-        for field in ['name', 'service_id']:
-            setattr(self, field, data[field])
+        if 'name' in data:
+            setattr(self, 'name', data['name'])
+        if 'service_name' in data:
+            service = Service.query.filter_by(name=data['service_name']).first_or_404()
+            setattr(self, 'service', service)
+        elif 'service_id' in data:
+            service = Service.query.get(data['service_id'])
+            setattr(self, 'service', service)
+        else:
+            return {'msg': "nor service_name or service_id found a valid service", 'success': False}
+
+        return {'msg': "object loaded ok", 'success': True}
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
 
-class HsmPed(db.Model):
+class HsmPed(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_ped"
     __searchable__ = ['type', 'keyno', 'keysn', 'hsmdomain_id', 'user_id', 'compartment_id', 'comment']
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(140))
     keyno = db.Column(db.String(140))
-    keysn = db.Column(db.String(140), unique=True)
+    keysn = db.Column(db.String(140))
     hsmdomain = db.relationship('HsmDomain')
     hsmdomain_id = db.Column(db.Integer, db.ForeignKey('hsm_domain.id'))
     user = db.relationship('User')
@@ -64,14 +76,65 @@ class HsmPed(db.Model):
         return data
 
     def from_dict(self, data):
-        for field in ['keyno', 'keysn', 'hsmdomain_id', 'compartment_id', 'user_id', 'type']:
-            setattr(self, field, data[field])
+        if data['type'] in ['blue', 'red', 'red2', 'orange', 'black']:
+            setattr(self, 'type', data['type'])
+        else:
+            return {'msg': "type not of an allowed one blue, red, red2, orange or black", 'success': False}
+
+        setattr(self, 'keyno', data['keyno'])
+        setattr(self, 'keysn', data['keysn'])
+        if 'hsmdomain_id' in data:
+            hsmdomain = HsmDomain.query.get(data['hsmdomain_id'])
+            if hsmdomain is None:
+                return {'msg': "no hsmdomain found via id", 'success': False}
+            setattr(self, 'hsmdomain_id', hsmdomain.id)
+
+        elif 'hsmdomain_name' in data:
+            hsmdomain = HsmDomain.query.filter_by(name=data['hsmdomain_name']).first()
+            if hsmdomain is None:
+                return {'msg': "no hsmdomain found via hsmdomain_name", 'success': False}
+            setattr(self, 'hsmdomain_id', hsmdomain.id)
+
+        else:
+            return {'msg': "no hsmdomain found via hsmdomain_name nor id", 'success': False}
+
+        if 'compartment_id' in data:
+            compartment = Compartment.query.get(data['compartment_id'])
+            if compartment is None:
+                return {'msg': "no compartment found via id", 'success': False}
+            setattr(self, 'compartment_id', compartment.id)
+
+        elif 'compartment_name' in data:
+            compartment = Compartment.query.filter_by(name=data['compartment_name']).first()
+            if compartment is None:
+                return {'msg': "no compartment found via compartment_name", 'success': False}
+            setattr(self, 'compartment_id', compartment.id)
+
+        else:
+            return {'msg': "no compartment found via hsmdomain_name nor id", 'success': False}
+
+        if 'user_id' in data:
+            user = User.query.get(data['user_id'])
+            if user is None:
+                return {'msg': "no user found via id", 'success': False}
+            setattr(self, 'user_id', user.id)
+
+        elif 'user_name' in data:
+            user = User.query.filter_by(username=data['user_name']).first()
+            if user is None:
+                return {'msg': "no user found via user_name", 'success': False}
+            setattr(self, 'user_id', user.id)
+
+        else:
+            return {'msg': "no user found via user_name nor id", 'success': False}
+
+        return {'msg': "Object created", 'success': True}
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
 
-class HsmPedUpdates(db.Model):
+class HsmPedUpdates(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_ped_updates"
     __searchable__ = ['type', 'keyno', 'keysn', 'hsmdomain_id', 'user_id', 'compartment_id']
     id = db.Column(db.Integer, primary_key=True)
@@ -107,7 +170,7 @@ class HsmPedUpdates(db.Model):
             setattr(self, field, data[field])
 
 
-class HsmPin(db.Model):
+class HsmPin(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_pin"
     __searchable__ = ['ped_id', 'compartment_id']
     id = db.Column(db.Integer, primary_key=True)
@@ -135,7 +198,7 @@ class HsmPin(db.Model):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
 
-class HsmPciCard(db.Model):
+class HsmPciCard(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_pci_card"
     __searchable__ = ['name', 'serial', 'fbno', 'model', 'manufacturedate', 'safe_id', 'status', 'comment', 'hsmdomain_id', 'server_id']
     id = db.Column(db.Integer, primary_key=True)
@@ -179,9 +242,7 @@ class HsmPciCard(db.Model):
         return data
 
     def from_dict(self, data):
-        from app.modules.safe.models import Safe
-        for field in ['serial', 'model', 'fbno', 'name', 'status',
-                      'contract', 'comment']:
+        for field in ['serial', 'model', 'fbno', 'name', 'status', 'contract', 'comment']:
             if field not in data:
                 msg = 'must include field: %s' % field
                 return {'msg': msg, 'success': False}
@@ -189,10 +250,10 @@ class HsmPciCard(db.Model):
 
         for field in ['support_start', 'support_end', 'manufacturedate']:
             if field in data:
-                date = datetime.strptime(data['manufacturedate'], "%Y-%m-%d")
-                setattr(self, 'manufacturedate', date)
+                date = datetime.strptime(data[field], "%Y-%m-%d")
+                setattr(self, field, date)
             else:
-                msg = 'must include field: manufacturedate'
+                msg = f'must include field: {field}'
                 return {'msg': msg, 'success': False}
 
         if 'server_id' in data:
@@ -245,7 +306,7 @@ class HsmPciCard(db.Model):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
 
-class HsmBackupUnit(db.Model):
+class HsmBackupUnit(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_backup_unit"
     __searchable__ = ['name', 'serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'safe_id', 'comment']
     id = db.Column(db.Integer, primary_key=True)
@@ -254,7 +315,6 @@ class HsmBackupUnit(db.Model):
     model = db.Column(db.String(140))
     manufacturedate = db.Column(db.String(140))
     fbno = db.Column(db.String(140))
-    hsmdomain = db.Column(db.String(140))
     safe = db.relationship('Safe')
     safe_id = db.Column(db.Integer, db.ForeignKey('safe.id'))
     hsmdomain = db.relationship('HsmDomain')
@@ -278,17 +338,21 @@ class HsmBackupUnit(db.Model):
         return data
 
     def from_dict(self, data):
-        for field in ['name', 'serial', 'model', 'manufacturedate', 'fbno', 'hsmdomain_id', 'safe_id']:
+        for field in ['name', 'serial', 'model', 'manufacturedate', 'fbno']:
             setattr(self, field, data[field])
 
+        safe = None
         if 'safe_id' in data:
-            compartment = Compartment.query.get(data['safe_id']).first()
-            if compartment is None:
-                return {'msg': "no compartment found via compartment_id", 'success': False}
-            else:
-                setattr(self, 'compartment_id', data['compartment_id'])
+            safe = Safe.query.get(data['safe_id']).first()
+        if 'safe_name' in data:
+            safe = Safe.query.filter_by(name=data['safe_name']).first()
         else:
-            return {'msg': "must supply valid compartment_id", 'success': False}
+            return {'msg': "must supply valid safe via save_id or safe_name", 'success': False}
+
+        if safe is None:
+            return {'msg': "no safe found via safe_id/name", 'success': False}
+        else:
+            setattr(self, 'safe_id', safe.id)
 
         if 'hsmdomain_id' in data:
             hsmdomain = HsmDomain.query.get(data['hsmdomain_id'])

@@ -168,7 +168,7 @@
         </a>
         {% for i in hsmpins %}
           <a href="{{ url_for('main.hsm_pin_edit', pin=i.id) }}" class="list-group-item">
-            {{i.ped.keysn}} - {{i.ped.keyno}} - {{i.ped.hsmdomain.name}} - {{i.ped.user.username}}
+            {{i.ped.keysn}} - {{i.ped.keyno}}
           </a>
         {% endfor %}
       </div>

@@ -520,8 +520,8 @@ def hsm_pcicard_delete():
         flash(_('HSM PED was not deleted, id not found!'))
         return redirect(url_for('main.index'))
 
-    deleted_msg = 'HSM PED deleted: %s %s' % (hsmpcicard.keyno,
-                                              hsmpcicard.service.name)
+    deleted_msg = f'HSM PED deleted: {hsmpcicard.serial} {hsmpcicard.name}\
+                    {hsmpcicard.hsmdomain.service.name}'
     db.session.delete(hsmpcicard)
     db.session.commit()
     flash(deleted_msg)
@@ -641,8 +641,8 @@ def hsm_backupunit_delete():
         flash(_('HSM PED was not deleted, id not found!'))
         return redirect(url_for('main.index'))
 
-    deleted_msg = 'HSM PED deleted: %s %s' % (hsmbackupunit.keyno,
-                                              hsmbackupunit.service.name)
+    deleted_msg = 'HSM PED deleted: %s %s' % (hsmbackupunit.serial,
+                                              hsmbackupunit.name)
     db.session.delete(hsmbackupunit)
     db.session.commit()
     flash(deleted_msg)
