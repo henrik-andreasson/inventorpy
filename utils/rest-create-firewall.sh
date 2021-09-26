@@ -23,8 +23,8 @@ fi
 if [ "x$1" != "x" ] ; then
     csvfile=$1
 else
-    echo "arg1 must be a file with location definitions in it"
-    echo "name,location_id"
+    echo "arg1 must be a file with hsm pci card definitions in it"
+    echo "#serial,fbno,model,manufacturdate,safe,hsmdomain_name,server_name,name,contract,support_start,support_end,status,comment"
     exit
 fi
 
@@ -32,8 +32,8 @@ fi
 IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
 
-  name=$(echo $row | cut -f1 -d\,)
-  alias=$(echo $row | cut -f2 -d\,)
+  serial=$(echo $row | cut -f1 -d\,)
+  fbno=$(echo $row | cut -f2 -d\,)
   ipaddress=$(echo $row | cut -f3 -d\,)
   serial=$(echo $row | cut -f4 -d\,)
   manufacturer=$(echo $row | cut -f5 -d\,)

@@ -45,15 +45,9 @@ for row in $(cat "${csvfile}") ; do
     continue
   fi
 
-   http --verify cacerts.pem --verbose POST "${API_URL}/hsmped/add" \
-   "keyno=${keyno}" \
+   http --verify cacerts.pem --verbose POST "${API_URL}/hsmped/delete" \
    "keysn=${keysn}" \
    "hsmdomain_name=${hsmdomain_name}" \
-   "user_name=${user_name}" \
-   "compartment_name=${compartment_name}" \
-   "type=${type}" \
-   "comment=${comment}" \
-   "duplicate_of=${duplicate_of}" \
    "Authorization:Bearer $token"
 
 done

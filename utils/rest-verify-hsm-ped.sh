@@ -1,17 +1,16 @@
 #!/bin/bash
 
-
 if [ -f variables ] ; then
   . variables
-  echo "URL: ${API_URL}"
-  echo "User: ${API_USER}"
+  echo "# URL: ${API_URL}"
+  echo "# User: ${API_USER}"
 
 fi
 
 token=""
 if [ -f rest-get-token.sh ] ; then
   . rest-get-token.sh
-  token=$(get_new_token)
+  token=$(get_new_token 2>/dev/null)
   if [ $? -ne 0 ] ; then
     echo "failed to get a login token"
     exit
@@ -21,10 +20,11 @@ else
   exit
 fi
 
+
 if [ "x$1" != "x" ] ; then
     csvfile=$1
 else
-    echo "arg1 must be a file with hsm ped definitions in it"
+    echo "arg1 must be a file with hsm pci card definitions in it"
     exit
 fi
 
@@ -45,15 +45,24 @@ for row in $(cat "${csvfile}") ; do
     continue
   fi
 
-   http --verify cacerts.pem --verbose POST "${API_URL}/hsmped/add" \
-   "keyno=${keyno}" \
-   "keysn=${keysn}" \
-   "hsmdomain_name=${hsmdomain_name}" \
-   "user_name=${user_name}" \
-   "compartment_name=${compartment_name}" \
-   "type=${type}" \
-   "comment=${comment}" \
-   "duplicate_of=${duplicate_of}" \
-   "Authorization:Bearer $token"
+  result=$(http --verify cacerts.pem  "${API_URL}/hsmped/" \
+    keysn=${keysn} \
+    hsmdomain_name=${hsmdomain_name} \
+    "Authorization:Bearer $token")
+
+#  echo  "$result"
+  result_keysn=$(echo $result | jq '.keysn' | tr -d \")
+  if [ "${keysn}" == "${result_keysn}" ] ; then
+    echo "ok hsm-ped sn ${keysn}"
+  else
+    echo "fail hsm-ped sn <${keysn}> != <${result_keysn}>"
+  fi
+
+  result_type=$(echo $result | jq '.type' | tr -d \")
+  if [ "x${type}" == "x${result_type}" ] ; then
+      echo "ok hsm-ped type ${type}"
+  else
+      echo "fail hsm-ped <${type}> != <${result_type}>"
+  fi
 
 done

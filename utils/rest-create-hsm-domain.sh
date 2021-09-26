@@ -31,7 +31,7 @@ IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
 
   name=$(echo $row | cut -f1 -d\,)
-  service_id=$(echo $row | cut -f2 -d,)
+  service_name=$(echo $row | cut -f2 -d\,)
   iscomment=$(echo $row | grep "#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
@@ -39,7 +39,7 @@ for row in $(cat "${csvfile}") ; do
 
    http --verify cacerts.pem --verbose POST "${API_URL}/hsmdomain/add" \
     "name=${name}" \
-    "service_id=${service_id}" \
+    "service_name=${service_name}" \
      "Authorization:Bearer $token"
 
 done

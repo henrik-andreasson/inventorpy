@@ -1,0 +1,39 @@
+# key-sn,user_name,compartment_name,hsmdomain_name,comment
+# so admin in primary location
+1,user1,TEST-COMP-KISTA-15,hsmdom1,
+2,user2,TEST-COMP-KISTA-16,hsmdom1,
+3,user3,TEST-COMP-KISTA-17,hsmdom1,
+4,user4,TEST-COMP-KISTA-18,hsmdom1,
+# so admin in secondary location
+5,user1,TEST-COMP-SOLNA-15,hsmdom1,
+6,user2,TEST-COMP-SOLNA-16,hsmdom1,
+7,user3,TEST-COMP-SOLNA-17,hsmdom1,
+8,user4,TEST-COMP-SOLNA-18,hsmdom1,
+# hsm domain primary loc
+9,user1,TEST-COMP-KISTA-15,hsmdom1,
+# hsm domain seconary loc
+10,user2,TEST-COMP-SOLNA-15,hsmdom1,
+# par dom red should be in primary location
+11,user1,TEST-COMP-KISTA-15,hsmdom1,
+12,user2,TEST-COMP-KISTA-16,hsmdom1,
+13,user3,TEST-COMP-KISTA-17,hsmdom1,
+14,user4,TEST-COMP-KISTA-18,hsmdom1,
+# par dom red should be in secondary locations
+15,user1,TEST-COMP-SOLNA-19,hsmdom1,
+16,user2,TEST-COMP-SOLNA-20,hsmdom1,
+17,user3,TEST-COMP-SOLNA-21,hsmdom1,
+18,user3,TEST-COMP-SOLNA-22,hsmdom1,
+# user keys 50% ish in primary location 50% in secondary loc
+19,user5,TEST-COMP-KISTA-19,hsmdom1,
+20,user6,TEST-COMP-KISTA-20,hsmdom1,
+21,user7,TEST-COMP-KISTA-21,hsmdom1,
+22,user8,TEST-COMP-KISTA-22,hsmdom1,
+23,user9,TEST-COMP-KISTA-23,hsmdom1,
+24,user10,TEST-COMP-SOLNA-24,hsmdom1,
+25,user11,TEST-COMP-SOLNA-25,hsmdom1,
+26,user12,TEST-COMP-SOLNA-26,hsmdom1,
+27,user13,TEST-COMP-SOLNA-27,hsmdom1,
+28,user14,TEST-COMP-SOLNA-29,hsmdom1,
+# orange 1 in prim 1 in second
+29,user5,TEST-COMP-KISTA-5,hsmdom1,
+30,user6,TEST-COMP-SOLNA-6,hsmdom1,

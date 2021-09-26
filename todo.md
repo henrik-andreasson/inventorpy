@@ -1,8 +1,8 @@
 # todo
 
+* import twice (negative test) do not work fine for compartment
+
 ## via browser
-* sorting and filtering
-* search
 * make input safe for sorting lists
 
 ## via rest api

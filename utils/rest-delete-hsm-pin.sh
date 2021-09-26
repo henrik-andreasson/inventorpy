@@ -52,11 +52,10 @@ for row in $(cat "${csvfile}") ; do
     echo "failed to get ped ${keysn} + ${hsmdomain_name}"
     continue
   fi
-  echo "ped id: ${result_pedid}"
 
-   http --verify cacerts.pem --verbose POST "${API_URL}/hsmpin/add" \
+   http --verify cacerts.pem --verbose DELETE "${API_URL}/hsmpin" \
    "ped_id=${result_pedid}" \
-   "compartment_name=${compartment_name}" \
    "Authorization:Bearer $token"
+
 
 done

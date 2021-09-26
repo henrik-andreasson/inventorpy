@@ -1,0 +1,13 @@
+#serial,fbno,model,manufacturdate,safe_name,hsmdomain_name,server_name,name,contract,support_start,support_end,status,comment
+1,FB000001,luna6,2020-01-01,TEST-SAFE-STHLM-1,hsmdom1,server1.tld,HSM1,contract1,2020-01-01,2020-01-01,active,comment1
+2,FB000002,luna6,2020-01-01,TEST-SAFE-STHLM-2,hsmdom1,server2.tld,HSM2,contract1,2020-01-01,2020-01-01,active,comment2
+3,FB000003,luna6,2020-01-01,TEST-SAFE-STHLM-3,hsmdom1,server3.tld,HSM3,contract1,2020-01-01,2020-01-01,active,comment3
+4,FB000004,luna6,2020-01-01,TEST-SAFE-STHLM-4,hsmdom1,server4.tld,HSM4,contract1,2020-01-01,2020-01-01,active,comment4
+5,FB000005,luna6,2020-01-01,TEST-SAFE-STHLM-5,hsmdom1,server5.tld,HSM5,contract1,2020-01-01,2020-01-01,active,comment5
+6,FB000006,luna6,2020-01-01,TEST-SAFE-STHLM-6,hsmdom1,server6.tld,HSM6,contract1,2020-01-01,2020-01-01,active,comment6
+7,FB000007,luna6,2020-01-01,TEST-SAFE-STHLM-1,hsmdom2,server7.tld,HSM7,contract2,2020-01-01,2020-01-01,active,comment7
+8,FB000008,luna6,2020-01-01,TEST-SAFE-STHLM-2,hsmdom2,server8.tld,HSM8,contract2,2020-01-01,2020-01-01,active,comment8
+9,FB000009,luna6,2020-01-01,TEST-SAFE-STHLM-3,hsmdom2,server9.tld,HSM9,contract2,2020-01-01,2020-01-01,active,comment9
+10,FB000010,luna6,2020-01-01,TEST-SAFE-STHLM-4,hsmdom2,server10.tld,HSM10,contract2,2020-01-01,2020-01-01,active,comment10
+11,FB000011,luna6,2020-01-01,TEST-SAFE-STHLM-5,hsmdom2,server11.tld,HSM11,contract2,2020-01-01,2020-01-01,active,comment11
+12,FB000012,luna6,2020-01-01,TEST-SAFE-STHLM-6,hsmdom2,server12.tld,HSM12,contract2,2020-01-01,2020-01-01,active,comment12

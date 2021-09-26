@@ -41,11 +41,11 @@ for row in $(cat "${csvfile}") ; do
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
-
+  echo "keysn: $keysn compartment: $compartment_name"
   result=$(http --verify cacerts.pem  "${API_URL}/hsmped" \
     keysn=${keysn} \
     hsmdomain_name=${hsmdomain_name} \
-    "Authorization:Bearer $token")
+    "Authorization:Bearer $token" )
 
   result_pedid=$(echo $result | jq '.id' | tr -d \")
   if [ "x${result_pedid}" == "x" ] ; then
@@ -54,9 +54,9 @@ for row in $(cat "${csvfile}") ; do
   fi
   echo "ped id: ${result_pedid}"
 
-   http --verify cacerts.pem --verbose POST "${API_URL}/hsmpin/add" \
+
+   http --verify cacerts.pem --verbose POST "${API_URL}/hsmpin" \
    "ped_id=${result_pedid}" \
-   "compartment_name=${compartment_name}" \
    "Authorization:Bearer $token"
 
 done

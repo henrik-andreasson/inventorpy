@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 if [ -f variables ] ; then
   . variables
   echo "URL: ${API_URL}"
@@ -24,7 +23,7 @@ fi
 if [ "x$1" != "x" ] ; then
     csvfile=$1
 else
-    echo "arg1 must be a file with hsm ped definitions in it"
+    echo "arg1 must be a file with hsm backup units definitions in it"
     exit
 fi
 
@@ -32,28 +31,28 @@ fi
 IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
 
-  keyno=$(echo $row | cut -f1 -d\,)
-  keysn=$(echo $row | cut -f2 -d\,)
-  user_name=$(echo $row | cut -f3 -d\,)
-  compartment_name=$(echo $row | cut -f4 -d\,)
-  type=$(echo $row | cut -f5 -d\,)
-  hsmdomain_name=$(echo $row | cut -f6 -d\,)
-  comment=$(echo $row | cut -f7 -d\,)
-  duplicate_of=$(echo $row | cut -f8 -d\,)
+  name=$(echo $row | cut -f1 -d\,)
+  serial=$(echo $row | cut -f2 -d\,)
+  fbno=$(echo $row | cut -f3 -d\,)
+  model=$(echo $row | cut -f4 -d\,)
+  manufacturedate=$(echo $row | cut -f5 -d\,)
+  safe_name=$(echo $row | cut -f6 -d\,)
+  hsmdomain_name=$(echo $row | cut -f7 -d\,)
+  comment=$(echo $row | cut -f8 -d\,)
   iscomment=$(echo $row | grep "#" )
   if [ "x$iscomment" != "x" ] ; then
     continue
   fi
 
-   http --verify cacerts.pem --verbose POST "${API_URL}/hsmped/add" \
-   "keyno=${keyno}" \
-   "keysn=${keysn}" \
+   http --verify cacerts.pem --verbose POST "${API_URL}/hsm_backup_unit/add" \
+   "serial=${serial}" \
+   "fbno=${fbno}" \
+   "model=${model}" \
+   "manufacturedate=${manufacturedate}" \
    "hsmdomain_name=${hsmdomain_name}" \
-   "user_name=${user_name}" \
-   "compartment_name=${compartment_name}" \
-   "type=${type}" \
+   "safe_name=${safe_name}" \
+   "name=${name}" \
    "comment=${comment}" \
-   "duplicate_of=${duplicate_of}" \
    "Authorization:Bearer $token"
 
 done
