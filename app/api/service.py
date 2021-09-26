@@ -77,14 +77,15 @@ def update_service(id):
 
 
 @bp.route('/service/adduser', methods=['POST'])
+@token_auth.login_required
 def add_user_to_service():
 
     data = request.get_json() or {}
     if 'service' not in data or 'username' not in data:
         return bad_request('must include service(name) and username fields')
 
-    service = Service.query.filter_by(name=data['service']).first()
-    user = User.query.filter_by(username=data['username']).first()
+    service = Service.query.filter_by(name=data['service']).first_or_404()
+    user = User.query.filter_by(username=data['username']).first_or_404()
     original_data = service.to_dict()
 
     service.users.append(user)
@@ -94,4 +95,70 @@ def add_user_to_service():
     response = jsonify(service.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('api.get_service', id=service.id)
+    return response
+
+
+@bp.route('/service/users/<servicename>', methods=['GET'])
+@token_auth.login_required
+def list_service_users(servicename):
+
+    if servicename is None:
+        return bad_request('must include servicename')
+
+    service = Service.query.filter_by(name=servicename).first()
+    if service is None:
+        return bad_request('Service with name: %s not found' % service)
+
+    return jsonify(service.get_users())
+
+
+@bp.route('/service/users/<servicename>', methods=['POST'])
+@token_auth.login_required
+def set_service_users(servicename):
+
+    if servicename is None:
+        return bad_request('must include servicename')
+
+    service = Service.query.filter_by(name=servicename).first()
+    if service is None:
+        return bad_request('Service with name: %s not found' % service)
+
+    data = request.get_json() or {}
+    if 'users' not in data:
+        return bad_request('must include username fields')
+
+    service.set_users(data['users'])
+
+    return jsonify(service.get_users())
+
+
+@bp.route('/service/manager/<servicename>', methods=['POST'])
+@token_auth.login_required
+def set_mgr_of_service(servicename):
+
+    data = request.get_json() or {}
+    if 'username' not in data:
+        return bad_request('must include an username field')
+
+    service = Service.query.filter_by(name=servicename).first_or_404()
+    user = User.query.filter_by(username=data['username']).first_or_404()
+    original_data = service.to_dict()
+
+    service.manager = user
+    db.session.commit()
+    audit.auditlog_update_post('service', original_data=original_data, updated_data=service.to_dict(), record_name=service.name)
+
+    response = jsonify(service.to_dict())
+    response.status_code = 201
+    response.headers['Location'] = url_for('api.get_service', id=service.id)
+    return response
+
+
+@bp.route('/service/manager/<servicename>', methods=['GET'])
+@token_auth.login_required
+def get_mgr_of_service(servicename):
+
+    service = Service.query.filter_by(name=servicename).first_or_404()
+    response = jsonify({"manager": service.manager.username})
+    response.status_code = 200
     return response
