@@ -79,6 +79,18 @@ class Service(PaginatedAPIMixin, db.Model):
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
+    def get_users(self):
+        data = {}
+        for u in self.users:
+            data[u.id] = u.username
+        return data
+
+    def set_users(self, data):
+        for i in data:
+            u = User.query.filter_by(id=i).first_or_404()
+            self.users.append(u)
+        return True
+
 
 class User(PaginatedAPIMixin, UserMixin, db.Model):
     __tablename__ = "user"
