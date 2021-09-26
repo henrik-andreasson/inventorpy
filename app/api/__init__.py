@@ -2,4 +2,4 @@ from flask import Blueprint
 
 bp = Blueprint('api', __name__)
 
-from app.api import users, errors, tokens, service, network, server, location, safe, hsmdomain, hsmped, hsmpin, hsmpcicard, rack, switch, firewall
+from app.api import users, errors, tokens, service, network, server, location, safe, hsmdomain, hsmped, hsmpin, hsmpcicard, hsm_backup_unit, rack, switch, firewall
