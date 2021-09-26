@@ -104,6 +104,10 @@ def create_compartment():
     if user == 0:
         return bad_request('must include field user_id or username')
 
+    check_compartment = Compartment.query.filter_by(name=data['name']).first()
+    if check_compartment is not None:
+        return bad_request('Compartment already exist with id: %s' % check_compartment.id)
+
     compartment = Compartment()
     compartment.from_dict(data)
 
