@@ -12,16 +12,20 @@ from app.api.auth import token_auth
 @token_auth.login_required
 def create_hsmdomain():
     data = request.get_json() or {}
-    for field in ['name', 'service_id']:
-        if field not in data:
-            return bad_request('must include field: %s' % field)
+    if 'name' not in data:
+        return bad_request('must include field: name')
+
+    if 'service_name' not in data and 'service_id' not in data:
+        return bad_request('must include service_name or service_id')
 
     check_hsmdomain = HsmDomain.query.filter_by(name=data['name']).first()
     if check_hsmdomain is not None:
         return bad_request('HSM Domain already exist with id: %s' % check_hsmdomain.id)
 
     hsmdomain = HsmDomain()
-    hsmdomain.from_dict(data)
+    status = hsmdomain.from_dict(data)
+    if status['success'] is False:
+        return bad_request(status['msg'])
 
     db.session.add(hsmdomain)
     db.session.commit()
@@ -48,8 +52,14 @@ def get_hsmdomainlist():
 
 @bp.route('/hsmdomain/<int:id>', methods=['GET'])
 @token_auth.login_required
-def get_hsmdomain(id):
+def get_hsmdomain_by_id(id):
     return jsonify(HsmDomain.query.get_or_404(id).to_dict())
+
+
+@bp.route('/hsmdomain/<name>', methods=['GET'])
+@token_auth.login_required
+def get_hsmdomain_by_name(name):
+    return jsonify(HsmDomain.query.filter_by(name=name).first_or_404().to_dict())
 
 
 @bp.route('/hsmdomain/<int:id>', methods=['PUT'])

@@ -67,3 +67,9 @@ def update_hsmpcicard(id):
     audit.auditlog_update_post('hsm_pci_card', original_data=original_data, updated_data=data, record_name=hsmpcicard.name)
 
     return jsonify(hsmpcicard.to_dict())
+
+
+@bp.route('/hsmpcicard/<name>', methods=['GET'])
+@token_auth.login_required
+def get_hsmpcicard_by_name(name):
+    return jsonify(HsmPciCard.query.filter_by(name=name).first_or_404().to_dict())
