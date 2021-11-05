@@ -67,6 +67,15 @@ Developer mode, ie mount the current directory into the docker container and hav
 
     docker run -p5000:5000 -it  --mount type=bind,source="$(pwd)",target=/inventorpy inventorpy flask run --host=0.0.0.0 --reload
 
+# clean database
+
+    * mv app.db demo.db
+    * flask db init
+    * flask db migrate -m baseline
+    * flask db upgrade
+    * flask user new admin foo123 admin@example.com
+
+
 # docs
 
 <https://henrik-andreasson.github.io/inventorpy/>

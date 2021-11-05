@@ -2,17 +2,21 @@
 FROM debian:latest
 
 # Set the working directory to /app
-#DEV:
 WORKDIR /inventorpy
 
 COPY . /inventorpy
 
 # Install any needed packages
 RUN apt-get update
-RUN apt-get install --no-install-recommends -y python3.7 \
-        sqlite3 jq python3-pip python3-setuptools rustc cargo \
-        python3-dev libssl-dev python3-wheel gunicorn3
 
+RUN apt-get install --no-install-recommends -y python3.7 \
+        sqlite3 jq python3-pip python3-setuptools  cargo \
+        python3-wheel gunicorn3
+
+#        python3-dev libssl-dev \
+#        build-essential libffi-dev rustc
+
+RUN pip3 install -U pip
 RUN pip3 install -r requirements.txt
 
 RUN apt-get clean
