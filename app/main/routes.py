@@ -26,6 +26,8 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
+ 
+    users = User.query.order_by(User.username).limit(10)
     servers = Server.query.order_by(Server.hostname).limit(10)
     locations = Location.query.order_by(Location.place).limit(10)
     services = Service.query.order_by(Service.name).limit(10)
@@ -44,7 +46,7 @@ def index():
                            servers=servers, locations=locations,
                            services=services, hsmdomains=hsmdomains,
                            hsmpeds=hsmpeds, hsmpins=hsmpins,
-                           networks=networks, safes=safes,
+                           networks=networks, safes=safes, users=users,
                            compartments=compartments, hsmpcicards=hsmpcicards,
                            racks=racks, hsmpedupdates=hsmpedupdates,
                            hsmbackupunits=hsmbackupunits)

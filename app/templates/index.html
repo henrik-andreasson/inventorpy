@@ -7,21 +7,6 @@
       <div class="row">
         <div class="col-sm-6">
 
-
-          {% if users %}
-          <div class="list-group">
-            <a href="{{ url_for('main.user_list')}}" class="list-group-item">
-              <h4 class="list-group-item-heading">{{_('Users')}}</h4>
-            </a>
-            {% for u in users %}
-            <a href="{{ url_for('main.user', username=u.username) }}" class="list-group-item">
-              {{u.username}}
-            </a>
-            {% endfor %}
-          </div>
-          {% endif %}
-
-
     {% if servers %}
       <div class="list-group">
         <a href="{{ url_for('main.server_list')}}" class="list-group-item">
@@ -90,6 +75,22 @@
 
     </div>
     {% endif %}
+
+
+
+    {% if users %}
+    <div class="list-group">
+          <a href="{{ url_for('main.user_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Users')}}</h4>
+          </a>
+          {% for u in users %}
+            <a href="{{ url_for('main.user', username=u.username) }}" class="list-group-item">
+              {{u.username}}
+            </a>
+          {% endfor %}
+      </div>
+    {% endif %}
+
 
 
   </div>
