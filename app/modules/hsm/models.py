@@ -172,7 +172,7 @@ class HsmPedUpdates(PaginatedAPIMixin, db.Model):
 
 class HsmPin(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_pin"
-    __searchable__ = ['ped_id', 'compartment_id']
+#    __searchable__ = ['ped_id', 'compartment_id']
     id = db.Column(db.Integer, primary_key=True)
     ped = db.relationship('HsmPed')
     ped_id = db.Column(db.Integer, db.ForeignKey('hsm_ped.id'))
@@ -180,7 +180,7 @@ class HsmPin(PaginatedAPIMixin, db.Model):
     compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
 
     def __repr__(self):
-        return '<HsmPin {}>'.format(self.ped.keyno)
+        return '<HsmPin {}>'.format(self.id)
 
     def to_dict(self):
         data = {
@@ -200,7 +200,7 @@ class HsmPin(PaginatedAPIMixin, db.Model):
 
 class HsmPciCard(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_pci_card"
-    __searchable__ = ['name', 'serial', 'fbno', 'model', 'manufacturedate', 'safe_id', 'status', 'comment', 'hsmdomain_id', 'server_id']
+    __searchable__ = ['name', 'serial', 'fbno', 'model', 'status', 'comment']
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140))
     serial = db.Column(db.String(140), unique=True)

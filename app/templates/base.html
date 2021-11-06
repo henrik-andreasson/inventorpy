@@ -107,7 +107,7 @@
      <li class="nav-item"><a href="{{ url_for('main.updates_list') }}">{{ _('Pending Updates') }}</a></li>
      <li class="nav-item"><a href="{{ url_for('main.logs_list') }}">{{ _('Logs') }}</a></li>
      <li class="nav-item"><a href="{{ url_for('main.search') }}">{{ _('Search') }}</a></li>
-
+     <li class="nav-item"><a href="{{ url_for('main.reindex') }}">{{ _('Reindex Search') }}</a></li>
    </ul>
    {% endif %}
 
@@ -145,5 +145,5 @@
     {{ moment.include_moment() }}
     {{ moment.lang(g.locale) }}
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<!--    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/custom.css') }}">-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/custom.css') }}">
 {% endblock %}

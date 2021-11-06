@@ -18,16 +18,28 @@
             {% endfor %}
           </div>
           {% endif %}
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-6">
+        {% if form %}
+        {{ wtf.quick_form(form) }}
+        {% endif %}
 
-
+      </div>
   </div>
+  <div class="row">
+    <div class="col-sm-6">
+      {% if reindex %}
+        {{reindex}}
+      {% endif %}
+
+    </div>
+</div>
+
 </div>
 
 
-{% if form %}
-{{ wtf.quick_form(form) }}
-
-{% endif %}
 
 
 {% endblock %}

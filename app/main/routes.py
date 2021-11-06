@@ -13,7 +13,6 @@ from app.modules.firewall.models import Firewall
 from app.modules.switch.models import Switch
 from app.main import bp
 from datetime import datetime
-from flask_msearch import Search
 
 
 @bp.before_app_request
@@ -159,6 +158,15 @@ def search():
 # Switch
     return render_template('search.html', title=_('Search'),
                            hits=hits, form=form)
+
+@bp.route('/reindex', methods=['GET', 'POST'])
+@login_required
+def reindex():
+    from app import search
+    search.delete_index()
+    search.create_index()
+
+    return render_template('search.html', reindex=_("Reindexed"))
 
 
 @bp.route('/user/<username>')
