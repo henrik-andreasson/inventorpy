@@ -21,3 +21,8 @@ environment = SelectField(_l('Environment'), choices=[('dev', 'Development'),
                                                       ('at', 'Acceptance Testing'),
                                                       ('prod', 'Production'),
                                                       ]) #_
+
+# bugs
+
+
+* /inventorpy/app/__init__.py:26: SAWarning: relationship 'User.service' will copy column user.id to column service.manager_id, which conflicts with relationship(s): 'Service.manager' (copies user.id to service.manager_id). If this is not the intention, consider if these relationships should be linked with back_populates, or if viewonly=True should be applied to one or more if they are read-only. For the less common case that foreign key constraints are partially overlapping, the orm.foreign() annotation can be used to isolate the columns that should be written towards.   To silence this warning, add the parameter 'overlaps="manager"' to the 'User.service' relationship. (Background on this error at: https://sqlalche.me/e/14/qzyx)

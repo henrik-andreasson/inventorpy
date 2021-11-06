@@ -1,29 +1,43 @@
 #key-id,key-sn,user_name,compartment_name,key_type,hsmdomain_name,comment,duplicate_of
+#
 # so admin in primary location
+#
 1,1,user1,TEST-COMP-KISTA-1,blue,hsmdom1,,,
 2,2,user2,TEST-COMP-KISTA-2,blue,hsmdom1,,,
 3,3,user3,TEST-COMP-KISTA-3,blue,hsmdom1,,,
 4,4,user4,TEST-COMP-KISTA-4,blue,hsmdom1,,,
+#
 # so admin in secondary location
+#
 1,5,user1,TEST-COMP-SOLNA-1,blue,hsmdom1,,,
 2,6,user2,TEST-COMP-SOLNA-2,blue,hsmdom1,,,
 3,7,user3,TEST-COMP-SOLNA-3,blue,hsmdom1,,,
 4,8,user4,TEST-COMP-SOLNA-4,blue,hsmdom1,,,
+#
 # hsm domain primary loc
+#
 1,9,user1,TEST-COMP-KISTA-1,red2,hsmdom1,,,
+#
 # hsm domain seconary loc
+#
 1,10,user2,TEST-COMP-SOLNA-1,red2,hsmdom1,,9
+#
 # par dom red should be in primary location
+#
 2,11,user1,TEST-COMP-KISTA-1,red,hsmdom1,,,
 3,12,user2,TEST-COMP-KISTA-2,red,hsmdom1,,,
 4,13,user3,TEST-COMP-KISTA-3,red,hsmdom1,,,
 1,14,user4,TEST-COMP-KISTA-4,red,hsmdom1,,,
+#
 # par dom red should be in secondary locations
+#
 2,15,user1,TEST-COMP-SOLNA-1,red,hsmdom1,,11
 3,16,user2,TEST-COMP-SOLNA-2,red,hsmdom1,,12
 4,17,user3,TEST-COMP-SOLNA-3,red,hsmdom1,,13
 4,18,user3,TEST-COMP-SOLNA-3,red,hsmdom1,,14
+#
 # user keys 50% ish in primary location 50% in secondary loc
+#
 1,19,user5,TEST-COMP-KISTA-5,black,hsmdom1,,
 2,20,user6,TEST-COMP-KISTA-6,black,hsmdom1,,
 3,21,user7,TEST-COMP-KISTA-7,black,hsmdom1,,
@@ -34,6 +48,8 @@
 8,26,user12,TEST-COMP-SOLNA-12,black,hsmdom1,,
 9,27,user13,TEST-COMP-SOLNA-13,black,hsmdom1,,
 10,28,user14,TEST-COMP-SOLNA-14,black,hsmdom1,,
+#
 # orange 1 in prim 1 in second
+#
 1,29,user5,TEST-COMP-KISTA-5,orange,hsmdom1,,
 1,30,user6,TEST-COMP-SOLNA-6,orange,hsmdom1,,29

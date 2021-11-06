@@ -45,7 +45,7 @@ for row in $(cat "${csvfile}") ; do
     continue
   fi
 
-  result=$(http --verify cacerts.pem  "${API_URL}/hsmped/" \
+  result=$(http --verify cacerts.pem  "${API_URL}/hsmped" \
     keysn=${keysn} \
     hsmdomain_name=${hsmdomain_name} \
     "Authorization:Bearer $token")

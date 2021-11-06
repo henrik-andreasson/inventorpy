@@ -13,7 +13,7 @@ from app.modules.firewall.models import Firewall
 from app.modules.switch.models import Switch
 from app.main import bp
 from datetime import datetime
-# from flask_msearch import Search
+from flask_msearch import Search
 
 
 @bp.before_app_request

@@ -2,15 +2,15 @@
 
 if [ -f variables ] ; then
   . variables
-  echo "URL: ${API_URL}"
-  echo "User: ${API_USER}"
+  echo "# URL: ${API_URL}"
+  echo "# User: ${API_USER}"
 
 fi
 
 token=""
 if [ -f rest-get-token.sh ] ; then
   . rest-get-token.sh
-  token=$(get_new_token)
+  token=$(get_new_token 2>/dev/null)
   if [ $? -ne 0 ] ; then
     echo "failed to get a login token"
     exit
