@@ -9,7 +9,7 @@ COPY . /inventorpy
 # Install any needed packages
 RUN apt-get update
 
-RUN apt-get install --no-install-recommends -y python3.7 \
+RUN apt-get install --no-install-recommends -y python3 \
         sqlite3 jq python3-pip python3-setuptools  cargo \
         python3-wheel gunicorn3
 

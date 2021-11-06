@@ -57,7 +57,7 @@ class FilterFirewallListForm(FlaskForm):
 
         self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
         self.rack.choices.insert(0, (-1, _l('None')))
-        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.order_by(Server.id).all()]
+        self.server.choices = [(s.id, s.hostname) for s in Server.query.order_by(Server.id).all()]
         self.server.choices.insert(0, (-1, _l('None')))
         self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
         self.network.choices.insert(0, (-1, _l('None')))
@@ -86,7 +86,7 @@ class FirewallPortForm(FlaskForm):
         self.firewall.choices.insert(0, (-1, _l('Not Connected')))
         self.switch_port.choices = [(s.id, '{} {}'.format(s.name, s.switch.name)) for s in SwitchPort.query.order_by(SwitchPort.id).all()]
         self.switch_port.choices.insert(0, (-1, _l('Not Connected')))
-        self.server.choices = [(s.id, '{} ({})'.format(s.hostname, s.rack.name)) for s in Server.query.order_by(Server.id).all()]
+        self.server.choices = [(s.id, s.hostname) for s in Server.query.order_by(Server.id).all()]
         self.server.choices.insert(0, (-1, _l('Not Connected')))
         self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
         self.network.choices.insert(0, (-1, _l('None')))
