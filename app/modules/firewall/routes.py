@@ -78,6 +78,9 @@ def firewall_edit():
         return redirect(url_for('main.logs_list', module='firewall', module_id=firewallid))
     if 'ports' in request.form:
         return redirect(url_for('main.firewall_port_list', firewall=firewallid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.firewall_qr', id=firewallid))
+
 
     firewall = Firewall.query.get(firewallid)
     original_data = firewall.to_dict()
@@ -355,3 +358,23 @@ def firewall_port_delete():
     audit.auditlog_delete_post('firewallport', data=firewallport.to_dict(), record_name=firewallport.name)
 
     return redirect(url_for('main.index'))
+
+
+@bp.route('/firewall/qr/<int:id>', methods=['GET'])
+@login_required
+def firewall_qr(id):
+    if id is None:
+        flash(_('Firewall was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    firewall=None
+    from app.modules.firewall.models import Firewall
+    firewall = Firewall.query.get(id)
+
+    if firewall is None:
+        flash(_('Firewall was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.firewall_edit", firewall=firewall.id, _external=True)
+    return render_template('firewall_qr.html', title=_('QR Code'),
+                           firewall=firewall, qr_data=qr_data)

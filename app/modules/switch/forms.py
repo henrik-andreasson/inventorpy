@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, TextAreaField
-from wtforms.fields.html5 import DateTimeField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField, DateTimeField
+#from wtforms.fields.html5 import
 from wtforms.validators import DataRequired
 from flask_babel import lazy_gettext as _l
 from datetime import datetime
@@ -35,6 +35,7 @@ class SwitchForm(FlaskForm):
     delete = SubmitField(_l('Delete'))
     logs = SubmitField(_l('Logs'))
     ports = SubmitField(_l('SwitchPorts'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

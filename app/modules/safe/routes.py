@@ -48,6 +48,8 @@ def safe_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.safe_delete', safe=safeid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.safe_qr', id=safeid))
 
     safe = Safe.query.get(safeid)
     form = SafeForm(obj=safe)
@@ -176,6 +178,8 @@ def compartment_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.compartment_delete', compartment=compartmentid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.compartment_qr', id=compartmentid))
 
     compartment = Compartment.query.get(compartmentid)
     original_data = compartment.to_dict()
@@ -305,3 +309,43 @@ def compartment_audit():
 
         return render_template('safe.html', title=_('Audit Compartment'),
                                hsmpeds=hsmpeds, hsmpins=hsmpins, form=form)
+
+
+@bp.route('/safe/qr/<int:id>', methods=['GET'])
+@login_required
+def safe_qr(id):
+
+    if id is None:
+        flash(_('safe was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    safe=None
+    safe = Safe.query.get(id)
+
+    if safe is None:
+        flash(_('safe was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.safe_edit", safe=safe.id, _external=True)
+    return render_template('safe_qr.html', title=_('QR Code'),
+                           safe=safe, qr_data=qr_data)
+
+
+@bp.route('/compartment/qr/<int:id>', methods=['GET'])
+@login_required
+def compartment_qr(id):
+
+    if id is None:
+        flash(_('compartment was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    compartment=None
+    compartment = Compartment.query.get(id)
+
+    if compartment is None:
+        flash(_('compartment was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.compartment_edit", compartment=compartment.id, _external=True)
+    return render_template('compartment_qr.html', title=_('QR Code'),
+                           compartment=compartment, qr_data=qr_data)

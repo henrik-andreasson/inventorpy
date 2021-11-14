@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, TextAreaField
-from wtforms.fields.html5 import DateTimeField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField, DateTimeField
 from wtforms.validators import DataRequired
 from flask_babel import lazy_gettext as _l
 from datetime import datetime
@@ -41,6 +40,7 @@ class HsmPedForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -76,6 +76,7 @@ class HsmPinForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -108,6 +109,7 @@ class HsmPciCardForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -130,6 +132,7 @@ class HsmBackupUnitForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

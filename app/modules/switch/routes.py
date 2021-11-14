@@ -74,6 +74,8 @@ def switch_edit():
         return redirect(url_for('main.logs_list', module='switch', module_id=switchid))
     if 'ports' in request.form:
         return redirect(url_for('main.switch_port_list', switch=switchid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.switch_qr', id=switchid))
 
     switch = Switch.query.get(switchid)
     original_data = switch.to_dict()
@@ -347,3 +349,24 @@ def switch_port_delete():
     audit.auditlog_delete_post('switchport', data=switchport.to_dict(), record_name=switchport.name)
 
     return redirect(url_for('main.index'))
+
+
+
+@bp.route('/switch/qr/<int:id>', methods=['GET'])
+@login_required
+def switch_qr(id):
+
+    if id is None:
+        flash(_('switch was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    switch=None
+    switch = Switch.query.get(id)
+
+    if switch is None:
+        flash(_('switch was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.switch_edit", switch=switch.id, _external=True)
+    return render_template('switch_qr.html', title=_('QR Code'),
+                           switch=switch, qr_data=qr_data)

@@ -11,6 +11,7 @@ class RackForm(FlaskForm):
     submit = SubmitField(_l('Submit'))
     cancel = SubmitField(_l('Cancel'))
     delete = SubmitField(_l('Delete'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

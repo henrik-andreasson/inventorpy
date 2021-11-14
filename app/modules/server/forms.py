@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, TextAreaField, BooleanField
-from wtforms.fields.html5 import DateTimeField
+from wtforms import StringField, SubmitField, SelectField, TextAreaField, BooleanField, DateTimeField
 from wtforms.validators import DataRequired, NumberRange
 from flask_babel import lazy_gettext as _l
 from datetime import datetime
@@ -58,6 +57,7 @@ class ServerForm(FlaskForm):
     hsm_add = SubmitField(_l('Add HSM'))
     switchport_list = SubmitField(_l('List Switch ports'))
     switchport_add = SubmitField(_l('Add Switch port'))
+    qrcode = SubmitField(_l('QR Code'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

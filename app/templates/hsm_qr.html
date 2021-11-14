@@ -1,0 +1,76 @@
+<html>
+<body>
+
+{% if hsmpcicard %}
+
+<table class="table table-hover">
+    <tr>
+        <td>
+          <a href="{{ url_for('main.hsm_pcicard_edit', pcicard=hsmpcicard.id)}}">
+            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+            </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+        <h2>hsmpcicard-{{hsmpcicard.id}} - {{hsmpcicard.name}}</h2>
+      </td>
+</tr>
+
+{% elif hsmbackupunit %}
+
+<table class="table table-hover">
+    <tr>
+        <td>
+          <a href="{{ url_for('main.hsm_backupunit_edit', id=hsmbackupunit.id)}}">
+            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+          </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+        <h2>hsmbackupunit-{{hsmbackupunit.id}} - {{hsmbackupunit.name}}</h2>
+      </td>
+</tr>
+
+
+{% elif hsmped %}
+
+<table class="table table-hover">
+    <tr>
+        <td>
+          <a href="{{ url_for('main.hsm_ped_edit', ped=hsmped.id)}}">
+            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+          </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+        <h2>hsmped-{{hsmped.id}} - {{hsmped.type}} - {{hsmped.keyno}} - {{hsmped.keysn}} - {{hsmped.hsmdomain.name}}</h2>
+      </td>
+</tr>
+
+{% elif hsmpin %}
+
+<table class="table table-hover">
+    <tr>
+        <td>
+          <a href="{{ url_for('main.hsm_pin_edit', pin=hsmpin.id)}}">
+              <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+          </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+        <h2>hsmpin-{{hsmpin.id}} - {{hsmpin.compartment.name}}</h2>
+      </td>
+</tr>
+
+{% endif %}
+
+</body>
+</html>

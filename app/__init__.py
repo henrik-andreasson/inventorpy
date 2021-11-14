@@ -48,6 +48,9 @@ def create_app(config_class=Config):
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
+    from app.modules.qr import bp as qr_bp
+    app.register_blueprint(qr_bp, url_prefix='/qr')
+
     from app.modules.switch import bp as switch_bp
     app.register_blueprint(switch_bp, url_prefix='/switch')
 

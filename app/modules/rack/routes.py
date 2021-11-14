@@ -48,13 +48,15 @@ def rack_add():
 @bp.route('/rack/edit/', methods=['GET', 'POST'])
 @login_required
 def rack_edit():
-
+ 
     rackid = request.args.get('rack')
 
     if 'cancel' in request.form:
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.rack_delete', rack=rackid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.rack_qr', id=rackid))
 
     rack = Rack.query.get(rackid)
     if rack is None:
@@ -195,3 +197,23 @@ def rack_audit():
                                switch_title=_('Switches'),
                                form=form, servers=servers,
                                switchs=switchs, firewalls=fws)
+
+
+@bp.route('/rack/qr/<int:id>', methods=['GET'])
+@login_required
+def rack_qr(id):
+
+    if id is None:
+        flash(_('Rack was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    rack=None
+    rack = Rack.query.get(id)
+
+    if rack is None:
+        flash(_('rack was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.rack_edit", rack=rack.id, _external=True)
+    return render_template('rack_qr.html', title=_('QR Code'),
+                           rack=rack, qr_data=qr_data)

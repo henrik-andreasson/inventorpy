@@ -1,0 +1,27 @@
+<html>
+<body>
+  {% if server %}
+
+
+<table class="table table-hover">
+    <tr>
+        <td>
+
+            <a href="{{ url_for('main.server_edit', server=server.id)}}">
+              <img src="{{ url_for('main.qr_img', id=server.id, module='server', _external=True) }}" />
+            </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+          <h2>server-{{server.id}} - {{server.hostname}}</h2>
+
+      </td>
+</tr>
+
+
+        {% endif %}
+
+</body>
+</html>

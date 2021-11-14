@@ -1,0 +1,25 @@
+<html>
+<body>
+
+{% if rack %}
+
+<table class="table table-hover">
+    <tr>
+        <td>
+          <a href="{{ url_for('main.rack_edit', rack=rack.id)}}">
+            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+            </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+        <h2>rack-{{rack.id}} - {{rack.name}}</h2>
+      </td>
+</tr>
+
+
+{% endif %}
+
+</body>
+</html>

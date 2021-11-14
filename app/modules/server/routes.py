@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, \
-    current_app, session
+    current_app, session, send_file
 from flask_login import login_required
 from app import db, audit
 from app.main import bp
@@ -10,7 +10,7 @@ from app.modules.server.forms import ServerForm, FilterServerListForm, VirtualSe
 from flask_babel import _
 from sqlalchemy import desc, asc
 from app.api.errors import bad_request
-
+import io
 
 @bp.route('/server/add', methods=['GET', 'POST'])
 @login_required
@@ -104,6 +104,9 @@ def server_edit():
         return redirect(url_for('main.switch_port_list', serverid=serverid))
     if 'switchport_add' in request.form:
         return redirect(url_for('main.switch_port_add', serverid=serverid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.server_qr', id=serverid))
+
 # TODO: fix the link where these are going
     server = Server.query.get(serverid)
     original_data = server.to_dict()
@@ -534,3 +537,17 @@ def virtual_server_delete():
     audit.auditlog_delete_post('virtual_server', data=virtual_server.to_dict(), record_name=virtual_server.hostname)
 
     return redirect(url_for('main.index'))
+
+
+@bp.route('/server/qr/<int:id>', methods=['GET'])
+@login_required
+def server_qr(id):
+
+    server = Server.query.get(id)
+
+    if server is None:
+        flash(_('Server was found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    return render_template('qr.html', title=_('QR Server'),
+                           server=server)

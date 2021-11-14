@@ -1,0 +1,23 @@
+<html>
+<body>
+
+{% if firewall %}
+
+<table class="table table-hover">
+    <tr>
+        <td>
+          <a href="{{ url_for('main.firewall_edit', firewall=firewall.id)}}">
+              <img src="{{ url_for('main.qr_img', id=firewall.id, module='firewall', _external=True) }}" />
+            </a>
+
+        </td>
+    </tr>
+    <tr>
+      <td style="text-align:center">
+          <h2>firewall-{{firewall.id}} - {{firewall.name}}</h2>
+      </td>
+</tr>
+{% endif %}
+
+</body>
+</html>

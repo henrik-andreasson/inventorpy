@@ -154,6 +154,8 @@ def hsm_ped_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.hsm_ped_delete', ped=pedid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.hsm_ped_qr', id=pedid))
 
     hsmped = HsmPed.query.get(pedid)
     original_data = hsmped.to_dict()
@@ -325,6 +327,8 @@ def hsm_pin_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.hsm_pin_delete', pin=pinid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.hsm_pin_qr', id=pinid))
 
     hsmpin = HsmPin.query.get(pinid)
     original_data = hsmpin.to_dict()
@@ -448,6 +452,8 @@ def hsm_pcicard_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.hsm_pcicard_delete', pcicard=pcicardid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.hsm_pcicard_qr', id=pcicardid))
 
     hsmpcicard = HsmPciCard.query.get(pcicardid)
     original_data = hsmpcicard.to_dict()
@@ -574,6 +580,8 @@ def hsm_backupunit_edit():
         return redirect(request.referrer)
     if 'delete' in request.form:
         return redirect(url_for('main.hsm_backupunit_delete', backupunit=backupunitid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.hsm_backupunit_qr', id=backupunitid))
 
     hsmbackupunit = HsmBackupUnit.query.get(backupunitid)
 
@@ -649,3 +657,83 @@ def hsm_backupunit_delete():
     audit.auditlog_delete_post('hsm_ped', data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
 
     return redirect(url_for('main.index'))
+
+
+@bp.route('/hsm/pcicard/qr/<int:id>', methods=['GET'])
+@login_required
+def hsm_pcicard_qr(id):
+
+    if id is None:
+        flash(_('pcicard was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    hsmpcicard=None
+    hsmpcicard = HsmPciCard.query.get(id)
+
+    if hsmpcicard is None:
+        flash(_('hsmpcicard was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.hsm_pcicard_edit", hsmpcicard=hsmpcicard.id, _external=True)
+
+    return render_template('hsm_qr.html', title=_('QR Code'),
+                           hsmpcicard=hsmpcicard, qr_data=qr_data)
+
+
+@bp.route('/hsm/backupunit/qr/<int:id>', methods=['GET'])
+@login_required
+def hsm_backupunit_qr(id):
+
+    if id is None:
+        flash(_('backupunit was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    hsmbackupunit=None
+    hsmbackupunit = HsmBackupUnit.query.get(id)
+
+    if hsmbackupunit is None:
+        flash(_('backupunit was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.hsm_backupunit_edit", id=hsmbackupunit.id, _external=True)
+
+    return render_template('hsm_qr.html', title=_('QR Code'),
+                           hsmbackupunit=hsmbackupunit, qr_data=qr_data)
+
+
+@bp.route('/hsm/ped/qr/<int:id>', methods=['GET'])
+@login_required
+def hsm_ped_qr(id):
+
+    if id is None:
+        flash(_('ped was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    hsmped = HsmPed.query.get(id)
+    if hsmped is None:
+        flash(_('hsmped was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.hsm_ped_edit", hsmped=hsmped.id, _external=True)
+
+    return render_template('hsm_qr.html', title=_('QR Code'),
+                           hsmped=hsmped, qr_data=qr_data)
+
+
+@bp.route('/hsm/pin/qr/<int:id>', methods=['GET'])
+@login_required
+def hsm_pin_qr(id):
+
+    if id is None:
+        flash(_('pin was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    hsmpin = HsmPin.query.get(id)
+    if hsmpin is None:
+        flash(_('hsmpin was not found, id not found!'))
+        return redirect(url_for('main.index'))
+
+    qr_data = url_for("main.hsm_pin_edit", hsmpin=hsmpin.id, _external=True)
+
+    return render_template('hsm_qr.html', title=_('QR Code'),
+                           hsmpin=hsmpin, qr_data=qr_data)
