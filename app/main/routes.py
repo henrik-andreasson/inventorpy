@@ -26,7 +26,7 @@ def before_request():
 @bp.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
- 
+
     users = User.query.order_by(User.username).limit(10)
     servers = Server.query.order_by(Server.hostname).limit(10)
     locations = Location.query.order_by(Location.place).limit(10)
@@ -41,6 +41,9 @@ def index():
     hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.serial).limit(10)
     racks = Rack.query.order_by(Rack.name).limit(10)
     hsmpedupdates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).limit(10)
+    switches = Switch.query.order_by(Switch.id).limit(10)
+    firewalls = Firewall.query.order_by(Firewall.id).limit(10)
+
 
     return render_template('index.html', title=_('Explore'),
                            servers=servers, locations=locations,
@@ -49,7 +52,8 @@ def index():
                            networks=networks, safes=safes, users=users,
                            compartments=compartments, hsmpcicards=hsmpcicards,
                            racks=racks, hsmpedupdates=hsmpedupdates,
-                           hsmbackupunits=hsmbackupunits)
+                           hsmbackupunits=hsmbackupunits,
+                           switches=switches, firewalls=firewalls)
 
 
 @bp.route('/search', methods=['GET', 'POST'])

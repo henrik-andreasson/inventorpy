@@ -91,6 +91,31 @@
       </div>
     {% endif %}
 
+    {% if switches %}
+      <div class="list-group">
+        <a href="{{ url_for('main.switch_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('Switches')}}</h4>
+        </a>
+        {% for s in switches %}
+          <a href="{{ url_for('main.switch_edit', switch=s.id) }}" class="list-group-item">
+            {{s.name}} 
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if firewalls %}
+      <div class="list-group">
+        <a href="{{ url_for('main.firewall_list')}}" class="list-group-item">
+          <h4 class="list-group-item-heading">{{_('firewalls')}}</h4>
+        </a>
+        {% for f in firewalls %}
+          <a href="{{ url_for('main.firewall_edit', firewall=f.id) }}" class="list-group-item">
+            {{f.name}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
 
 
   </div>
