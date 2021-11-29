@@ -7,7 +7,7 @@
     <tr>
         <td>
           <a href="{{ url_for('main.hsm_pcicard_edit', pcicard=hsmpcicard.id)}}">
-            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+            <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
             </a>
 
         </td>
@@ -24,7 +24,7 @@
     <tr>
         <td>
           <a href="{{ url_for('main.hsm_backupunit_edit', id=hsmbackupunit.id)}}">
-            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+            <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
           </a>
 
         </td>
@@ -42,7 +42,7 @@
     <tr>
         <td>
           <a href="{{ url_for('main.hsm_ped_edit', ped=hsmped.id)}}">
-            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+            <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
           </a>
 
         </td>
@@ -59,7 +59,7 @@
     <tr>
         <td>
           <a href="{{ url_for('main.hsm_pin_edit', pin=hsmpin.id)}}">
-              <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+              <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
           </a>
 
         </td>

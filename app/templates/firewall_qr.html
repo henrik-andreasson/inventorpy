@@ -7,7 +7,7 @@
     <tr>
         <td>
           <a href="{{ url_for('main.firewall_edit', firewall=firewall.id)}}">
-              <img src="{{ url_for('main.qr_img', id=firewall.id, module='firewall', _external=True) }}" />
+              <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
             </a>
 
         </td>

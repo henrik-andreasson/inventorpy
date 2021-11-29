@@ -8,7 +8,7 @@ from flask_babel import _
 
 @bp.route('/qr/image', methods=['GET'])
 @login_required
-def qr_img_from_text():
+def qr_img():
 
     string = request.args.get('string')
     if string is None:

@@ -8,7 +8,7 @@
         <td>
 
             <a href="{{ url_for('main.server_edit', server=server.id)}}">
-              <img src="{{ url_for('main.qr_img', id=server.id, module='server', _external=True) }}" />
+              <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
             </a>
 
         </td>

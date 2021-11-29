@@ -7,7 +7,7 @@
     <tr>
         <td>
           <a href="{{ url_for('main.safe_edit', safe=safe.id)}}">
-            <img src="{{ url_for('main.qr_img_from_text', string=qr_data, _external=True) }}" />
+            <img src="{{ url_for('main.qr_img', string=qr_data, _external=True) }}" />
             </a>
 
         </td>

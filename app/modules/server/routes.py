@@ -549,5 +549,7 @@ def server_qr(id):
         flash(_('Server was found, id not found!'))
         return redirect(url_for('main.index'))
 
-    return render_template('qr.html', title=_('QR Server'),
-                           server=server)
+    qr_data = url_for("main.server_edit", server=server.id, _external=True)
+
+    return render_template('server_qr.html', title=_('QR Server'),
+                           server=server, qr_data=qr_data)
