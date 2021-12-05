@@ -21,7 +21,7 @@ Big Thanks to Miguel!
 login with:
 
     user: admin
-    pass: foo123
+    pass: admin
 
 [inventorpy demo](https://inventorpydemo-hlvrh7b52a-lz.a.run.app/)
 
