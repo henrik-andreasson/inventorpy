@@ -38,12 +38,12 @@ def index():
     safes = Safe.query.order_by(Safe.name).limit(10)
     compartments = Compartment.query.order_by(Compartment.name).limit(10)
     hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.serial).limit(10)
-    hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.serial).limit(10)
+    hsmbackupunits = HsmBackupUnit.query.order_by(
+        HsmBackupUnit.serial).limit(10)
     racks = Rack.query.order_by(Rack.name).limit(10)
     hsmpedupdates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).limit(10)
     switches = Switch.query.order_by(Switch.id).limit(10)
     firewalls = Firewall.query.order_by(Firewall.id).limit(10)
-
 
     return render_template('index.html', title=_('Explore'),
                            servers=servers, locations=locations,
@@ -119,7 +119,8 @@ def search():
                    'link': url_for('main.hsm_pci_card_edit', hsm_pci_card=hsmcard.id)}
             hits.append(hit)
 
-        hsmbackups = HsmBackupUnit.query.msearch(keyword, rank_order=False).all()
+        hsmbackups = HsmBackupUnit.query.msearch(
+            keyword, rank_order=False).all()
         for hsmbup in hsmbackups:
             hit = {'title': f'{hsmbup.hsmdomain.name} - {hsmbup.name}',
                    'module': 'HsmBackupUnit', 'text': f'{hsmbup.serial} - {hsmbup.fbno} - {hsmbup.safe.name} - {hsmbup.comment}',
@@ -165,6 +166,7 @@ def search():
     return render_template('search.html', title=_('Search'),
                            hits=hits, form=form)
 
+
 @bp.route('/reindex', methods=['GET', 'POST'])
 @login_required
 def reindex():
@@ -181,20 +183,25 @@ def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     print("user: %s" % (user.username))
 
-    return render_template('user.html', user=user)
+    return render_template('user.html', user=user,
+                           title=_("User"))
 
 
 @bp.route('/user/list')
 @login_required
 def user_list():
     page = request.args.get('page', 1, type=int)
-    users = User.query.order_by(User.username).paginate(page, current_app.config['POSTS_PER_PAGE'], False)
+    users = User.query.order_by(User.username).paginate(
+        page, current_app.config['POSTS_PER_PAGE'], False)
     services = Service.query.all()
 
-    next_url = url_for('main.user_list', page=users.next_num) if users.has_next else None
-    prev_url = url_for('main.user_list', page=users.prev_num) if users.has_prev else None
+    next_url = url_for(
+        'main.user_list', page=users.next_num) if users.has_next else None
+    prev_url = url_for(
+        'main.user_list', page=users.prev_num) if users.has_prev else None
     return render_template('users.html', users=users.items, services=services,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url,
+                           title=_("User List"))
 
 
 @bp.route('/service/add', methods=['GET', 'POST'])
@@ -215,12 +222,14 @@ def service_add():
 
         db.session.add(service)
         db.session.commit()
-        audit.auditlog_new_post('service', original_data=service.to_dict(), record_name=service.name)
+        audit.auditlog_new_post(
+            'service', original_data=service.to_dict(), record_name=service.name)
         flash(_('Service have been saved.'))
         return redirect(url_for('main.service_list'))
 
     else:
-        return render_template('service.html', form=form)
+        return render_template('service.html', form=form,
+                               title=_("Add Service"))
 
 
 @bp.route('/service/edit', methods=['GET', 'POST'])
@@ -249,7 +258,8 @@ def service_edit():
         service.color = form.color.data
 
         db.session.commit()
-        audit.auditlog_update_post('service', original_data=original_data, updated_data=service.to_dict(), record_name=service.name)
+        audit.auditlog_update_post('service', original_data=original_data,
+                                   updated_data=service.to_dict(), record_name=service.name)
 
         flash(_('Your changes have been saved.'))
         return redirect(url_for('main.service_list'))
@@ -271,10 +281,13 @@ def service_list():
     page = request.args.get('page', 1, type=int)
     services = Service.query.order_by(Service.updated.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.service_list', page=services.next_num) if services.has_next else None
-    prev_url = url_for('main.service_list', page=services.prev_num) if services.has_prev else None
+    next_url = url_for('main.service_list',
+                       page=services.next_num) if services.has_next else None
+    prev_url = url_for('main.service_list',
+                       page=services.prev_num) if services.has_prev else None
     return render_template('services.html', services=services.items,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url,
+                           title=_("List Service"))
 
 
 @bp.route('/service/<servicename>', methods=['GET'])
@@ -321,12 +334,14 @@ def location_add():
         location.type = form.type.data
         db.session.add(location)
         db.session.commit()
-        audit.auditlog_new_post('location', original_data=location.to_dict(), record_name=location.longName())
+        audit.auditlog_new_post(
+            'location', original_data=location.to_dict(), record_name=location.longName())
         flash(_('Location have been saved.'))
         return redirect(url_for('main.location_list'))
 
     else:
-        return render_template('location.html', form=form)
+        return render_template('location.html', form=form,
+                               title=_("Add Location"))
 
 
 @bp.route('/location/edit', methods=['GET', 'POST'])
@@ -351,7 +366,8 @@ def location_edit():
         location.type = form.type.data
 
         db.session.commit()
-        audit.auditlog_update_post('location', original_data=original_data, updated_data=location.to_dict(), record_name=location.longName())
+        audit.auditlog_update_post('location', original_data=original_data,
+                                   updated_data=location.to_dict(), record_name=location.longName())
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.location_list'))
@@ -367,10 +383,13 @@ def location_list():
     page = request.args.get('page', 1, type=int)
     locations = Location.query.order_by(Location.area.desc()).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.location_list', page=locations.next_num) if locations.has_next else None
-    prev_url = url_for('main.location_list', page=locations.prev_num) if locations.has_prev else None
+    next_url = url_for('main.location_list',
+                       page=locations.next_num) if locations.has_next else None
+    prev_url = url_for('main.location_list',
+                       page=locations.prev_num) if locations.has_prev else None
     return render_template('location.html', locations=locations.items,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url,
+                           title=_('List Location'))
 
 
 @bp.route('/updates/list/', methods=['GET'])
@@ -379,10 +398,13 @@ def updates_list():
     page = request.args.get('page', 1, type=int)
     hsm_ped_updates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False)
-    next_url = url_for('main.updates_list', page=hsm_ped_updates.next_num) if hsm_ped_updates.has_next else None
-    prev_url = url_for('main.updates_list', page=hsm_ped_updates.prev_num) if hsm_ped_updates.has_prev else None
+    next_url = url_for(
+        'main.updates_list', page=hsm_ped_updates.next_num) if hsm_ped_updates.has_next else None
+    prev_url = url_for(
+        'main.updates_list', page=hsm_ped_updates.prev_num) if hsm_ped_updates.has_prev else None
     return render_template('updates.html', hsmpedupdates=hsm_ped_updates.items,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url,
+                           title=_('HSM Update'))
 
 
 @bp.route('/logs/list/', methods=['GET', 'POST'])
@@ -406,7 +428,10 @@ def logs_list():
         logs = Audit.query.order_by(Audit.timestamp.desc()).paginate(
             page, current_app.config['POSTS_PER_PAGE'], False)
 
-    next_url = url_for('main.logs_list', page=logs.next_num) if logs.has_next else None
-    prev_url = url_for('main.logs_list', page=logs.prev_num) if logs.has_prev else None
+    next_url = url_for(
+        'main.logs_list', page=logs.next_num) if logs.has_next else None
+    prev_url = url_for(
+        'main.logs_list', page=logs.prev_num) if logs.has_prev else None
     return render_template('logs.html', logs=logs.items,
-                           next_url=next_url, prev_url=prev_url)
+                           next_url=next_url, prev_url=prev_url,
+                           title=_('Logs'))
