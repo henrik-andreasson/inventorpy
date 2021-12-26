@@ -376,9 +376,3 @@ def switch_qr(id):
     qr_data = url_for("main.switch_edit", switch=switch.id, _external=True)
     return render_template('switch_qr.html', title=_('QR Code'),
                            switch=switch, qr_data=qr_data)
-        flash(_('switch was not found, id not found!'))
-        return redirect(url_for('main.index'))
-
-    qr_data = url_for("main.switch_edit", switch=switch.id, _external=True)
-    return render_template('switch_qr.html', title=_('QR Code'),
-                           switch=switch, qr_data=qr_data)
