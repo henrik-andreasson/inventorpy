@@ -6,6 +6,8 @@ from app.main import bp
 from app.models import Service, Location
 from app.modules.network.models import Network
 from app.modules.network.forms import NetworkForm, FilterNetworkListForm
+from app.modules.firewall.models import Firewall
+from app.modules.switch.models import Switch
 from flask_babel import _
 import ipcalc
 from sqlalchemy import desc, asc
@@ -34,7 +36,8 @@ def network_add():
         db.session.add(network)
 
         db.session.commit()
-        audit.auditlog_new_post('network', original_data=network.to_dict(), record_name=network.name)
+        audit.auditlog_new_post(
+            'network', original_data=network.to_dict(), record_name=network.name)
         flash(_('New network is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -74,7 +77,8 @@ def network_edit():
         network.service_id = form.service.data
 
         db.session.commit()
-        audit.auditlog_update_post('network', original_data=original_data, updated_data=network.to_dict(), record_name=network.name)
+        audit.auditlog_update_post('network', original_data=original_data,
+                                   updated_data=network.to_dict(), record_name=network.name)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -149,7 +153,8 @@ def network_delete():
     flash(deleted_msg)
     db.session.delete(network)
     db.session.commit()
-    audit.auditlog_delete_post('network', data=network.to_dict(), record_name=network.name)
+    audit.auditlog_delete_post(
+        'network', data=network.to_dict(), record_name=network.name)
     return redirect(url_for('main.index'))
 
 
@@ -168,13 +173,22 @@ def network_view():
     netstr = "%s/%s" % (network.network, network.netmask)
     for x in ipcalc.Network(netstr):
         server_net_tuple = (x, '')
+
         s = Server.query.filter_by(ipaddress=str(x)).first()
         if s is not None:
             server_net_tuple = (x, s)
-            networkview.append(server_net_tuple)
+
         vs = VirtualServer.query.filter_by(ipaddress=str(x)).first()
         if vs is not None:
             server_net_tuple = (x, vs)
+
+        fw = Firewall.query.filter_by(ipaddress=str(x)).first()
+        if fw is not None:
+            server_net_tuple = (x, fw)
+
+        sw = Switch.query.filter_by(ipaddress=str(x)).first()
+        if sw is not None:
+            server_net_tuple = (x, sw)
 
         networkview.append(server_net_tuple)
 
