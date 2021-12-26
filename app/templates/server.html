@@ -143,4 +143,70 @@
 {% if form %}
       {{ wtf.quick_form(form) }}
 {% endif %}
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+  {{ _("View connected Switch Ports") }}
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{_("Connected Switch Ports for server:")}} {{server.hostname}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% if switchports %}
+        <table class="table table-hover">
+            <tr>
+              <td>{{_('Inventory id')}}</td>
+              <td>{{_('Name')}}</td>
+              <td>{{_('Switch')}}</td>
+              <td>{{_('Network')}}</td>
+            </tr>
+
+            {% for sp in switchports %}
+
+              <tr>
+                <td>
+                      {{ sp.inventory_id() }}
+                </td>
+                <td>
+                      <A HREF="{{url_for('main.switch_port_edit', switchport=sp.id)}}">
+                        {{ sp.name }}
+                      </A>
+                </td>
+                <td>
+                        {{sp.switch.name}}
+                </td>
+                <td>
+                  {% if sp.network %}
+                      {{sp.network.name}}
+                  {% endif %}
+                </td>
+
+              </tr>
+            {% endfor %}
+
+          </table>
+
+
+
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 {% endblock %}

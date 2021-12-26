@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, \
-    current_app, session, send_file
+    current_app, session
 from flask_login import login_required
 from app import db, audit
 from app.main import bp
@@ -24,9 +24,11 @@ def server_add():
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.get(form.service.data)
 
-        server_checker = Server.query.filter_by(hostname=form.hostname.data).first()
+        server_checker = Server.query.filter_by(
+            hostname=form.hostname.data).first()
         if server_checker is not None:
-            flash(_(f'Server {server_checker.hostname} is already registered, enter a different hostname!'))
+            flash(
+                _(f'Server {server_checker.hostname} is already registered, enter a different hostname!'))
             return render_template('server.html', title=_('Add Server'),
                                    form=form)
 
@@ -62,7 +64,8 @@ def server_add():
         server.rack = rack
         db.session.add(server)
         db.session.commit()
-        audit.auditlog_new_post('server', original_data=server.to_dict(), record_name=server.hostname)
+        audit.auditlog_new_post(
+            'server', original_data=server.to_dict(), record_name=server.hostname)
         flash(_('New server is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -142,7 +145,8 @@ def server_edit():
         server.virtual_host = form.virtual_host.data
 
         db.session.commit()
-        audit.auditlog_update_post('server', original_data=original_data, updated_data=server.to_dict(), record_name=server.hostname)
+        audit.auditlog_update_post('server', original_data=original_data,
+                                   updated_data=server.to_dict(), record_name=server.hostname)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -151,8 +155,12 @@ def server_edit():
         form.network.data = server.network_id
         form.service.data = server.service_id
         form.rack.data = server.rack_id
+        from app.modules.switch.models import SwitchPort
+        switchports = SwitchPort.query.filter_by(server_id=server.id)
+
         return render_template('server.html', title=_('Edit Server'),
-                               form=form)
+                               form=form, server=server,
+                               switchports=switchports)
 
 
 @bp.route('/server/copy/', methods=['GET', 'POST'])
@@ -170,7 +178,8 @@ def server_copy():
     form.service.data = copy_from_server.service_id
 
     if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
+        service = Service.query.filter_by(
+            name=session['selected_service']).first()
         form.service.choices = [(service.id, service.name)]
 
     else:
@@ -207,8 +216,10 @@ def server_copy():
         db.session.add(server)
 
         db.session.commit()
-        audit.auditlog_new_post('server', original_data=server.to_dict(), record_name=server.hostname)
-        flash(_(f'Created new server: {server.hostname} with vales based on {copy_from_server.hostname}'))
+        audit.auditlog_new_post(
+            'server', original_data=server.to_dict(), record_name=server.hostname)
+        flash(
+            _(f'Created new server: {server.hostname} with vales based on {copy_from_server.hostname}'))
         return redirect(url_for('main.index'))
 
     else:
@@ -300,7 +311,8 @@ def server_delete():
     flash(deleted_msg)
     db.session.delete(server)
     db.session.commit()
-    audit.auditlog_delete_post('server', data=server.to_dict(), record_name=server.hostname)
+    audit.auditlog_delete_post(
+        'server', data=server.to_dict(), record_name=server.hostname)
 
     return redirect(url_for('main.index'))
 
@@ -340,7 +352,8 @@ def virtual_server_add():
         virtual_server.service = service
         db.session.add(virtual_server)
         db.session.commit()
-        audit.auditlog_new_post('virtual_server', original_data=virtual_server.to_dict(), record_name=virtual_server.hostname)
+        audit.auditlog_new_post('virtual_server', original_data=virtual_server.to_dict(
+        ), record_name=virtual_server.hostname)
         flash(_('New virtual_server is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -374,7 +387,8 @@ def virtual_server_edit():
     original_data = virtual_server.to_dict()
 
     if virtual_server is None:
-        render_template('service.html', title=_('VirtualServer is not defined'))
+        render_template('service.html', title=_(
+            'VirtualServer is not defined'))
 
     form = VirtualServerForm(formdata=request.form, obj=virtual_server)
 
@@ -391,7 +405,8 @@ def virtual_server_edit():
         virtual_server.environment = form.environment.data
 
         db.session.commit()
-        audit.auditlog_update_post('virtual_server', original_data=original_data, updated_data=virtual_server.to_dict(), record_name=virtual_server.hostname)
+        audit.auditlog_update_post('virtual_server', original_data=original_data,
+                                   updated_data=virtual_server.to_dict(), record_name=virtual_server.hostname)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -421,7 +436,8 @@ def virtual_server_copy():
     form.service.data = copy_from_virtual_server.service_id
 
     if 'selected_service' in session:
-        service = Service.query.filter_by(name=session['selected_service']).first()
+        service = Service.query.filter_by(
+            name=session['selected_service']).first()
         form.service.choices = [(service.id, service.name)]
 
     else:
@@ -434,7 +450,8 @@ def virtual_server_copy():
     form.location.choices = location_choices
 
     if copy_from_virtual_server is None:
-        render_template('service.html', title=_('VirtualServer is not defined'))
+        render_template('service.html', title=_(
+            'VirtualServer is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
         virtual_server = VirtualServer(hostname=form.hostname.data,
@@ -449,8 +466,10 @@ def virtual_server_copy():
         db.session.add(virtual_server)
 
         db.session.commit()
-        audit.auditlog_new_post('virtual_server', original_data=virtual_server.to_dict(), record_name=virtual_server.hostname)
-        flash(_('Copied values from virtual_server %s to %s.' % (copy_from_virtual_server.hostname, virtual_server.hostname)))
+        audit.auditlog_new_post('virtual_server', original_data=virtual_server.to_dict(
+        ), record_name=virtual_server.hostname)
+        flash(_('Copied values from virtual_server %s to %s.' %
+              (copy_from_virtual_server.hostname, virtual_server.hostname)))
 
         return redirect(url_for('main.index'))
 
@@ -534,7 +553,8 @@ def virtual_server_delete():
     flash(deleted_msg)
     db.session.delete(virtual_server)
     db.session.commit()
-    audit.auditlog_delete_post('virtual_server', data=virtual_server.to_dict(), record_name=virtual_server.hostname)
+    audit.auditlog_delete_post('virtual_server', data=virtual_server.to_dict(
+    ), record_name=virtual_server.hostname)
 
     return redirect(url_for('main.index'))
 
