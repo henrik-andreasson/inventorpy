@@ -7,10 +7,10 @@ from app.models import Service, Location
 from app.modules.server.models import Server, VirtualServer
 from app.modules.rack.models import Rack
 from app.modules.server.forms import ServerForm, FilterServerListForm, VirtualServerForm, FilterVirtualServerListForm
+from app.modules.network.models import Network
 from flask_babel import _
 from sqlalchemy import desc, asc
-from app.api.errors import bad_request
-import io
+
 
 @bp.route('/server/add', methods=['GET', 'POST'])
 @login_required
@@ -326,10 +326,6 @@ def virtual_server_add():
 
     form = VirtualServerForm(formdata=request.form)
 
-    ip = request.args.get('ip')
-    if ip:
-        form.ipaddress.data = ip
-
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.get(form.service.data)
         if service is None:
@@ -359,6 +355,20 @@ def virtual_server_add():
         return redirect(url_for('main.index'))
 
     else:
+
+        ip = request.args.get('ip')
+        if ip:
+            form.ipaddress.data = ip
+
+        net_id = request.args.get('net')
+        if net_id:
+            network = Network.query.get(net_id)
+            if network is not None:
+                form.network.default = network.id
+                form.network.data = network.id
+
+            else:
+                print(f'network selected: {net_id} found no network by id')
 
         return render_template('server.html', title=_('Add VirtualServer'),
                                form=form)

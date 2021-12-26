@@ -13,7 +13,8 @@ class ServerForm(FlaskForm):
     hostname = StringField(_l('Hostname'), validators=[DataRequired()])
     role = StringField(_l('Host Role (FE1)'), validators=[DataRequired()])
     ipaddress = StringField(_l('IP Address'), validators=[DataRequired()])
-    network = SelectField(_l('Network'), coerce=int, validators=[NumberRange(1, None, _l('Must select a Network'))])
+    network = SelectField(_l('Network'), coerce=int, validators=[
+                          NumberRange(1, None, _l('Must select a Network'))])
     memory = StringField(_l('Memory'))
     cpu = StringField(_l('CPU'))
     psu = StringField(_l('PSU'))
@@ -61,9 +62,12 @@ class ServerForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
-        self.rack.choices = [(r.id, r.name_with_location()) for r in Rack.query.order_by(Rack.name).all()]
-        self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.name).all()]
+        self.service.choices = [(s.id, s.name)
+                                for s in Service.query.order_by(Service.name).all()]
+        self.rack.choices = [(r.id, r.name_with_location())
+                             for r in Rack.query.order_by(Rack.name).all()]
+        self.network.choices = [(n.id, n.name)
+                                for n in Network.query.order_by(Network.name).all()]
         self.network.choices.insert(0, (-1, _l('None')))
 
 
@@ -75,9 +79,11 @@ class FilterServerListForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.rack.choices = [(r.id, r.name) for r in Rack.query.order_by(Rack.name).all()]
+        self.rack.choices = [(r.id, r.name)
+                             for r in Rack.query.order_by(Rack.name).all()]
         self.rack.choices.insert(0, (-1, _l('All')))
-        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.service.choices = [(s.id, s.name)
+                                for s in Service.query.order_by(Service.name).all()]
         self.service.choices.insert(0, (-1, _l('All')))
         self.environment.choices = [('all', 'All'),
                                     ('dev', 'Development'),
@@ -93,7 +99,8 @@ class VirtualServerForm(FlaskForm):
     hostname = StringField(_l('Hostname'), validators=[DataRequired()])
     role = StringField(_l('Host Role (FE1)'))
     ipaddress = StringField(_l('IP Address'), validators=[DataRequired()])
-    network = SelectField(_l('Network'), coerce=int)
+    network = SelectField(_l('Network'), coerce=int, validators=[
+                          NumberRange(1, None, _l('Must select a Network'))])
     memory = StringField(_l('Memory'))
     cpu = StringField(_l('CPU'))
     hd = StringField(_l('Hard drive'))
@@ -123,10 +130,13 @@ class VirtualServerForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
-        self.network.choices = [(n.id, n.name) for n in Network.query.order_by(Network.id).all()]
+        self.service.choices = [(s.id, s.name)
+                                for s in Service.query.order_by(Service.name).all()]
+        self.network.choices = [(n.id, n.name)
+                                for n in Network.query.order_by(Network.id).all()]
         self.network.choices.insert(0, (-1, _l('None')))
-        self.hosting_server.choices = [(s.id, s.hostname, s.rack.name) for s in Server.query.filter((Server.virtual_host != 'no')).all()]
+        self.hosting_server.choices = [(s.id, s.hostname, s.rack.name)
+                                       for s in Server.query.filter((Server.virtual_host != 'no')).all()]
         self.hosting_server.choices.insert(0, (-1, _l('None')))
 
 
@@ -137,7 +147,19 @@ class FilterVirtualServerListForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.service.choices = [(s.id, s.name) for s in Service.query.order_by(Service.name).all()]
+        self.service.choices = [(s.id, s.name)
+                                for s in Service.query.order_by(Service.name).all()]
+        self.service.choices.insert(0, (-1, _l('All')))
+        self.environment.choices = [('all', 'All'),
+                                    ('dev', 'Development'),
+                                    ('tools', 'Tools'),
+                                    ('cicd', 'CI/CD'),
+                                    ('st', 'System Testing'),
+                                    ('at', 'Acceptance Testing'),
+                                    ('prod', 'Production'),
+                                    ]
+        self.service.choices = [(s.id, s.name)
+                                for s in Service.query.order_by(Service.name).all()]
         self.service.choices.insert(0, (-1, _l('All')))
         self.environment.choices = [('all', 'All'),
                                     ('dev', 'Development'),

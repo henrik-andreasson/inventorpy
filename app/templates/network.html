@@ -86,7 +86,7 @@
     <td><A HREF="{{url_for('main.network_list', sort='network',  order=order)}}">{{_('IP Network')}}</A></td>
     <td><A HREF="{{url_for('main.network_list', sort='netmask',  order=order)}}">{{_('IP Netmask')}}</A></td>
     <td><A HREF="{{url_for('main.network_list', sort='gatewy',   order=order)}}">{{_('IP Gateway')}}</A></td>
-    <td><A HREF="{{url_for('main.network_list', sort='location', order=order)}}">{{_('Location')}}  </A></td>
+    <td><A HREF="{{url_for('main.network_list', sort='vlan',     order=order)}}">{{_('VLAN')}}  </A></td>
     <td><A HREF="{{url_for('main.network_list', sort='service',  order=order)}}">{{_('Service')}}   </A></td>
   </tr>
   <tr>
@@ -94,7 +94,7 @@
     <td>{{network.network}}</td>
     <td>{{network.netmask}}</td>
     <td>{{network.gateway}}</td>
-    <td>{{network.location.name}}</td>
+    <td>{{network.vlan}}</td>
     <td>{{network.service.name}}</td>
   </tr>
 </table>
@@ -110,17 +110,31 @@
 
       <tr>
         <td>
-          {% if sn[1].hostname %}
-            {{ sn[1].hostname }}
+          {% if sn[1].__class__.__name__.lower() == 'server' %}
+            <A HREF="{{url_for('main.server_edit', server=sn[1].id)}}">{{ sn[1].hostname }}
+          {% elif sn[1].__class__.__name__.lower() == 'virtualserver' %}
+            <A HREF="{{url_for('main.virtual_server_edit', virtual_server=sn[1].id)}}">{{ sn[1].hostname }}
+          {% elif sn[1].__class__.__name__.lower() == 'firewall' %}
+            <A HREF="{{url_for('main.firewall_edit', firewall=sn[1].id)}}">{{ sn[1].name }}
+          {% elif sn[1].__class__.__name__.lower() == 'switch' %}
+            <A HREF="{{url_for('main.switch_edit', switch=sn[1].id)}}">{{ sn[1].name }}
+
           {% elif network.gateway == sn[0] %}
             {{ _('Gateway') }}
           {% else %}
+            Add:
             <A HREF="{{url_for('main.server_add', ip=sn[0], net=network.id)}}">
-            {{ _('Add Server') }}
-          </A> -
-          <A HREF="{{url_for('main.virtual_server_add', ip=sn[0], net=network.id)}}">
-          {{ _('Add Virtual Server') }}
-        </A>
+              {{ _('Server') }} </A> -
+
+            <A HREF="{{url_for('main.virtual_server_add', ip=sn[0], net=network.id)}}">
+              {{ _('Virtual Server') }}  </A> -
+
+            <A HREF="{{url_for('main.firewall_add', ip=sn[0], net=network.id)}}">
+              {{ _('Firewall') }}  </A> -
+
+            <A HREF="{{url_for('main.switch_add', ip=sn[0], net=network.id)}}">
+              {{ _('Switch') }}  </A> -
+
           {% endif %}
         </td>
         <td>
