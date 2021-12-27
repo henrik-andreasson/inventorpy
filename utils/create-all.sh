@@ -11,7 +11,7 @@
 ./rest-create-compartment.sh test-compartment.csv
 ./rest-create-switchs.sh test-switch.csv
 ./rest-create-switch-ports.sh test-switch-ports.csv
-#./rest-create-hsm-domain.sh import-hsm-domain.csv
-#./rest-create-hsm-pcicard.sh import-hsm-pcicard.csv
-#./rest-create-hsm-ped.sh import-hsm-ped.csv
-#./rest-create-hsm-pin.sh import-hsm-pin.csv
+./rest-create-hsm-domain.sh test-hsm-domain.csv
+./rest-create-hsm-pcicard.sh test-hsm-pcicard.csv
+./rest-create-hsm-ped.sh test-hsm-ped.csv
+./rest-create-hsm-pin.sh test-hsm-pin.csv

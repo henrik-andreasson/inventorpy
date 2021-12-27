@@ -1,7 +1,7 @@
 #name, alias,ip,serial,manufacturer,model,rack_name,rack_position,service_name,status,support_start,support_end,comment
-fw-1,FW-1,10.1.99.14,123,fortigate,200D,RACK-1,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
-fw-2,FW-2,10.1.99.30,123,fortigate,200D,RACK-2,2,service2,operation,2020-01-01,2025-01-01,managed by dudes
-fw-3,FW-3,10.1.99.62,123,fortigate,200D,RACK-3,2,service3,operation,2020-01-01,2025-01-01,managed by dudes
-fw-4,FW-4,10.1.99.94,123,fortigate,200D,RACK-4,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
-fw-5,FW-5,10.1.99.126,123,fortigate,200D,RACK-5,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
-fw-6,FW-6,10.1.99.158,123,fortigate,200D,RACK-6,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
+fw-1,FW-1,10.1.99.14,001,fortigate,200D,RACK-1,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
+fw-2,FW-2,10.1.99.30,002,fortigate,200D,RACK-2,2,service2,operation,2020-01-01,2025-01-01,managed by dudes
+fw-3,FW-3,10.1.99.62,003,fortigate,200D,RACK-3,2,service3,operation,2020-01-01,2025-01-01,managed by dudes
+fw-4,FW-4,10.1.99.94,004,fortigate,200D,RACK-4,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
+fw-5,FW-5,10.1.99.126,005,fortigate,200D,RACK-5,2,service1,operation,2020-01-01,2025-01-01,managed by dudes
+fw-6,FW-6,10.1.99.158,005,fortigate,200D,RACK-6,2,service1,operation,2020-01-01,2025-01-01,managed by dudes

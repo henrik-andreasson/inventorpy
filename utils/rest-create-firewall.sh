@@ -24,7 +24,7 @@ if [ "x$1" != "x" ] ; then
     csvfile=$1
 else
     echo "arg1 must be a file with hsm pci card definitions in it"
-    echo "#serial,fbno,model,manufacturdate,safe,hsmdomain_name,server_name,name,contract,support_start,support_end,status,comment"
+    echo "#name, alias,ip,serial,manufacturer,model,rack_name,rack_position,service_name,status,support_start,support_end,comment"
     exit
 fi
 
@@ -32,10 +32,10 @@ fi
 IFS=$'\n'
 for row in $(cat "${csvfile}") ; do
 
-  serial=$(echo $row | cut -f1 -d\,)
-  fbno=$(echo $row | cut -f2 -d\,)
+  name=$(echo $row | cut -f1 -d\,)
+  alias=$(echo $row | cut -f1 -d\,)
   ipaddress=$(echo $row | cut -f3 -d\,)
-  serial=$(echo $row | cut -f4 -d\,)
+  serial=$(echo $row | cut -f1 -d\,)
   manufacturer=$(echo $row | cut -f5 -d\,)
   model=$(echo $row | cut -f6 -d\,)
   rack_name=$(echo $row | cut -f7 -d\,)

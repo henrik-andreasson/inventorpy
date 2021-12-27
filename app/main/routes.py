@@ -182,9 +182,10 @@ def reindex():
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     print("user: %s" % (user.username))
+    services = Service.query.all()
 
     return render_template('user.html', user=user,
-                           title=_("User"))
+                           services=services, title=_("User"))
 
 
 @bp.route('/user/list')

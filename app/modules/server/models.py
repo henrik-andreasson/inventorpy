@@ -36,7 +36,8 @@ class Server(db.Model):
     support_end = db.Column(db.DateTime)
     environment = db.Column(db.String(140))
     switch_ports = db.relationship("SwitchPort", back_populates="server")
-    virtual_guests = db.relationship("VirtualServer", back_populates="hosting_server")
+    virtual_guests = db.relationship(
+        "VirtualServer", back_populates="hosting_server")
     virtual_host = db.Column(db.String(10))
 
     def __repr__(self):
@@ -99,7 +100,8 @@ class Server(db.Model):
         if 'service_id' in data:
             service = Service.query.get(data['service_id'])
         elif 'service_name' in data:
-            service = Service.query.filter_by(name=data['service_name']).first()
+            service = Service.query.filter_by(
+                name=data['service_name']).first()
 
         if service is None:
             return {'msg': "no service found via service_name nor id", 'success': False}
@@ -109,7 +111,8 @@ class Server(db.Model):
         if 'network_id' in data:
             network = Network.query.get(data['network_id'])
         elif 'network_name' in data:
-            network = Network.query.filter_by(name=data['network_name']).first()
+            network = Network.query.filter_by(
+                name=data['network_name']).first()
             if network is None:
                 return {'msg': "no network found via network_name nor id", 'success': False}
         else:
@@ -182,7 +185,8 @@ class VirtualServer(db.Model):
         if 'service_id' in data:
             service = Service.query.get(data['service_id'])
         elif 'service_name' in data:
-            service = Service.query.filter_by(name=data['service_name']).first()
+            service = Service.query.filter_by(
+                name=data['service_name']).first()
 
         if service is None:
             return {'msg': "no service found via service_name nor id", 'success': False}
@@ -193,7 +197,8 @@ class VirtualServer(db.Model):
         if 'network_id' in data:
             network = Network.query.get(data['network_id'])
         elif 'network_name' in data:
-            network = Network.query.filter_by(name=data['network_name']).first()
+            network = Network.query.filter_by(
+                name=data['network_name']).first()
         if network is None:
             return {'msg': "no network found via network_name nor id", 'success': False}
         else:
@@ -203,7 +208,8 @@ class VirtualServer(db.Model):
         if 'hosting_server_id' in data:
             hosting_server = Server.query.get(data['hosting_server_id'])
         elif 'hosting_server_name' in data:
-            hosting_server = Server.query.filter_by(hostname=data['hosting_server_name']).first()
+            hosting_server = Server.query.filter_by(
+                hostname=data['hosting_server_name']).first()
         if hosting_server is None:
             return {'msg': "no hosting_server found via name nor id", 'success': False}
         else:
