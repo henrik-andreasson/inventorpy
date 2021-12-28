@@ -143,4 +143,10 @@
 {% if form %}
       {{ wtf.quick_form(form) }}
 {% endif %}
+
+{% if qr %}
+      <img src="{{ url_for('static', filename=qr) }}" />
+{% endif %}
+
+
 {% endblock %}
