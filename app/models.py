@@ -1,6 +1,6 @@
 from hashlib import md5
 from time import time
-from flask import current_app, g
+from flask import current_app, g, request
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -18,8 +18,10 @@ from app.rocketchat import InventorpyRocketChatClient
 Base = declarative_base()
 
 service_user = db.Table('service_user',
-                        db.Column('service_id', db.Integer, db.ForeignKey('service.id')),
-                        db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+                        db.Column('service_id', db.Integer,
+                                  db.ForeignKey('service.id')),
+                        db.Column('user_id', db.Integer,
+                                  db.ForeignKey('user.id'))
                         )
 
 
@@ -104,7 +106,10 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     api_key = db.Column(db.String(32), index=True, unique=True)
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
-    service = db.relationship('Service')
+    role = db.Column(db.String(140))
+    active = db.Column(db.Integer)
+
+#    service = db.relationship('Service')
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -321,7 +326,8 @@ class Audit(PaginatedAPIMixin, db.Model):
     def auditlog_new_post(self, module, original_data, record_name):
         ts = datetime.utcnow()
         if hasattr(g, 'current_user'):
-            user = User.query.filter_by(username=g.current_user.username).first()
+            user = User.query.filter_by(
+                username=g.current_user.username).first()
         else:
             user = User.query.filter_by(username=current_user.username).first()
         audit = Audit(module=module, module_id=original_data['id'],
@@ -331,13 +337,15 @@ class Audit(PaginatedAPIMixin, db.Model):
         db.session.add(audit)
         db.session.commit()
         rocket = InventorpyRocketChatClient()
-        rs = "{} added {} a {} with data {}".format(user.username, record_name, module, self.dict_to_string(original_data))
+        rs = "{} added {} a {} with data {}".format(
+            user.username, record_name, module, self.dict_to_string(original_data))
         rocket.send_message_to_rocket_chat(rs)
 
     def auditlog_update_post(self, module, original_data, updated_data, record_name):
         ts = datetime.utcnow()
         if hasattr(g, 'current_user'):
-            user = User.query.filter_by(username=g.current_user.username).first()
+            user = User.query.filter_by(
+                username=g.current_user.username).first()
         else:
             user = User.query.filter_by(username=current_user.username).first()
 
@@ -352,13 +360,15 @@ class Audit(PaginatedAPIMixin, db.Model):
                 db.session.add(audit)
                 db.session.commit()
                 rocket = InventorpyRocketChatClient()
-                rs = "{} changed {} a {} field: {} from: {} to: {}".format(user.username, record_name, module, field, original_data[field], updated_data[field])
+                rs = "{} changed {} a {} field: {} from: {} to: {}".format(
+                    user.username, record_name, module, field, original_data[field], updated_data[field])
                 rocket.send_message_to_rocket_chat(rs)
 
     def auditlog_delete_post(self, module, data, record_name):
         ts = datetime.utcnow()
         if hasattr(g, 'current_user'):
-            user = User.query.filter_by(username=g.current_user.username).first()
+            user = User.query.filter_by(
+                username=g.current_user.username).first()
         else:
             user = User.query.filter_by(username=current_user.username).first()
 
@@ -371,8 +381,3 @@ class Audit(PaginatedAPIMixin, db.Model):
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
-
-
-def search():
-    keyword = request.args.get('keyword')
-    results = Post.query.msearch(keyword,fields=['title'],limit=20).filter(...)

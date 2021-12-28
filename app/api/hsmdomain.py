@@ -34,7 +34,6 @@ def create_hsmdomain():
     response = jsonify(hsmdomain.to_dict())
 
     response.status_code = 201
-    response.headers['HsmDomain'] = url_for('api.get_hsmdomain', id=hsmdomain.id)
     return response
 
 

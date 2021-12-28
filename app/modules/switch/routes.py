@@ -47,7 +47,8 @@ def switch_add():
         switch.rack = rack
         db.session.add(switch)
         db.session.commit()
-        audit.auditlog_new_post('switch', original_data=switch.to_dict(), record_name=switch.name)
+        audit.auditlog_new_post(
+            'switch', original_data=switch.to_dict(), record_name=switch.name)
         flash(_('New switch is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -98,7 +99,8 @@ def switch_edit():
         switch.rack_position = form.rack_position.data
 
         db.session.commit()
-        audit.auditlog_update_post('switch', original_data=original_data, updated_data=switch.to_dict(), record_name=switch.name)
+        audit.auditlog_update_post('switch', original_data=original_data,
+                                   updated_data=switch.to_dict(), record_name=switch.name)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -128,7 +130,8 @@ def switch_list():
         if server is not None:
             # a server is connected to a switch port not a switch thus:
             # TODO
-            switch_ports = SwitchPort.query.filter_by(server_id=server.id).all()
+            switch_ports = SwitchPort.query.filter_by(
+                server_id=server.id).all()
         elif service is not None:
             switchs = Switch.query.filter_by(service_id=service.id).paginate(
                     page, current_app.config['POSTS_PER_PAGE'], False)
@@ -172,7 +175,8 @@ def switch_delete():
     flash(deleted_msg)
     db.session.delete(switch)
     db.session.commit()
-    audit.auditlog_delete_post('switch', data=switch.to_dict(), record_name=switch.name)
+    audit.auditlog_delete_post(
+        'switch', data=switch.to_dict(), record_name=switch.name)
 
     return redirect(url_for('main.index'))
 
@@ -214,7 +218,8 @@ def switch_port_add():
             switchport.server = server
         db.session.add(switchport)
         db.session.commit()
-        audit.auditlog_new_post('switchport', original_data=switchport.to_dict(), record_name=switchport.name)
+        audit.auditlog_new_post(
+            'switchport', original_data=switchport.to_dict(), record_name=switchport.name)
         flash(_('New switchport is now posted!'))
 
         return redirect(url_for('main.index'))
@@ -257,7 +262,8 @@ def switch_port_edit():
         switchport.comment = form.comment.data
 
         db.session.commit()
-        audit.auditlog_update_post('switchport', original_data=original_data, updated_data=switchport.to_dict(), record_name=switchport.name)
+        audit.auditlog_update_post('switchport', original_data=original_data,
+                                   updated_data=switchport.to_dict(), record_name=switchport.name)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -346,10 +352,10 @@ def switch_port_delete():
     flash(deleted_msg)
     db.session.delete(switchport)
     db.session.commit()
-    audit.auditlog_delete_post('switchport', data=switchport.to_dict(), record_name=switchport.name)
+    audit.auditlog_delete_post(
+        'switchport', data=switchport.to_dict(), record_name=switchport.name)
 
     return redirect(url_for('main.index'))
-
 
 
 @bp.route('/switch/qr/<int:id>', methods=['GET'])
@@ -360,7 +366,7 @@ def switch_qr(id):
         flash(_('switch was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    switch=None
+    switch = None
     switch = Switch.query.get(id)
 
     if switch is None:

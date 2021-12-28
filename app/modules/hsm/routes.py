@@ -27,7 +27,8 @@ def hsm_domain_add():
         hsmdomain.service_id = service.id
         db.session.add(hsmdomain)
         db.session.commit()
-        audit.auditlog_new_post('hsm_domain', original_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
+        audit.auditlog_new_post(
+            'hsm_domain', original_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
 
         flash(_('New HSM Domain is now posted!'))
 
@@ -35,7 +36,7 @@ def hsm_domain_add():
 
     else:
 
-        return render_template('hsm.html', title=_('HSM'),
+        return render_template('hsm.html', title=_('Add HSM Domain'),
                                form=form)
 
 
@@ -64,7 +65,8 @@ def hsm_domain_edit():
         hsmdomain.service_id = service.id
 
         db.session.commit()
-        audit.auditlog_update_post('hsm_domain', original_data=original_data, updated_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
+        audit.auditlog_update_post('hsm_domain', original_data=original_data,
+                                   updated_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -89,7 +91,7 @@ def hsm_domain_list():
     prev_url = url_for('main.hsm_domain_list', page=hsmdomains.prev_num) \
         if hsmdomains.has_prev else None
 
-    return render_template('hsm.html', title=_('HSM Domains'),
+    return render_template('hsm.html', title=_('List HSM Domains'),
                            hsmdomains=hsmdomains.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -128,19 +130,22 @@ def hsm_ped_add():
                         keysn=form.keysn.data,
                         type=form.type.data,
                         comment=form.comment.data)
-        hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
-        hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
+        hsmped.compartment = Compartment.query.filter_by(
+            id=form.compartment.data).first_or_404()
+        hsmped.hsmdomain = HsmDomain.query.filter_by(
+            id=form.hsmdomain.data).first_or_404()
         hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.add(hsmped)
         db.session.commit()
-        audit.auditlog_new_post('hsm_ped', original_data=hsmped.to_dict(), record_name=hsmped.keyno)
+        audit.auditlog_new_post(
+            'hsm_ped', original_data=hsmped.to_dict(), record_name=hsmped.keyno)
 
         flash(_('New HSM PED is now posted!'))
 
         return redirect(url_for('main.index'))
 
     else:
-        return render_template('hsm.html', title=_('HSM'),
+        return render_template('hsm.html', title=_('Add HSM Ped'),
                                form=form)
 
 
@@ -171,13 +176,17 @@ def hsm_ped_edit():
                                      keysn=form.keysn.data,
                                      type=form.type.data,
                                      comment=form.comment.data)
-        hsmpedupdate.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
-        hsmpedupdate.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
-        hsmpedupdate.user = User.query.filter_by(id=form.user.data).first_or_404()
+        hsmpedupdate.compartment = Compartment.query.filter_by(
+            id=form.compartment.data).first_or_404()
+        hsmpedupdate.hsmdomain = HsmDomain.query.filter_by(
+            id=form.hsmdomain.data).first_or_404()
+        hsmpedupdate.user = User.query.filter_by(
+            id=form.user.data).first_or_404()
         db.session.add(hsmpedupdate)
         db.session.commit()
 
-        audit.auditlog_update_post('hsm_ped', original_data=original_data, updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+        audit.auditlog_update_post('hsm_ped', original_data=original_data,
+                                   updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
 
         flash(_('Your changes have been saved.'))
 
@@ -187,7 +196,7 @@ def hsm_ped_edit():
         form.compartment.data = hsmped.compartment_id
         form.hsmdomain.data = hsmped.hsmdomain_id
         form.user.data = hsmped.user_id
-        return render_template('hsm.html', title=_('Edit HSM Domain'),
+        return render_template('hsm.html', title=_('Edit HSM Ped'),
                                form=form)
 
 
@@ -214,29 +223,36 @@ def hsm_ped_approve():
     form = HsmPedUpdateForm(obj=hsmpedupdate)
 
     if request.method == 'POST' and form.validate_on_submit():
-        service = Service.query.filter_by(name=hsmpedupdate.hsmdomain.service.name).first()
+        service = Service.query.filter_by(
+            name=hsmpedupdate.hsmdomain.service.name).first()
         if current_user.username != service.manager.username:
-            flash(_('You are not the service manager of the service thus not allowed to approve this action'))
+            flash(
+                _('You are not the service manager of the service thus not allowed to approve this action'))
             return redirect(request.referrer)
 
         hsmped = HsmPed.query.get(pedid)
         hsmped.keyno = form.keyno.data
         hsmped.keysn = form.keysn.data
-        hsmped.compartment = Compartment.query.filter_by(id=form.compartment.data).first_or_404()
-        hsmped.hsmdomain = HsmDomain.query.filter_by(id=form.hsmdomain.data).first_or_404()
+        hsmped.compartment = Compartment.query.filter_by(
+            id=form.compartment.data).first_or_404()
+        hsmped.hsmdomain = HsmDomain.query.filter_by(
+            id=form.hsmdomain.data).first_or_404()
         hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.delete(hsmpedupdate)
         db.session.commit()
 
-        audit.auditlog_update_post('hsm_ped', original_data=original_data, updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+        audit.auditlog_update_post('hsm_ped', original_data=original_data,
+                                   updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
 
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
-        service = Service.query.filter_by(name=hsmpedupdate.hsmdomain.service.name).first()
-        flash(_('Only the service manager ({}) of the service are allowed to approve this action'.format(service.manager.username)))
+        service = Service.query.filter_by(
+            name=hsmpedupdate.hsmdomain.service.name).first()
+        flash(_('Only the service manager ({}) of the service are allowed to approve this action'.format(
+            service.manager.username)))
 
         form.compartment.data = hsmpedupdate.compartment_id
         form.hsmdomain.data = hsmpedupdate.hsmdomain_id
@@ -245,7 +261,8 @@ def hsm_ped_approve():
         hsmpeds = []
         hsmpeds.append(previous_ped)
         if previous_ped is None:
-            render_template('hsm.html', title=_('HSM PED Update is not defined'))
+            render_template('hsm.html', title=_(
+                'HSM PED Update is not defined'))
 
         return render_template('hsm.html', title=_('Approve HSM PED Update'),
                                form=form, hsmpeds=hsmpeds)
@@ -265,7 +282,7 @@ def hsm_ped_list():
     prev_url = url_for('main.hsm_ped_list', page=hsmpeds.prev_num) \
         if hsmpeds.has_prev else None
 
-    return render_template('hsm.html', title=_('HSM Domains'),
+    return render_template('hsm.html', title=_('List HSM Peds'),
                            hsmpeds=hsmpeds.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -285,7 +302,8 @@ def hsm_ped_delete():
                                               hsmped.hsmdomain.name)
     db.session.delete(hsmped)
     db.session.commit()
-    audit.auditlog_delete_post('hsm_ped', data=hsmped.to_dict(), record_name=hsmped.keyno)
+    audit.auditlog_delete_post(
+        'hsm_ped', data=hsmped.to_dict(), record_name=hsmped.keyno)
     flash(deleted_msg)
 
     return redirect(url_for('main.index'))
@@ -305,7 +323,8 @@ def hsm_pin_add():
         hsmpin.compartment = Compartment.query.get(form.compartment.data)
         db.session.add(hsmpin)
         db.session.commit()
-        audit.auditlog_new_post('hsm_pin', original_data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
+        audit.auditlog_new_post(
+            'hsm_pin', original_data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
 
         flash(_('New HSM PIN is now posted!'))
 
@@ -313,7 +332,7 @@ def hsm_pin_add():
 
     else:
 
-        return render_template('hsm.html', title=_('HSM PIN'),
+        return render_template('hsm.html', title=_('Add HSM PIN'),
                                form=form)
 
 
@@ -346,7 +365,8 @@ def hsm_pin_edit():
         hsmpin.ped_id = form.ped.data
 
         db.session.commit()
-        audit.auditlog_update_post('hsm_pin', original_data=original_data, updated_data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
+        audit.auditlog_update_post('hsm_pin', original_data=original_data,
+                                   updated_data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -372,7 +392,7 @@ def hsm_pin_list():
     prev_url = url_for('main.hsm_pin_list', page=hsmpins.prev_num) \
         if hsmpins.has_prev else None
 
-    return render_template('hsm.html', title=_('HSM Domains'),
+    return render_template('hsm.html', title=_('List HSM PINs'),
                            hsmpins=hsmpins.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -395,7 +415,8 @@ def hsm_pin_delete():
 
     db.session.commit()
     flash(deleted_msg)
-    audit.auditlog_delete_post('hsm_ped', data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
+    audit.auditlog_delete_post(
+        'hsm_ped', data=hsmpin.to_dict(), record_name=hsmpin.ped.keyno)
 
     return redirect(url_for('main.index'))
 
@@ -428,7 +449,8 @@ def hsm_pcicard_add():
         hsmpcicard.server = server
         db.session.add(hsmpcicard)
         db.session.commit()
-        audit.auditlog_new_post('hsm_pci_card', original_data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
+        audit.auditlog_new_post(
+            'hsm_pci_card', original_data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
 
         flash(_('New HSM PCI is now posted!'))
 
@@ -436,7 +458,7 @@ def hsm_pcicard_add():
 
     else:
 
-        return render_template('hsm.html', title=_('HSM'),
+        return render_template('hsm.html', title=_('Add HSM PCI Card '),
                                form=form)
 
 
@@ -461,7 +483,7 @@ def hsm_pcicard_edit():
     form = HsmPciCardForm(obj=hsmpcicard)
 
     if hsmpcicard is None:
-        render_template('hsm.html', title=_('HSM Domain is not defined'))
+        render_template('hsm.html', title=_('HSM PCI Card is not defined'))
 
     if request.method == 'POST' and form.validate_on_submit():
         hsmdomain = HsmDomain.query.get(form.hsmdomain.data)
@@ -476,7 +498,8 @@ def hsm_pcicard_edit():
         hsmpcicard.server = server
 
         db.session.commit()
-        audit.auditlog_update_post('hsm_pci_card', original_data=original_data, updated_data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
+        audit.auditlog_update_post('hsm_pci_card', original_data=original_data,
+                                   updated_data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -487,7 +510,7 @@ def hsm_pcicard_edit():
         form.safe.data = hsmpcicard.safe_id
         form.server.data = hsmpcicard.server_id
 
-        return render_template('hsm.html', title=_('Edit HSM Domain'),
+        return render_template('hsm.html', title=_('Edit HSM PCI Card'),
                                form=form)
 
 
@@ -510,7 +533,7 @@ def hsm_pcicard_list():
     prev_url = url_for('main.hsm_domain_list', page=hsmpcicards.prev_num) \
         if hsmpcicards.has_prev else None
 
-    return render_template('hsm.html', title=_('HSM Domains'),
+    return render_template('hsm.html', title=_('List HSM PCI Cards'),
                            hsmpcicards=hsmpcicards.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -531,7 +554,8 @@ def hsm_pcicard_delete():
     db.session.delete(hsmpcicard)
     db.session.commit()
     flash(deleted_msg)
-    audit.auditlog_delete_post('hsm_ped', data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
+    audit.auditlog_delete_post(
+        'hsm_ped', data=hsmpcicard.to_dict(), record_name=hsmpcicard.serial)
 
     return redirect(url_for('main.index'))
 
@@ -558,7 +582,8 @@ def hsm_backupunit_add():
         hsmbackupunit.safe = safe
         db.session.add(hsmbackupunit)
         db.session.commit()
-        audit.auditlog_new_post('hsm_backup_unit', original_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
+        audit.auditlog_new_post('hsm_backup_unit', original_data=hsmbackupunit.to_dict(
+        ), record_name=hsmbackupunit.serial)
 
         flash(_('Added HSM backupunit {} - {}'.format(hsmbackupunit.name, hsmbackupunit.serial)))
 
@@ -566,7 +591,7 @@ def hsm_backupunit_add():
 
     else:
 
-        return render_template('hsm.html', title=_('HSM'),
+        return render_template('hsm.html', title=_('Add HSM Backupunit'),
                                form=form)
 
 
@@ -586,7 +611,7 @@ def hsm_backupunit_edit():
     hsmbackupunit = HsmBackupUnit.query.get(backupunitid)
 
     if hsmbackupunit is None:
-        render_template('hsm.html', title=_('HSM Domain is not defined'))
+        render_template('hsm.html', title=_('HSM Backupunit is not defined'))
 
     original_data = hsmbackupunit.to_dict()
 
@@ -605,7 +630,8 @@ def hsm_backupunit_edit():
         hsmbackupunit.comment = form.comment.data
 
         db.session.commit()
-        audit.auditlog_update_post('hsm_backup_unit', original_data=original_data, updated_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
+        audit.auditlog_update_post('hsm_backup_unit', original_data=original_data,
+                                   updated_data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
@@ -633,7 +659,7 @@ def hsm_backupunit_list():
     prev_url = url_for('main.hsm_domain_list', page=hsmbackupunits.prev_num) \
         if hsmbackupunits.has_prev else None
 
-    return render_template('hsm.html', title=_('HSM Domains'),
+    return render_template('hsm.html', title=_('List HSM Backup unit'),
                            hsmbackupunits=hsmbackupunits.items, next_url=next_url,
                            prev_url=prev_url)
 
@@ -654,7 +680,8 @@ def hsm_backupunit_delete():
     db.session.delete(hsmbackupunit)
     db.session.commit()
     flash(deleted_msg)
-    audit.auditlog_delete_post('hsm_ped', data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
+    audit.auditlog_delete_post(
+        'hsm_ped', data=hsmbackupunit.to_dict(), record_name=hsmbackupunit.serial)
 
     return redirect(url_for('main.index'))
 
@@ -667,14 +694,15 @@ def hsm_pcicard_qr(id):
         flash(_('pcicard was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    hsmpcicard=None
+    hsmpcicard = None
     hsmpcicard = HsmPciCard.query.get(id)
 
     if hsmpcicard is None:
         flash(_('hsmpcicard was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    qr_data = url_for("main.hsm_pcicard_edit", hsmpcicard=hsmpcicard.id, _external=True)
+    qr_data = url_for("main.hsm_pcicard_edit",
+                      hsmpcicard=hsmpcicard.id, _external=True)
 
     return render_template('hsm_qr.html', title=_('QR Code'),
                            hsmpcicard=hsmpcicard, qr_data=qr_data)
@@ -688,14 +716,15 @@ def hsm_backupunit_qr(id):
         flash(_('backupunit was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    hsmbackupunit=None
+    hsmbackupunit = None
     hsmbackupunit = HsmBackupUnit.query.get(id)
 
     if hsmbackupunit is None:
         flash(_('backupunit was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    qr_data = url_for("main.hsm_backupunit_edit", id=hsmbackupunit.id, _external=True)
+    qr_data = url_for("main.hsm_backupunit_edit",
+                      id=hsmbackupunit.id, _external=True)
 
     return render_template('hsm_qr.html', title=_('QR Code'),
                            hsmbackupunit=hsmbackupunit, qr_data=qr_data)
