@@ -86,7 +86,7 @@ def safe_list():
     page = request.args.get('page', 1, type=int)
 
     safes = Safe.query.order_by(Safe.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.safe_list', page=safes.next_num) \
         if safes.has_next else None
@@ -226,7 +226,7 @@ def compartment_list():
 
     sortstr = "{}(Compartment.{})".format(order, sort)
     compartments = Compartment.query.order_by(eval(sortstr)).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.compartment_list', page=compartments.next_num, sort=sort, order=order) \
         if compartments.has_next else None

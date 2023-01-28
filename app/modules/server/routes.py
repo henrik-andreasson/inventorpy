@@ -278,13 +278,13 @@ def server_list():
 
     if len(input_search_query) < 1:
         servers = Server.query.order_by(eval(sortstr)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     else:
         query = " & ".join(input_search_query)
         print("query: {}".format(query))
         servers = Server.query.filter(eval(query)).order_by(eval(sortstr)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.server_list', page=servers.next_num) \
         if servers.has_next else None
@@ -479,7 +479,7 @@ def virtual_server_copy():
         audit.auditlog_new_post('virtual_server', original_data=virtual_server.to_dict(
         ), record_name=virtual_server.hostname)
         flash(_('Copied values from virtual_server %s to %s.' %
-              (copy_from_virtual_server.hostname, virtual_server.hostname)))
+                (copy_from_virtual_server.hostname, virtual_server.hostname)))
 
         return redirect(url_for('main.index'))
 
@@ -530,13 +530,13 @@ def virtual_server_list():
 
     if len(input_search_query) < 1:
         virtual_servers = VirtualServer.query.order_by(eval(sortstr)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     else:
         query = " & ".join(input_search_query)
         print("query: {}".format(query))
         virtual_servers = VirtualServer.query.filter(eval(query)).order_by(eval(sortstr)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.virtual_server_list', page=virtual_servers.next_num) \
         if virtual_servers.has_next else None
@@ -580,6 +580,5 @@ def server_qr(id):
         return redirect(url_for('main.index'))
 
     qr_data = url_for("main.server_edit", server=server.id, _external=True)
-
     return render_template('server_qr.html', title=_('QR Server'),
                            server=server, qr_data=qr_data)

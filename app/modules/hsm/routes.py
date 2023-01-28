@@ -84,7 +84,7 @@ def hsm_domain_list():
     page = request.args.get('page', 1, type=int)
 
     hsmdomains = HsmDomain.query.order_by(HsmDomain.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.hsm_domain_list', page=hsmdomains.next_num) \
         if hsmdomains.has_next else None
@@ -275,7 +275,7 @@ def hsm_ped_list():
     page = request.args.get('page', 1, type=int)
 
     hsmpeds = HsmPed.query.order_by(HsmPed.keysn).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.hsm_ped_list', page=hsmpeds.next_num) \
         if hsmpeds.has_next else None
@@ -385,7 +385,7 @@ def hsm_pin_list():
     page = request.args.get('page', 1, type=int)
 
     hsmpins = HsmPin.query.order_by(HsmPin.id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.hsm_pin_list', page=hsmpins.next_num) \
         if hsmpins.has_next else None
@@ -393,7 +393,7 @@ def hsm_pin_list():
         if hsmpins.has_prev else None
 
     return render_template('hsm.html', title=_('List HSM PINs'),
-                           hsmpins=hsmpins.items, next_url=next_url,
+                           hsmpins=hsmpins, next_url=next_url,
                            prev_url=prev_url)
 
 
@@ -523,10 +523,10 @@ def hsm_pcicard_list():
 
     if serverid is not None:
         hsmpcicards = HsmPciCard.query.filter_by(server_id=serverid).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     else:
         hsmpcicards = HsmPciCard.query.order_by(HsmPciCard.id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.hsm_domain_list', page=hsmpcicards.next_num) \
         if hsmpcicards.has_next else None
@@ -652,7 +652,7 @@ def hsm_backupunit_list():
     page = request.args.get('page', 1, type=int)
 
     hsmbackupunits = HsmBackupUnit.query.order_by(HsmBackupUnit.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.hsm_domain_list', page=hsmbackupunits.next_num) \
         if hsmbackupunits.has_next else None

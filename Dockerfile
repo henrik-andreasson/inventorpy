@@ -10,10 +10,10 @@ COPY . /inventorpy
 RUN apt-get update
 
 RUN apt-get install --no-install-recommends -y python3 \
-        sqlite3 jq python3-pip python3-setuptools  cargo \
+        sqlite3 jq python3-pip  \
         python3-wheel gunicorn3
 
-#        python3-dev libssl-dev \
+#        python3-dev libssl-dev python3-setuptools  cargo\
 #        build-essential libffi-dev rustc
 
 RUN pip3 install -U pip

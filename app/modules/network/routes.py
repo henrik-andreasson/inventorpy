@@ -111,20 +111,20 @@ def network_list():
 
         if service is not None and environment is not None and environment != "all":
             networks = Network.query.filter_by(service_id=service.id, environment=environment).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif service is not None:
             networks = Network.query.filter_by(service_id=service.id).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
         elif environment is not None and environment != "all":
             networks = Network.query.filter_by(environment=environment).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             networks = Network.query.order_by(eval(sortstr)).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     else:
         networks = Network.query.order_by(eval(sortstr)).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.network_list', page=networks.next_num) \
         if networks.has_next else None

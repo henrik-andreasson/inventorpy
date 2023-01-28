@@ -193,7 +193,7 @@ def user(username):
 def user_list():
     page = request.args.get('page', 1, type=int)
     users = User.query.order_by(User.username).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     services = Service.query.all()
 
     next_url = url_for(
@@ -281,7 +281,7 @@ def service_edit():
 def service_list():
     page = request.args.get('page', 1, type=int)
     services = Service.query.order_by(Service.updated.desc()).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     next_url = url_for('main.service_list',
                        page=services.next_num) if services.has_next else None
     prev_url = url_for('main.service_list',
@@ -383,7 +383,7 @@ def location_edit():
 def location_list():
     page = request.args.get('page', 1, type=int)
     locations = Location.query.order_by(Location.area.desc()).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     next_url = url_for('main.location_list',
                        page=locations.next_num) if locations.has_next else None
     prev_url = url_for('main.location_list',
@@ -398,7 +398,7 @@ def location_list():
 def updates_list():
     page = request.args.get('page', 1, type=int)
     hsm_ped_updates = HsmPedUpdates.query.order_by(HsmPedUpdates.id).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     next_url = url_for(
         'main.updates_list', page=hsm_ped_updates.next_num) if hsm_ped_updates.has_next else None
     prev_url = url_for(
@@ -418,16 +418,16 @@ def logs_list():
 
     if logs_for_user is not None:
         logs = Audit.query.filter_by(user_id=logs_for_user).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     elif module is not None and module_id is not None:
         logs = Audit.query.filter_by(module=module, module_id=module_id).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     elif module is not None:
         logs = Audit.query.filter_by(module=module).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            papage=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     else:
         logs = Audit.query.order_by(Audit.timestamp.desc()).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for(
         'main.logs_list', page=logs.next_num) if logs.has_next else None

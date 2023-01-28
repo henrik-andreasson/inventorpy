@@ -48,7 +48,7 @@ def rack_add():
 @bp.route('/rack/edit/', methods=['GET', 'POST'])
 @login_required
 def rack_edit():
- 
+
     rackid = request.args.get('rack')
 
     if 'cancel' in request.form:
@@ -90,7 +90,7 @@ def rack_list():
     page = request.args.get('page', 1, type=int)
 
     racks = Rack.query.order_by(Rack.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.rack_list', page=racks.next_num) \
         if racks.has_next else None

@@ -1,6 +1,6 @@
 from app import db
 
-
+ 
 class Rack(db.Model):
     __tablename__ = "rack"
     __searchable__ = ['name', 'audit_status', 'location_id', 'audit_comment', 'comment']
@@ -60,4 +60,7 @@ class Rack(db.Model):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
     def name_with_location(self):
-        return '{} ({})'.format(self.name, self.location.longName())
+        if self.location:
+            return '{} ({})'.format(self.name, self.location.longName())
+        else:
+            return '{}'.format(self.name)
