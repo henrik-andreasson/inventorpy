@@ -83,3 +83,48 @@ class Compartment(db.Model):
 
     def inventory_id(self):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
+
+class PhysicalKey(db.Model):
+    __tablename__ = "physical_key"
+    __searchable__ = ['comment', 'audit_comment', 'audit_status']
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))
+    compartment = db.relationship('Compartment')
+    compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
+    user = db.relationship('User', foreign_keys='PhysicalKey.user_id')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    audit_status = db.Column(db.String(20))
+    audit_comment = db.Column(db.String(255))
+    audit_date = db.Column(db.DateTime)
+    auditor = db.relationship('User', foreign_keys='PhysicalKey.auditor_id')
+    auditor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    comment = db.Column(db.String(255))
+
+    def __repr__(self):
+        return '<Key {}>'.format(self.name)
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'user_id': self.user_id,
+            'compartment_id': self.compartment_id,
+            'audit_status': self.audit_status,
+            'audit_comment': self.audit_comment,
+            'auditor_id': self.auditor_id,
+            'comment': self.comment,
+            'audit_date': self.audit_date
+            }
+        return data
+
+    def from_dict(self, data):
+        for field in ['name', 'user_id', 'compartment_id', 'audit_status', 'auditor_id', 'audit_date', 'comment']:
+            if field in data:
+                setattr(self, field, data[field])
+        if 'username' in data:
+            u = User.query.filter_by(username=data['username']).first()
+            setattr(self, 'user_id', u.id)
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)

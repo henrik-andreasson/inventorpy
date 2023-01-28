@@ -29,7 +29,8 @@ def create_hsmdomain():
 
     db.session.add(hsmdomain)
     db.session.commit()
-    audit.auditlog_new_post('hsm_domain', original_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
+    audit.auditlog_new_post(
+        'hsm_domain', original_data=hsmdomain.to_dict(), record_name=hsmdomain.name)
 
     response = jsonify(hsmdomain.to_dict())
 
@@ -69,6 +70,7 @@ def update_hsmdomain(id):
     data = request.get_json() or {}
     hsmdomain.from_dict(data, new_hsmdomain=False)
     db.session.commit()
-    audit.auditlog_update_post('hsm_domain', original_data=original_data, updated_data=data)
+    audit.auditlog_update_post(
+        'hsm_domain', original_data=original_data, updated_data=data)
 
     return jsonify(hsmdomain.to_dict())
