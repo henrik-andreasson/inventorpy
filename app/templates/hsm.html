@@ -37,6 +37,7 @@
   <table class="table table-hover">
     <tr>
       <td>{{_('Inventory id')}}</td>
+      <td>{{_('Key Type')}}</td>
       <td>{{_('Key No')}}</td>
       <td>{{_('Key S/N')}}</td>
       <td>{{_('HSM Domain')}}</td>
@@ -47,7 +48,10 @@
     {% for p in hsmpeds %}
 
       <tr>
-        <td>  {{ p.inventory_id() }} </td>
+        <td> {% if p %} {{ p.inventory_id() }} {% endif %} </td>
+        <td>
+                {{ p.type }}
+        </td>
         <td>
               <A HREF="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
                 {{ p.keyno }}

@@ -26,7 +26,9 @@
             <A HREF="{{url_for('main.safe_content', safe=s.id)}}">{{_('Content')}}</A>
         </td>
         <td>
-          {{ s.location.longName() }}
+          {% if s.location %}
+	          {{ s.location.longName() }}
+	  {% endif %}
         </td>
       </tr>
     {% endfor %}

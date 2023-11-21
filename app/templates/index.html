@@ -69,7 +69,10 @@
           </a>
         {% for r in racks %}
           <A HREF="{{url_for('main.rack_edit', rack=r.id)}}" class="list-group-item">
-                    {{ r.name }} - {{ r.location.longName() }}
+                    {{ r.name }} - 
+		{% if r.location %}
+			{{ r.location.longName() }}
+		{% endif %}
           </A>
         {% endfor %}
 
@@ -208,7 +211,9 @@
           </a>
         {% for s in safes %}
           <A HREF="{{url_for('main.safe_edit', safe=s.id)}}" class="list-group-item">
-                    {{ s.name }} - {{ s.location.longName() }}
+                    {{ s.name }} - 
+		    {% if s.localtion %}{{ s.location.longName() }}
+		    {% endif %}
           </A>
         {% endfor %}
     </div>

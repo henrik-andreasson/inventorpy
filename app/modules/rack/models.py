@@ -60,4 +60,8 @@ class Rack(db.Model):
         return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
 
     def name_with_location(self):
-        return '{} ({})'.format(self.name, self.location.longName())
+        if self.location:
+                return '{} ({})'.format(self.name, self.location.longName())
+        else:
+                return '{} no-loc'.format(self.name)
+

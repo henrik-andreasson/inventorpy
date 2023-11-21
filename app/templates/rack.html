@@ -24,7 +24,9 @@
               </A>
         </td>
         <td>
-                {{ r.location.longName() }}
+		{% if r.location %}
+	                {{ r.location.longName() }}
+		{% endif %}
         </td>
         <td>
           <A HREF="{{url_for('main.rack_edit', rack=r.id)}}">

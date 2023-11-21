@@ -6,6 +6,7 @@ from app.modules.safe.models import Safe, Compartment
 from app.models import PaginatedAPIMixin
 
 
+
 class HsmDomain(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_domain"
     __searchable__ = ['name']
@@ -156,7 +157,7 @@ class HsmPedUpdates(PaginatedAPIMixin, db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
-            'type': self.name,
+            'type': self.type,
             'keyno': self.keyno,
             'keysn': self.keysn,
             'compartment_id': self.compartment_id,
