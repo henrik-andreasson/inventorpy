@@ -64,4 +64,3 @@ class Rack(db.Model):
                 return '{} ({})'.format(self.name, self.location.longName())
         else:
                 return '{} no-loc'.format(self.name)
-

@@ -139,21 +139,21 @@ def firewall_list():
             firewall_ports = FirewallPort.query.filter_by(server_id=server.id).all()
         elif service is not None:
             firewalls = Firewall.query.filter_by(service_id=service.id).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif rack is not None:
             firewalls = Firewall.query.filter_by(rack_id=rack.id).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             firewalls = Firewall.query.order_by(Firewall.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     else:
         if service is not None:
             firewalls = Firewall.query.filter_by(service_id=service.id).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             firewalls = Firewall.query.order_by(Firewall.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.firewall_list', page=firewalls.next_num) \
         if firewalls.has_next else None
@@ -307,28 +307,28 @@ def firewall_port_list():
             firewallports = FirewallPort.query.filter_by(server_id=server.id).all()
         elif rack is not None:
             firewallports = FirewallPort.query.filter_by(rack_id=rack).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif network is not None:
             firewallports = FirewallPort.query.filter_by(netowrk_id=network).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             firewallports = FirewallPort.query.order_by(Firewall.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     else:
 
         if server is not None and firewall is not None:
             firewallports = FirewallPort.query.filter((FirewallPort.server_id == server.id),
                                                       (FirewallPort.firewall_id == firewall.id)).paginate(
-                                                  page, current_app.config['POSTS_PER_PAGE'], False)
+                                                  page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif server is not None:
             firewallports = FirewallPort.query.filter_by(server_id=server.id).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif firewall is not None:
             firewallports = FirewallPort.query.filter_by(firewall_id=firewall.id).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             firewallports = FirewallPort.query.order_by(FirewallPort.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.firewall_port_list', page=firewallports.next_num) \
         if firewallports.has_next else None

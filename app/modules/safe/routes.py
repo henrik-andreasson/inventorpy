@@ -4,8 +4,9 @@ from app import db, audit
 from app.main import bp
 from app.models import Location, User
 from app.modules.hsm.models import HsmBackupUnit, HsmPed, HsmPin
-from app.modules.safe.models import Safe, Compartment
-from app.modules.safe.forms import SafeForm, CompartmentForm, AuditCompartmentForm, AuditSafeForm
+from app.modules.safe.models import Safe, Compartment, PhysicalKey
+from app.modules.safe.forms import SafeForm, CompartmentForm,\
+ AuditCompartmentForm, PhysicalKeyForm
 from flask_babel import _
 from datetime import datetime
 from sqlalchemy import desc, asc
@@ -26,7 +27,8 @@ def safe_add():
         safe.location = location
         db.session.add(safe)
         db.session.commit()
-        audit.auditlog_new_post('safe', original_data=safe.to_dict(), record_name=safe.name)
+        audit.auditlog_new_post(
+            'safe', original_data=safe.to_dict(), record_name=safe.name)
 
         flash(_('New Safe is now posted!'))
 
@@ -66,7 +68,8 @@ def safe_edit():
         safe.name = form.name.data
         safe.location = location
         db.session.commit()
-        audit.auditlog_update_post('safe', original_data=original_data, updated_data=safe.to_dict(), record_name=safe.name)
+        audit.auditlog_update_post(
+            'safe', original_data=original_data, updated_data=safe.to_dict(), record_name=safe.name)
 
         flash(_('Your changes to the safe have been saved.'))
 
@@ -86,7 +89,7 @@ def safe_list():
     page = request.args.get('page', 1, type=int)
 
     safes = Safe.query.order_by(Safe.name).paginate(
-            page, current_app.config['POSTS_PER_PAGE'], False)
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.safe_list', page=safes.next_num) \
         if safes.has_next else None
@@ -131,7 +134,8 @@ def safe_delete():
                                            safe.location.longName())
     db.session.delete(safe)
     db.session.commit()
-    audit.auditlog_delete_post('safe', data=safe.to_dict(), record_name=safe.name)
+    audit.auditlog_delete_post(
+        'safe', data=safe.to_dict(), record_name=safe.name)
     flash(deleted_msg)
 
     return redirect(url_for('main.index'))
@@ -156,7 +160,8 @@ def compartment_add():
         compartment.user = user
         db.session.add(compartment)
         db.session.commit()
-        audit.auditlog_new_post('compartment', original_data=compartment.to_dict(), record_name=compartment.name)
+        audit.auditlog_new_post(
+            'compartment', original_data=compartment.to_dict(), record_name=compartment.name)
 
         flash(_('New Compartment is now posted!'))
 
@@ -197,7 +202,8 @@ def compartment_edit():
         compartment.safe = safe
         compartment.user = user
         db.session.commit()
-        audit.auditlog_update_post('compartment', original_data=original_data, updated_data=compartment.to_dict(), record_name=compartment.name)
+        audit.auditlog_update_post('compartment', original_data=original_data,
+                                   updated_data=compartment.to_dict(), record_name=compartment.name)
 
         flash(_('Your changes to the compartment have been saved.'))
 
@@ -226,7 +232,7 @@ def compartment_list():
 
     sortstr = "{}(Compartment.{})".format(order, sort)
     compartments = Compartment.query.order_by(eval(sortstr)).paginate(
-        page, current_app.config['POSTS_PER_PAGE'], False)
+        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.compartment_list', page=compartments.next_num, sort=sort, order=order) \
         if compartments.has_next else None
@@ -252,7 +258,8 @@ def compartment_delete():
     deleted_msg = 'Compartment deleted: %s' % (compartment.name)
     db.session.delete(compartment)
     db.session.commit()
-    audit.auditlog_delete_post('compartment', data=compartment.to_dict(), record_name=compartment.name)
+    audit.auditlog_delete_post(
+        'compartment', data=compartment.to_dict(), record_name=compartment.name)
 
     flash(deleted_msg)
 
@@ -275,7 +282,8 @@ def compartment_audit():
         return redirect(request.referrer)
 
     if request.method == 'POST' and form.validate_on_submit():
-        auditor = User.query.filter_by(username=current_user.username).first_or_404()
+        auditor = User.query.filter_by(
+            username=current_user.username).first_or_404()
         if current_user.username == compartment.user.username:
             flash(_('You are not allowed to audit your own compartment'))
             return redirect(request.referrer)
@@ -292,7 +300,8 @@ def compartment_audit():
         compartment.audit_comment = form.comment.data
         compartment.auditor_id = auditor.id
         db.session.commit()
-        audit.auditlog_update_post('compartment', original_data=original_data, updated_data=compartment.to_dict(), record_name=compartment.name)
+        audit.auditlog_update_post('compartment', original_data=original_data,
+                                   updated_data=compartment.to_dict(), record_name=compartment.name)
 
         flash(_('Your changes to the compartment have been saved.'))
 
@@ -319,7 +328,7 @@ def safe_qr(id):
         flash(_('safe was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    safe=None
+    safe = None
     safe = Safe.query.get(id)
 
     if safe is None:
@@ -339,13 +348,144 @@ def compartment_qr(id):
         flash(_('compartment was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    compartment=None
+    compartment = None
     compartment = Compartment.query.get(id)
 
     if compartment is None:
         flash(_('compartment was not found, id not found!'))
         return redirect(url_for('main.index'))
 
-    qr_data = url_for("main.compartment_edit", compartment=compartment.id, _external=True)
+    qr_data = url_for("main.compartment_edit",
+                      compartment=compartment.id, _external=True)
     return render_template('compartment_qr.html', title=_('QR Code'),
                            compartment=compartment, qr_data=qr_data)
+
+
+@bp.route('/physicalkey/add', methods=['GET', 'POST'])
+@login_required
+def physicalkey_add():
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+
+    form = PhysicalKeyForm(formdata=request.form)
+
+    if request.method == 'POST' and form.validate_on_submit():
+
+        user = User.query.get(form.user.data)
+        physicalkey = PhysicalKey(name=form.name.data)
+        physicalkey.user = user
+        db.session.add(physicalkey)
+        db.session.commit()
+        audit.auditlog_new_post(
+            'physicalkey', original_data=physicalkey.to_dict(), record_name=physicalkey.name)
+
+        flash(_('New PhysicalKey is now posted!'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+
+        return render_template('physicalkey.html', title=_('PhysicalKey'),
+                               form=form)
+
+
+@bp.route('/physicalkey/edit/', methods=['GET', 'POST'])
+@login_required
+def physicalkey_edit():
+
+    physicalkeyid = request.args.get('physicalkey')
+
+    if 'cancel' in request.form:
+        return redirect(request.referrer)
+    if 'delete' in request.form:
+        return redirect(url_for('main.physicalkey_delete', physicalkey=physicalkeyid))
+    if 'qrcode' in request.form:
+        return redirect(url_for('main.physicalkey_qr', id=physicalkeyid))
+
+    physicalkey = PhysicalKey.query.get(physicalkeyid)
+    form = PhysicalKeyForm(obj=physicalkey)
+
+    if physicalkey is None:
+        flash(_('PhysicalKey not found'))
+        return redirect(request.referrer)
+
+    original_data = physicalkey.to_dict()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        location = Location.query.get(form.location.data)
+
+        physicalkey.name = form.name.data
+        physicalkey.location = location
+        db.session.commit()
+        audit.auditlog_update_post('physicalkey', original_data=original_data,
+                                   updated_data=physicalkey.to_dict(), record_name=physicalkey.name)
+
+        flash(_('Your changes to the physicalkey have been saved.'))
+
+        return redirect(url_for('main.index'))
+
+    else:
+        form.location.data = physicalkey.location_id
+
+        return render_template('physicalkey.html', title=_('Edit PhysicalKey'),
+                               form=form)
+
+
+@bp.route('/physicalkey/list/', methods=['GET', 'POST'])
+@login_required
+def physicalkey_list():
+
+    page = request.args.get('page', 1, type=int)
+
+    physicalkeys = PhysicalKey.query.order_by(PhysicalKey.name).paginate(
+            page, current_app.config['POSTS_PER_PAGE'], False)
+
+    next_url = url_for('main.physicalkey_list', page=physicalkeys.next_num) \
+        if physicalkeys.has_next else None
+    prev_url = url_for('main.physicalkey_list', page=physicalkeys.prev_num) \
+        if physicalkeys.has_prev else None
+
+    return render_template('physicalkey.html', title=_('PhysicalKey'),
+                           physicalkeys=physicalkeys.items, next_url=next_url,
+                           prev_url=prev_url)
+
+
+@bp.route('/physicalkey/content/', methods=['GET', 'POST'])
+@login_required
+def physicalkey_content():
+
+    physicalkeyid = request.args.get('physicalkey')
+    physicalkey = PhysicalKey.query.get(physicalkeyid)
+    if physicalkey is None:
+        flash(_('PhysicalKey not found'))
+        return redirect(request.referrer)
+
+    hsmbackupunits = HsmBackupUnit.query.filter_by(
+        physicalkey_id=physicalkey.id)
+    compartments = Compartment.query.filter_by(physicalkey_id=physicalkey.id)
+
+    return render_template('physicalkey.html', title=_('PhysicalKey'),
+                           compartments=compartments,
+                           hsmbackupunits=hsmbackupunits)
+
+
+@bp.route('/physicalkey/delete/', methods=['GET', 'POST'])
+@login_required
+def physicalkey_delete():
+
+    physicalkeyid = request.args.get('physicalkey')
+    physicalkey = PhysicalKey.query.get(physicalkeyid)
+
+    if physicalkey is None:
+        flash(_('PhysicalKey was not deleted, id not found!'))
+        return redirect(url_for('main.index'))
+
+    deleted_msg = 'PhysicalKey deleted: %s %s' % (physicalkey.name,
+                                                  physicalkey.location.longName())
+    db.session.delete(physicalkey)
+    db.session.commit()
+    audit.auditlog_delete_post(
+        'physicalkey', data=physicalkey.to_dict(), record_name=physicalkey.name)
+    flash(deleted_msg)
+
+    return redirect(url_for('main.index'))

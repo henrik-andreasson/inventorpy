@@ -134,21 +134,21 @@ def switch_list():
                 server_id=server.id).all()
         elif service is not None:
             switchs = Switch.query.filter_by(service_id=service.id).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif rack is not None:
             switchs = Switch.query.filter_by(rack_id=rack.id).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             switchs = Switch.query.order_by(Switch.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     else:
         if service is not None:
             switchs = Switch.query.filter_by(service_id=service.id).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             switchs = Switch.query.order_by(Switch.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.switch_list', page=switchs.next_num) \
         if switchs.has_next else None
@@ -304,28 +304,28 @@ def switch_port_list():
             switchports = SwitchPort.query.filter_by(server_id=server.id).all()
         elif rack is not None:
             switchports = SwitchPort.query.filter_by(rack_id=rack).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif network is not None:
             switchports = SwitchPort.query.filter_by(netowrk_id=network).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     else:
 
         if server is not None and switch is not None:
             switchports = SwitchPort.query.filter((SwitchPort.server_id == server.id),
                                                   (SwitchPort.switch_id == switch.id)).paginate(
-                                                  page, current_app.config['POSTS_PER_PAGE'], False)
+                                                  page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif server is not None:
             switchports = SwitchPort.query.filter_by(server_id=server.id).paginate(
-                    page, current_app.config['POSTS_PER_PAGE'], False)
+                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         elif switch is not None:
             switchports = SwitchPort.query.filter_by(switch_id=switch.id).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
         else:
             switchports = SwitchPort.query.order_by(SwitchPort.name).paginate(
-                page, current_app.config['POSTS_PER_PAGE'], False)
+                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     next_url = url_for('main.switch_port_list', page=switchports.next_num) \
         if switchports.has_next else None
