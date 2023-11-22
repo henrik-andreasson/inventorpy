@@ -216,3 +216,89 @@ class VirtualServer(db.Model):
             setattr(self, 'hosting_server_id', hosting_server.id)
 
         return {'msg': "object loaded ok", 'success': True}
+
+vip_real_servers = db.Table('vip_real_servers',
+                        db.Column('vip_id', db.Integer,
+                                  db.ForeignKey('virtual_ip.id')),
+                        db.Column('server_id', db.Integer,
+                                  db.ForeignKey('server.id'))
+                        )
+
+vip_virtual_servers = db.Table('vip_virtual_servers',
+                        db.Column('vip_id', db.Integer,
+                                  db.ForeignKey('virtual_ip.id')),
+                        db.Column('server_id', db.Integer,
+                                  db.ForeignKey('virtual_server.id'))
+                        )
+
+class VirtualIP(db.Model):
+    __tablename__ = "virtual_ip"
+    __searchable__ = ['hostname', 'role', 'status', 'ipaddress', 'serial', 'memory',
+                      'cpu', 'psu', 'model', 'os_name', 'manufacturer', 'comment',
+                      'environment']
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(140))
+    ipaddress = db.Column(db.String(140))
+    status = db.Column(db.String(140))
+    network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
+    network = db.relationship('Network')
+    service_id = db.Column(db.Integer, db.ForeignKey('service.id'))
+    service = db.relationship('Service')
+    port_config = db.Column(db.String(2000))
+    comment = db.Column(db.String(2000))
+    environment = db.Column(db.String(140))
+    real_servers = db.relationship("Server", secondary=vip_real_servers)
+    virtual_servers = db.relationship("VirtualServer", secondary=vip_virtual_servers)
+
+    def __repr__(self):
+        return '<Server {}>'.format(self.hostname)
+
+    def inventory_id(self):
+        return '{}-{}'.format(self.__class__.__name__.lower(), self.id)
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'role': self.role,
+            'ipaddress': self.ipaddress,
+            'status': self.status,
+            'network_id': self.network_id,
+            'port_config': self.port_config,
+            'comment': self.comment,
+            'environment': self.environment,
+            'real_servers': self.real_servers,
+            'virtual_servers': self.virtual_servers
+            }
+        return data
+
+    def from_dict(self, data):
+
+        for field in ['role', 'ipaddress', 'status', 'comment', 'environment',
+                    'port_config', 'virtual_host', 'real_servers', 'network_id']:
+            if field not in data:
+                return {'msg': "must include field: %s" % field, 'success': False}
+            else:
+                setattr(self, field, data[field])
+
+        if 'service_id' in data:
+            service = Service.query.get(data['service_id'])
+        elif 'service_name' in data:
+            service = Service.query.filter_by(
+                name=data['service_name']).first()
+
+        if service is None:
+            return {'msg': "no service found via service_name nor id", 'success': False}
+        else:
+            setattr(self, 'service_id', service.id)
+
+        if 'network_id' in data:
+            network = Network.query.get(data['network_id'])
+        elif 'network_name' in data:
+            network = Network.query.filter_by(
+                name=data['network_name']).first()
+            if network is None:
+                return {'msg': "no network found via network_name nor id", 'success': False}
+        else:
+            setattr(self, 'network_id', network.id)
+
+        return {'msg': "object loaded ok", 'success': True}
