@@ -163,32 +163,50 @@ def hsm_ped_edit():
         return redirect(url_for('main.hsm_ped_qr', id=pedid))
 
     hsmped = HsmPed.query.get(pedid)
-    original_data = hsmped.to_dict()
-
     if hsmped is None:
-        render_template('hsm.html', title=_('HSM PED is not defined'))
+        flash(_(f'No ped is found with id {pedid}.'))
+        return redirect(url_for('main.index'))
+
+    original_data = hsmped.to_dict()
 
     form = HsmPedForm(obj=hsmped)
 
     if request.method == 'POST' and form.validate_on_submit():
 
-        hsmpedupdate = HsmPedUpdates(keyno=form.keyno.data,
-                                     keysn=form.keysn.data,
-                                     type=form.type.data,
-                                     comment=form.comment.data)
-        hsmpedupdate.compartment = Compartment.query.filter_by(
-            id=form.compartment.data).first_or_404()
-        hsmpedupdate.hsmdomain = HsmDomain.query.filter_by(
-            id=form.hsmdomain.data).first_or_404()
-        hsmpedupdate.user = User.query.filter_by(
-            id=form.user.data).first_or_404()
-        db.session.add(hsmpedupdate)
-        db.session.commit()
+        if current_app.config['PED_HANDOVER_MUST_BE_APPROVED'] is True:
 
-        audit.auditlog_update_post('hsm_ped', original_data=original_data,
-                                   updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+            hsmpedupdate = HsmPedUpdates(keyno=form.keyno.data,
+                                         keysn=form.keysn.data,
+                                         type=form.type.data)
+            hsmpedupdate.ped = HsmPed.query.filter_by(
+                id=form.hsmped.data).first_or_404()
+            hsmpedupdate.compartment = Compartment.query.filter_by(
+                id=form.compartment.data).first_or_404()
+            hsmpedupdate.hsmdomain = HsmDomain.query.filter_by(
+                id=form.hsmdomain.data).first_or_404()
+            hsmpedupdate.user = User.query.filter_by(
+                id=form.user.data).first_or_404()
+            db.session.add(hsmpedupdate)
+            db.session.commit()
 
-        flash(_('Your changes have been saved.'))
+            audit.auditlog_update_post('hsm_ped', original_data=original_data,
+                                       updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+
+            flash(_('Your changes must be approved.'))
+        else:
+            # TODO: creates a new PED !!!!
+            hsmped = HsmPed(keyno=form.keyno.data,
+                            keysn=form.keysn.data,
+                            type=form.type.data)
+            hsmped.compartment = Compartment.query.filter_by(
+                            id=form.compartment.data).first_or_404()
+            hsmped.hsmdomain = HsmDomain.query.filter_by(
+                            id=form.hsmdomain.data).first_or_404()
+            hsmped.user = User.query.filter_by(
+                            id=form.user.data).first_or_404()
+            db.session.add(hsmped)
+            db.session.commit()
+            flash(_('Your changes has been committed.'))
 
         return redirect(url_for('main.index'))
 
@@ -196,6 +214,8 @@ def hsm_ped_edit():
         form.compartment.data = hsmped.compartment_id
         form.hsmdomain.data = hsmped.hsmdomain_id
         form.user.data = hsmped.user_id
+        form.hsmped.data = hsmped.id
+
         return render_template('hsm.html', title=_('Edit HSM Ped'),
                                form=form)
 
@@ -206,11 +226,6 @@ def hsm_ped_approve():
 
     pedid = request.args.get('ped')
 
-    hsmpedupdate = HsmPedUpdates.query.get(pedid)
-    original_data = hsmpedupdate.to_dict()
-
-    if hsmpedupdate is None:
-        render_template('hsm.html', title=_('HSM PED Update is not defined'))
 
     if 'postpone' in request.form:
         return redirect(request.referrer)
@@ -220,52 +235,67 @@ def hsm_ped_approve():
         flash("Pending Approval was denied")
         return redirect(url_for('main.index'))
 
-    form = HsmPedUpdateForm(obj=hsmpedupdate)
+
+    hsmpedupdate = HsmPedUpdates.query.get(pedid)
+    if hsmpedupdate is None:
+        flash(_(f'Ped not found {pedid}.'))
+        return redirect(url_for('main.index'))
+
+    org_hsmped = HsmPed.query.get(hsmpedupdate.ped_id)
+    original_data = org_hsmped.to_dict()
+    form = HsmPedUpdateForm(obj=hsmpedupdate.ped_id)
 
     if request.method == 'POST' and form.validate_on_submit():
         service = Service.query.filter_by(
             name=hsmpedupdate.hsmdomain.service.name).first()
         if current_user.username != service.manager.username:
             flash(
-                _('You are not the service manager of the service thus not allowed to approve this action'))
+                _(f'You({current_user.username}) are not the service manager({service.manager.username}) of the service thus not allowed to approve this action'))
             return redirect(request.referrer)
 
-        hsmped = HsmPed.query.get(pedid)
-        hsmped.keyno = form.keyno.data
-        hsmped.keysn = form.keysn.data
-        hsmped.compartment = Compartment.query.filter_by(
+        upd_hsmped = HsmPed.query.get(form.hsmped.data)
+        if upd_hsmped is None:
+            flash(_('hsm PED not found.'))
+            return redirect(url_for('main.index'))
+
+        upd_hsmped.keyno = form.keyno.data
+        upd_hsmped.keysn = form.keysn.data
+        upd_hsmped.compartment = Compartment.query.filter_by(
             id=form.compartment.data).first_or_404()
-        hsmped.hsmdomain = HsmDomain.query.filter_by(
+        upd_hsmped.hsmdomain = HsmDomain.query.filter_by(
             id=form.hsmdomain.data).first_or_404()
-        hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
+        upd_hsmped.user = User.query.filter_by(id=form.user.data).first_or_404()
         db.session.delete(hsmpedupdate)
         db.session.commit()
 
         audit.auditlog_update_post('hsm_ped', original_data=original_data,
-                                   updated_data=hsmped.to_dict(), record_name=hsmped.keyno)
+                                   updated_data=upd_hsmped.to_dict(), record_name=upd_hsmped.keysn)
 
         flash(_('Your changes have been saved.'))
 
         return redirect(url_for('main.index'))
 
     else:
+
+
         service = Service.query.filter_by(
             name=hsmpedupdate.hsmdomain.service.name).first()
-        flash(_('Only the service manager ({}) of the service are allowed to approve this action'.format(
-            service.manager.username)))
-
         form.compartment.data = hsmpedupdate.compartment_id
         form.hsmdomain.data = hsmpedupdate.hsmdomain_id
+        form.type.data = hsmpedupdate.type
+        form.keysn.data = hsmpedupdate.keysn
+        form.keyno.data = hsmpedupdate.keyno
         form.user.data = hsmpedupdate.user_id
-        previous_ped = HsmPed.query.get(pedid)
-        hsmpeds = []
-        hsmpeds.append(previous_ped)
-        if previous_ped is None:
-            render_template('hsm.html', title=_(
-                'HSM PED Update is not defined'))
+        form.hsmped.data = hsmpedupdate.ped_id
+        form.comment.data = hsmpedupdate.comment
+
+        ped_org_data = []
+        ped_org_data.append(org_hsmped)
 
         return render_template('hsm.html', title=_('Approve HSM PED Update'),
-                               form=form, hsmpeds=hsmpeds)
+                               hsmpedupdate=hsmpedupdate,
+                               form=form,
+                               ped_org_data=ped_org_data)
 
 
 @bp.route('/hsm/ped/list/', methods=['GET', 'POST'])

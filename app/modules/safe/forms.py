@@ -23,7 +23,7 @@ class SafeForm(FlaskForm):
 
 
 class AuditSafeForm(FlaskForm):
-    safe = SelectField(_l('Location'), coerce=int)
+    safe = SelectField(_l('Location'), coerce=int) # location TODO:
     comment = TextAreaField(_l('Audit Comment'))
     approved = SubmitField(_l('Audit Approved'))
     failed = SubmitField(_l('Audit Failed'))

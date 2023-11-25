@@ -24,6 +24,7 @@ class HsmDomainForm(FlaskForm):
 
 class HsmPedForm(FlaskForm):
     # TODO: move ped_types to global definition
+    hsmped = SelectField(_l('HSM PED'), coerce=int)
     type = SelectField(_l('PED Type'), choices=[('blue', 'HSM Admin (BLUE)'),
                                                 ('red', 'Partition Admin (RED)'),
                                                 ('black', 'User (BLACK)'),
@@ -49,14 +50,24 @@ class HsmPedForm(FlaskForm):
         self.user.choices = [(u.id, u.username) for u in User.query.all()]
         self.duplicate_of.choices = [(p.id, f"{p.keysn}/{p.type}/{p.user.username}") for p in HsmPed.query.all()]
         self.duplicate_of.choices.insert(0, (0, 'None'))
+        self.hsmped.choices = [(h.id, f"{h.keysn}/{h.type}/{h.user.username}") for h in HsmPed.query.all()]
 
 
 class HsmPedUpdateForm(FlaskForm):
+    hsmped = SelectField(_l('HSM Ped'), validators=[DataRequired()], coerce=int, render_kw={'readonly': True})
+    type = SelectField(_l('PED Type'), choices=[('blue', 'HSM Admin (BLUE)'),
+                                                ('red', 'Partition Admin (RED)'),
+                                                ('black', 'User (BLACK)'),
+                                                ('orange', 'Remote PED (ORANGE)'),
+                                                ('red2', 'HSM Domain (RED2)'),
+                                                ('grey', 'User (GREY)')],
+                                                render_kw={'readonly': True})
     keyno = StringField(_l('Key No.'),  render_kw={'readonly': True})
     keysn = StringField(_l('Key S/N'),  render_kw={'readonly': True})
     hsmdomain = SelectField(_l('HSM Domain'), coerce=int,  render_kw={'readonly': True})
     compartment = SelectField(_l('Compartment'), coerce=int,  render_kw={'readonly': True})
     user = SelectField(_l('User'), coerce=int,  render_kw={'readonly': True})
+    comment = StringField(_l('Comment'), render_kw={'readonly': True})
     requested_by = SelectField(_l('Requested by'),  render_kw={'readonly': True})
     approve = SubmitField(_l('Approve'))
     deny = SubmitField(_l('Deny'))
@@ -68,7 +79,7 @@ class HsmPedUpdateForm(FlaskForm):
         self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
         self.user.choices = [(u.id, u.username) for u in User.query.all()]
         self.requested_by.choices = [(current_user.username, current_user.username)]
-
+        self.hsmped.choices = [(h.id, f"{h.keysn}/{h.type}/{h.user.username}") for h in HsmPed.query.all()]
 
 class HsmPinForm(FlaskForm):
     ped = SelectField(_l('HSM PED'), coerce=int)

@@ -31,6 +31,9 @@ class Config(object):
     CERT_DN_COMP_IS_USERNAME = os.environ.get('CERT_DN_COMP_IS_USERNAME') or "CN"
     PROXY_FIX = os.environ.get('PROXY_FIX') or 0
 
+    # Force approval of PED key handover
+    PED_HANDOVER_MUST_BE_APPROVED = True
+
     # flask-msearch will use table name as elasticsearch index name unless set __msearch_index__
     MSEARCH_INDEX_NAME = 'msearch'
     # simple,whoosh,elaticsearch, default is simple

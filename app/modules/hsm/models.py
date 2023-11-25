@@ -139,6 +139,8 @@ class HsmPedUpdates(PaginatedAPIMixin, db.Model):
     __tablename__ = "hsm_ped_updates"
     __searchable__ = ['type', 'keyno', 'keysn', 'hsmdomain_id', 'user_id', 'compartment_id']
     id = db.Column(db.Integer, primary_key=True)
+    ped = db.relationship('HsmPed')
+    ped_id = db.Column(db.Integer, db.ForeignKey('hsm_ped.id'))
     type = db.Column(db.String(140))
     keyno = db.Column(db.String(140))
     keysn = db.Column(db.String(140), unique=True)
@@ -150,6 +152,7 @@ class HsmPedUpdates(PaginatedAPIMixin, db.Model):
     requested_by_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     compartment = db.relationship('Compartment')
     compartment_id = db.Column(db.Integer, db.ForeignKey('compartment.id'))
+    comment = db.Column(db.String(255))
 
     def __repr__(self):
         return '<HsmPedUpdates {}>'.format(self.keyno)

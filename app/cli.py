@@ -66,7 +66,7 @@ def register(app):
     @click.argument('password')
     def passwd(username, password):
         """set password user."""
-        from app.main.models import User
+        from app.models import User
         user = User.query.filter_by(username=username).first()
         if user is None:
             print("User not found")

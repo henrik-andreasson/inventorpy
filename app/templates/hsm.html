@@ -61,13 +61,13 @@
                 {{ p.keysn }}
         </td>
         <td>
-                {{ p.hsmdomain.name }}
+               {% if p.hsmdomain %}   {{ p.hsmdomain.name }}  {% endif %}
         </td>
         <td>
-                {{ p.compartment.name }}
+               {% if p.compartment %}   {{ p.compartment.name }} {% endif %}
         </td>
         <td>
-                {{ p.user.username }}
+               {% if p.user %}   {{ p.user.username }} {% endif %}
         </td>
         {% if p.requested_by %}
         <td>
@@ -77,6 +77,96 @@
 
       </tr>
     {% endfor %}
+
+  </table>
+{% endif %}
+
+
+{% if ped_org_data %}
+
+  <h2> {{_('Original HSM PED Information')}} </h2>
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Key Type')}}</td>
+      <td>{{_('Key No')}}</td>
+      <td>{{_('Key S/N')}}</td>
+      <td>{{_('HSM Domain')}}</td>
+      <td>{{_('Safe')}}</td>
+      <td>{{_('Owner')}}</td>
+    </tr>
+
+    {% for p in ped_org_data %}
+
+      <tr>
+        <td>
+                {{ p.type }}
+        </td>
+        <td>
+              <A HREF="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
+                {{ p.keyno }}
+              </A>
+        </td>
+        <td>
+                {{ p.keysn }}
+        </td>
+        <td>
+               {% if p.hsmdomain %}   {{ p.hsmdomain.name }}  {% endif %}
+        </td>
+        <td>
+               {% if p.compartment %}   {{ p.compartment.name }} {% endif %}
+        </td>
+        <td>
+               {% if p.user %}   {{ p.user.username }} {% endif %}
+        </td>
+        {% if p.requested_by %}
+        <td>
+            {{ p.requested_by.username }}
+        </td>
+        {% endif %}
+
+      </tr>
+    </table>
+
+    {% endfor %}
+    {% if hsmpedupdate %}
+    <h2> {{_('Requested update HSM PED Information')}} </h2>
+    <table class="table table-hover">
+      <tr>
+        <td>{{_('Key Type')}}</td>
+        <td>{{_('Key No')}}</td>
+        <td>{{_('Key S/N')}}</td>
+        <td>{{_('HSM Domain')}}</td>
+        <td>{{_('Safe')}}</td>
+        <td>{{_('Owner')}}</td>
+      </tr>
+
+    <tr>
+      <td>
+              {{ hsmpedupdate.type }}
+      </td>
+      <td>
+              {{ hsmpedupdate.keyno }}
+      </td>
+      <td>
+              {{ hsmpedupdate.keysn }}
+      </td>
+      <td>
+             {% if hsmpedupdate.hsmdomain %}   {{ hsmpedupdate.hsmdomain.name }}  {% endif %}
+      </td>
+      <td>
+             {% if hsmpedupdate.compartment %}   {{ hsmpedupdate.compartment.name }} {% endif %}
+      </td>
+      <td>
+             {% if hsmpedupdate.user %}   {{ hsmpedupdate.user.username }} {% endif %}
+      </td>
+      <td>
+        {% if hsmpedupdate.requested_by %} {{ hsmpedupdate.requested_by.username }}{% endif %}
+      </td>
+
+    </tr>
+
+    {% endif %}
+
 
   </table>
 {% endif %}
@@ -224,6 +314,8 @@
             </li>
         </ul>
     </nav>
+
+
     {% if form %}
       {{ wtf.quick_form(form) }}
     {% endif %}

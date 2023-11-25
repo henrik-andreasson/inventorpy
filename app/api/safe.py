@@ -160,9 +160,10 @@ def get_compartmentlist():
 
     compartments = Compartment.query.all()
 
-    data = {
-        'items': [(item.id,) for item in compartments],
-    }
+    data = []
+    for compartment in compartments:
+        data.append(compartment.id)
+
     return jsonify(data)
 
 
@@ -172,14 +173,14 @@ def get_compartment(id):
     return jsonify(Compartment.query.get_or_404(id).to_dict())
 
 
-@bp.route('/compartment/<int:id>', methods=['PUT'])
+@bp.route('/compartment/<int:id>', methods=['POST'])
 @token_auth.login_required
 def update_compartment(id):
     compartment = Compartment.query.get_or_404(id)
     original_data = compartment.to_dict()
 
     data = request.get_json() or {}
-    compartment.from_dict(data, new_compartment=False)
+    compartment.from_dict(data)
     db.session.commit()
     audit.auditlog_update_post('compartment', original_data=original_data, updated_data=compartment.to_dict(), record_name=compartment.name)
 
