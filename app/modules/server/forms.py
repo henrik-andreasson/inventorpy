@@ -133,9 +133,10 @@ class VirtualServerForm(FlaskForm):
         self.service.choices = [(s.id, s.name)
                                 for s in Service.query.order_by(Service.name).all()]
         self.network.choices = [(n.id, n.name)
-                                for n in Network.query.order_by(Network.id).all()]
+                                for n in Network.query.order_by(Network.name).all()]
         self.network.choices.insert(0, (-1, _l('None')))
-        self.hosting_server.choices = [(s.id, s.hostname, s.rack.name)
+
+        self.hosting_server.choices = [(s.id, f'{s.hostname} - {s.rack.name}')
                                        for s in Server.query.filter((Server.virtual_host != 'no')).all()]
         self.hosting_server.choices.insert(0, (-1, _l('None')))
 
