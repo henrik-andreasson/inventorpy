@@ -67,7 +67,6 @@ def search():
 
     users = []
     hits = []
-    if keyword is not None:
 
 # Switch
     return render_template('search.html', title=_('Search'),
