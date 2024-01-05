@@ -36,9 +36,6 @@ babel = Babel()
 from app.models import Audit
 audit = Audit()
 
-from flask_msearch import Search
-search = Search()
-
 
 def create_app(config_class=Config):
     app = Flask(__name__)
