@@ -453,11 +453,7 @@ def virtual_server_copy():
     else:
         form.service.choices = [(s.id, s.name) for s in Service.query.all()]
 
-    location_choices = []
-    for l in Location.query.all():
-        newloc = (l.id, l.longName())
-        location_choices.append(newloc)
-    form.location.choices = location_choices
+
 
     if copy_from_virtual_server is None:
         render_template('service.html', title=_(
