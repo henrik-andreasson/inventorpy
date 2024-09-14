@@ -24,7 +24,7 @@ class HsmDomainForm(FlaskForm):
 
 class HsmPedForm(FlaskForm):
     # TODO: move ped_types to global definition
-    hsmped = SelectField(_l('HSM PED'), coerce=int)
+#    hsmped = SelectField(_l('HSM PED'), coerce=int)
     type = SelectField(_l('PED Type'), choices=[('blue', 'HSM Admin (BLUE)'),
                                                 ('red', 'Partition Admin (RED)'),
                                                 ('black', 'User (BLACK)'),
@@ -50,7 +50,7 @@ class HsmPedForm(FlaskForm):
         self.user.choices = [(u.id, u.username) for u in User.query.all()]
         self.duplicate_of.choices = [(p.id, f"{p.keysn}/{p.type}/{p.user.username}") for p in HsmPed.query.all()]
         self.duplicate_of.choices.insert(0, (0, 'None'))
-        self.hsmped.choices = [(h.id, f"{h.keysn}/{h.type}/{h.user.username}") for h in HsmPed.query.all()]
+#        self.hsmped.choices = [(h.id, f"{h.keysn}/{h.type}/{h.user.username}") for h in HsmPed.query.all()]
 
 
 class HsmPedUpdateForm(FlaskForm):

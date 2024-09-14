@@ -96,6 +96,41 @@ def hsm_domain_list():
                            prev_url=prev_url)
 
 
+@bp.route('/hsm/domain/content/', methods=['GET', 'POST'])
+@login_required
+def hsm_domain_content():
+
+    domain = request.args.get('domain', 1, type=int)
+    page = request.args.get('page', 1, type=int)
+
+    hsmdomain = HsmDomain.query.get(domain)
+    if hsmdomain is None:
+        flash(_('HSM Domain was not found!'))
+        return redirect(request.referrer)
+
+    hsmbackupunits = HsmBackupUnit.query.filter_by(hsmdomain_id=hsmdomain.id)
+    hsmpcicards = HsmPciCard.query.filter_by(hsmdomain_id=hsmdomain.id)
+    hsmpeds = HsmPed.query.filter_by(hsmdomain_id=hsmdomain.id)
+    hsmpins = []
+    for p in hsmpeds:
+        newpin = HsmPin.query.filter_by(ped_id=p.id).first()
+        if newpin is None:
+            print(f'ped: {p.keysn} had no pin found')
+        else:
+            hsmpins.append(newpin)
+
+    for i in hsmpins:
+        print(f' pin {i.id} found')
+
+    return render_template('hsmcontent.html', title=_(f'HSM Domain Content: {hsmdomain.name}'),
+                           hsmdomain=hsmdomain,
+                           hsmbackupunits=hsmbackupunits,
+                           hsmpcicards=hsmpcicards,
+                           hsmpeds=hsmpeds,
+                           hsmpins=hsmpins
+    )
+
+
 @bp.route('/hsm/domain/delete/', methods=['GET', 'POST'])
 @login_required
 def hsm_domain_delete():
@@ -463,7 +498,7 @@ def hsm_pcicard_add():
 
     if request.method == 'POST' and form.validate_on_submit():
 
-        if form.server.data == 0 and form.compartment.data == 0:
+        if form.server.data == 0 and form.safe.data == 0:
             flash(_('Must select server OR compartment!'))
             return redirect(request.referrer)
 

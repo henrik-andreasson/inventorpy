@@ -1,0 +1,129 @@
+{% extends "base.html" %} {% import 'bootstrap/wtf.html' as wtf %} {% block
+app_content %} {% if hsmpcicards %}
+
+<h2>HSM PCI Cards</h2>
+
+<table class="table table-hover">
+    <tr>
+        <td>{{_('Inventory id')}}</td>
+        <td>{{_('Serial')}}</td>
+        <td>{{_('Server')}}</td>
+        <td>{{_('Safe')}}</td>
+    </tr>
+
+    {% for h in hsmpcicards %}
+
+    <tr>
+        <td>{{ h.inventory_id() }}</td>
+        <td>
+            <a href="{{url_for('main.hsm_pcicard_edit', pcicard=h.id)}}">
+                {{ h.serial }}
+            </a>
+        </td>
+        <td>{{ h.server.hostname }}</td>
+        <td>{{ h.safe.name }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %} {% if hsmbackupunits %}
+
+<h2>HSM Backup Units</h2>
+
+<table class="table table-hover">
+    <tr>
+        <td>{{_('Inventory id')}}</td>
+        <td>{{_('Serial')}}</td>
+        <td>{{_('Name')}}</td>
+        <td>{{_('Safe')}}</td>
+        <td>{{_('Service')}}</td>
+    </tr>
+
+    {% for b in hsmbackupunits %}
+
+    <tr>
+        <td>{{ b.inventory_id() }}</td>
+        <td>
+            <a href="{{url_for('main.hsm_backupunit_edit', id=b.id)}}">
+                {{ b.serial }}
+            </a>
+        </td>
+        <td>{{ b.name }}</td>
+        <td>{{ b.safe.name }}</td>
+        <td>{{ b.hsmdomain.service.name }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %} {% if hsmpeds %}
+<h2>HSM Ped</h2>
+<table class="table table-hover">
+    <tr>
+        <td>{{_('Inventory id')}}</td>
+        <td>{{_('Key No')}}</td>
+        <td>{{_('Key S/N')}}</td>
+        <td>{{_('Safe')}}</td>
+        <td>{{_('Owner')}}</td>
+    </tr>
+
+    {% for p in hsmpeds %}
+
+    <tr>
+        <td>{{ p.inventory_id() }}</td>
+        <td>
+            <a href="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
+                {{ p.keyno }}
+            </a>
+        </td>
+        <td>{{ p.keysn }}</td>
+        <td>{{ p.compartment.name }}</td>
+        <td>{{ p.user.username }}</td>
+        {% if p.requested_by %}
+        <td>{{ p.requested_by.username }}</td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+</table>
+{% endif %} {% if hsmpins %}
+
+<h2>HSM PIN</h2>
+
+<table class="table table-hover">
+    <tr>
+        <td>{{_('Inventory id')}}</td>
+        <td>{{_('Key No')}}</td>
+        <td>{{_('Key S/N')}}</td>
+        <td>{{_('Compartment')}}</td>
+        <td>{{_('Owner')}}</td>
+    </tr>
+
+    {% for i in hsmpins %}
+
+    <tr>
+        <td>{{ i.inventory_id() }}</td>
+        <td>
+            <a href="{{url_for('main.hsm_pin_edit', pin=i.id)}}">
+                {{ i.id }}
+            </a>
+        </td>
+        <td>{{ i.ped.keysn }}</td>
+        <td>{{i.compartment.name}}</td>
+        <td>{{i.ped.user.username}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+<nav aria-label="...">
+    <ul class="pager">
+        <li class="previous{% if not prev_url %} disabled{% endif %}">
+            <a href="{{ prev_url or '#' }}">
+                <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+            </a>
+        </li>
+        <li class="next{% if not next_url %} disabled{% endif %}">
+            <a href="{{ next_url or '#' }}">
+                {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% if form %} {{ wtf.quick_form(form) }} {% endif %} {% endblock %}
