@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+{% if order == "desc" %}
+  {% set order %}asc{% endset %}
+{% else %}
+  {% set order %}desc{% endset %}
+{% endif %}
+
+{% if pcs %}
+<table class="table table-hover">
+    <tr>
+      <td><A HREF="{{url_for('main.pc_list', sort='id',         order=order)}}">{{_('Inventory ID')}}</A></td>
+      <td><A HREF="{{url_for('main.pc_list', sort='serial',     order=order)}}">{{_('Serial')}}    </A></td>
+      <td><A HREF="{{url_for('main.pc_list', sort='env',        order=order)}}">{{_('Environment')}}  </A></td>
+      <td><A HREF="{{url_for('main.pc_list', sort='service_id', order=order)}}">{{_('Service')}}     </A></td>
+      <td>{{_('Actions')}}        </A></td>
+    </tr>
+
+    {% for s in pcs %}
+
+      <tr>
+        <td>
+              {{ s.inventory_id() }}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.pc_edit', pc=s.id)}}">
+            {{ s.serial }}
+          </A>
+        </td>
+        <td>
+                {{s.environmane}}
+        </td>
+        <td>
+          {% if s.service %}
+              {{s.service.name}}
+          {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.pc_edit', pc=s.id)}}">
+            {{ _('Edit') }}
+          </A> -
+          <A HREF="{{url_for('main.pc_copy', copy_from_pc=s.id)}}">
+            {{ _('Copy') }}
+          </A>
+          {% if s.manufacturer.lower()  == "dell" %}
+            -
+            <A HREF="https://www.dell.com/support/home/en-us/product-support/servicetag/{{s.serial}}">
+              {{ _('Dell support') }}
+            </A>
+          {% endif %}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </table>
+
+
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+{% endif %}
+
+
+
+{% if form %}
+      {{ wtf.quick_form(form) }}
+{% endif %}
+
+{% if qr %}
+      <img src="{{ url_for('static', filename=qr) }}" />
+{% endif %}
+
+
+{% endblock %}

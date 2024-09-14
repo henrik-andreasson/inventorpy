@@ -11,6 +11,8 @@ class Pc(db.Model):
                       'cpu', 'model', 'os_name', 'manufacturer', 'comment',
                       'environment']
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    name = db.Column(db.String(140), unique=True)
     status = db.Column(db.String(140))
     network_id = db.Column(db.Integer, db.ForeignKey('network.id'))
     network = db.relationship('Network')
@@ -28,7 +30,7 @@ class Pc(db.Model):
     support_start = db.Column(db.DateTime)
     support_end = db.Column(db.DateTime)
     environment = db.Column(db.String(140))
-#    switch_port_id = db.Column(db.Integer, db.ForeignKey('switch_port.id'))
+    switch_port_id = db.Column(db.Integer, db.ForeignKey('switch_port.id'))
 
     def __repr__(self):
         return '<Pc {}>'.format(self.id)

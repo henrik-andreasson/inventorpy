@@ -37,6 +37,7 @@ def pc_add():
             return redirect(request.referrer)
 
         pc = Pc(
+                        name=form.name.data,
                         status=form.status.data,
                         network_id=form.network.data,
                         memory=form.memory.data,
@@ -106,6 +107,7 @@ def pc_edit():
 
     if request.method == 'POST' and form.validate_on_submit():
 
+        pc.name = form.name.data
         pc.status = form.status.data
         pc.network_id = form.network.data
         pc.memory = form.memory.data
@@ -167,6 +169,7 @@ def pc_copy():
 
     if request.method == 'POST' and form.validate_on_submit():
         pc = Pc(
+                        name=form.name.data,
                         status=form.status.data,
                         network_id=form.network.data,
                         memory=form.memory.data,

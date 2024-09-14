@@ -6,19 +6,24 @@ from datetime import datetime, timedelta
 from app.models import Location, Service
 from app.modules.rack.models import Rack
 from app.modules.network.models import Network
+from app.modules.switch.models import SwitchPort
 from app.modules.server.models import Server
+from app.models import User
 
 
 class PcForm(FlaskForm):
-    memory = StringField(_l('Memory'))
-    cpu = StringField(_l('CPU'))
-    hd = StringField(_l('Hard drive'))
-    os_name = StringField(_l('OS Name'))
-    os_version = StringField(_l('OS Version'))
+    user = SelectField(_l('User'))
+    name = StringField(_l('Name'),default="1")
+    memory = StringField(_l('Memory'),default="4GB")
+    cpu = StringField(_l('CPU'),default="4 core")
+    hd = StringField(_l('Hard drive'),default="SSD 100GB")
+    os_name = StringField(_l('OS Name'),default="Debian")
+    os_version = StringField(_l('OS Version'),default="12")
     serial = StringField(_l('Serial'), validators=[DataRequired()])
-    manufacturer = StringField(_l('Manufacturer'))
-    model = StringField(_l('Model'))
+    manufacturer = StringField(_l('Manufacturer'),default="Lenovo")
+    model = StringField(_l('Model'),default="Thinkstation")
     service = SelectField(_l('Service'), coerce=int)
+    switchport = SelectField(_l('Switch port'), coerce=int)
     network = SelectField(_l('Network'), coerce=int, validators=[
                           NumberRange(1, None, _l('Must select a Network'))])
     environment = SelectField(_l('Environment'), choices=[('dev', 'Development'),
@@ -28,7 +33,6 @@ class PcForm(FlaskForm):
                                                           ('at', 'Acceptance Testing'),
                                                           ('prod', 'Production'),
                                                           ])
-
     status = SelectField(_l('Status'), choices=[('pre-op', 'Pre Operation'),
                                                 ('operation', 'Operation'),
                                                 ('post-op', 'Post Operation'),
@@ -52,9 +56,14 @@ class PcForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.service.choices = [(s.id, s.name)
                                 for s in Service.query.order_by(Service.name).all()]
+        self.user.choices = [(u.id, u.username)
+                            for u in User.query.order_by(User.username).all()]
         self.network.choices = [(n.id, n.name)
                                 for n in Network.query.order_by(Network.name).all()]
+        self.switchport.choices = [(s.id, s.name)
+                                  for s in SwitchPort.query.order_by(SwitchPort.name).all()]
         self.network.choices.insert(0, (-1, _l('None')))
+        self.user.choices.insert(0, (-1, _l('None')))
 
 
 class FilterPcListForm(FlaskForm):

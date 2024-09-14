@@ -52,6 +52,14 @@
          </ul>
      </li>
      <li class="dropdown">
+         <a class="dropdown-toggle" data-toggle="dropdown" href="#">PC
+         <span class="caret"></span></a>
+         <ul class="dropdown-menu">
+           <li class="nav-item"><a href="{{ url_for('main.pc_list') }}">{{ _('List PCs') }}</a></li>
+           <li class="nav-item"><a href="{{ url_for('main.pc_add') }}">{{ _('Add PC') }}</a></li>
+         </ul>
+     </li>
+     <li class="dropdown">
          <a class="dropdown-toggle" data-toggle="dropdown" href="#">Network
          <span class="caret"></span></a>
          <ul class="dropdown-menu">

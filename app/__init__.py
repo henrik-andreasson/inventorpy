@@ -64,6 +64,9 @@ def create_app(config_class=Config):
     from app.modules.server import bp as server_bp
     app.register_blueprint(server_bp, url_prefix='/server')
 
+    from app.modules.pc import bp as pc_bp
+    app.register_blueprint(pc_bp, url_prefix='/pc')
+
     from app.modules.safe import bp as safe_bp
     app.register_blueprint(safe_bp, url_prefix='/safe')
 
