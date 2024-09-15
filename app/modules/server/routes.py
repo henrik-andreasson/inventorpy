@@ -260,9 +260,6 @@ def server_list():
         environment = form.environment.data
         service = Service.query.filter_by(id=service_id).first()
         rack = Rack.query.get(rack_id)
-        print(f"input service_id {service_id}")
-        print(f"input rack_id {rack_id}")
-        print(f"input environment {environment}")
         if service is not None:
             filter_by_service = service.id
         if service_id == "all" or service_id == -1:
@@ -549,6 +546,9 @@ def virtual_server_list():
     page = request.args.get('page', 1, type=int)
     sort = request.args.get('sort', 'hostname')
     order = request.args.get('order', 'asc')
+    filter_by_service = request.args.get('filter_by_service', None)
+    filter_by_environment = request.args.get('filter_by_environment', None)
+
     virtual_server_vars = list(vars(VirtualServer).keys())
 
     if sort not in virtual_server_vars:
@@ -569,10 +569,41 @@ def virtual_server_list():
         service_id = form.service.data
         environment = form.environment.data
         service = Service.query.filter_by(id=service_id).first()
+        if service is not None:
+            filter_by_service = service.id
+        if service_id == "all" or service_id == -1:
+            print(f"resetting service posted as all")
+            filter_by_service = None
+        if environment is not None:
+            filter_by_environment = environment
+        if environment == "all":
+            print(f"resetting environment posted as all")
+            filter_by_environment = None
+        page=0
+
     else:
         service_name = request.args.get('service')
         service = Service.query.filter_by(name=service_name).first()
         environment = request.args.get('environment')
+        if filter_by_service is not None:
+            print(f"service set by filter_by_service {filter_by_service}")
+            service = Service.query.get(filter_by_service)
+        else:
+            print(f"service set by service {service}")
+            service = Service.query.filter_by(name=service_name).first()
+
+        if filter_by_environment is not None:
+            print(f"env set by filter_by_environment {filter_by_environment}")
+            environment = filter_by_environment
+        else:
+            print(f"env set by environment {environment}")
+            environment = request.args.get('environment')
+
+        if service is not None:
+            form.service.data = service.id
+
+        if environment is not None and environment != "all":
+            form.environment.data = environment
 
     input_search_query = []
     if service is not None:
@@ -592,9 +623,13 @@ def virtual_server_list():
         virtual_servers = VirtualServer.query.filter(eval(query)).order_by(eval(sortstr)).paginate(
             page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
-    next_url = url_for('main.virtual_server_list', page=virtual_servers.next_num) \
+    next_url = url_for('main.virtual_server_list', page=virtual_servers.next_num,
+        filter_by_environment=filter_by_environment,
+        filter_by_service=filter_by_service) \
         if virtual_servers.has_next else None
-    prev_url = url_for('main.virtual_server_list', page=virtual_servers.prev_num) \
+    prev_url = url_for('main.virtual_server_list', page=virtual_servers.prev_num,
+        filter_by_environment=filter_by_environment,
+        filter_by_service=filter_by_service) \
         if virtual_servers.has_prev else None
 
     return render_template('server.html', title=_('VirtualServer'),
