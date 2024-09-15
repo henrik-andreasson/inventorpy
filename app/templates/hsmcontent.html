@@ -58,9 +58,10 @@ app_content %} {% if hsmpcicards %}
 <table class="table table-hover">
     <tr>
         <td>{{_('Inventory id')}}</td>
+        <td>{{_('Color')}}</td>
         <td>{{_('Key No')}}</td>
         <td>{{_('Key S/N')}}</td>
-        <td>{{_('Safe')}}</td>
+        <td>{{_('Compartment')}}</td>
         <td>{{_('Owner')}}</td>
     </tr>
 
@@ -68,6 +69,7 @@ app_content %} {% if hsmpcicards %}
 
     <tr>
         <td>{{ p.inventory_id() }}</td>
+        <td>{{ p.type }}</td>
         <td>
             <a href="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
                 {{ p.keyno }}

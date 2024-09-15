@@ -110,7 +110,7 @@ def hsm_domain_content():
 
     hsmbackupunits = HsmBackupUnit.query.filter_by(hsmdomain_id=hsmdomain.id)
     hsmpcicards = HsmPciCard.query.filter_by(hsmdomain_id=hsmdomain.id)
-    hsmpeds = HsmPed.query.filter_by(hsmdomain_id=hsmdomain.id)
+    hsmpeds = HsmPed.query.filter_by(hsmdomain_id=hsmdomain.id).order_by(HsmPed.type)
     hsmpins = []
     for p in hsmpeds:
         newpin = HsmPin.query.filter_by(ped_id=p.id).first()
@@ -249,7 +249,13 @@ def hsm_ped_edit():
         form.compartment.data = hsmped.compartment_id
         form.hsmdomain.data = hsmped.hsmdomain_id
         form.user.data = hsmped.user_id
-        form.hsmped.data = hsmped.id
+        form.type.data = hsmped.type
+        form.keysn.data = hsmped.keysn
+        form.keyno.data = hsmped.keyno
+        form.user.data = hsmped.user.id
+        form.duplicate_of.data = hsmped.duplicate_of
+        form.comment.data = hsmped.comment
+
 
         return render_template('hsm.html', title=_('Edit HSM Ped'),
                                form=form)
