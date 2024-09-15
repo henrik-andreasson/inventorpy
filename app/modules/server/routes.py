@@ -234,6 +234,9 @@ def server_list():
     page = request.args.get('page', 1, type=int)
     sort = request.args.get('sort', 'hostname')
     order = request.args.get('order', 'asc')
+    filter_by_rack = request.args.get('filter_by_rack', None)
+    filter_by_service = request.args.get('filter_by_service', None)
+    filter_by_environment = request.args.get('filter_by_environment', None)
     server_vars = list(vars(Server).keys())
 
     if sort not in server_vars:
@@ -257,38 +260,93 @@ def server_list():
         environment = form.environment.data
         service = Service.query.filter_by(id=service_id).first()
         rack = Rack.query.get(rack_id)
+        print(f"input service_id {service_id}")
+        print(f"input rack_id {rack_id}")
+        print(f"input environment {environment}")
+        if service is not None:
+            filter_by_service = service.id
+        if service_id == "all" or service_id == -1:
+            print(f"resetting service posted as all")
+            filter_by_service = None
+        if rack is not None:
+            filter_by_rack = rack.id
+        if rack_id == "all" or rack_id == -1:
+            print(f"resetting rack posted as all")
+            filter_by_rack = None
+        if environment is not None:
+            filter_by_environment = environment
+        if environment == "all":
+            print(f"resetting environment posted as all")
+            filter_by_environment = None
+        page=0
+
     else:
         service_name = request.args.get('service')
-        service = Service.query.filter_by(name=service_name).first()
-        environment = request.args.get('environment')
+        if filter_by_service is not None:
+            print(f"service set by filter_by_service {filter_by_service}")
+            service = Service.query.get(filter_by_service)
+        else:
+            print(f"service set by service {service}")
+            service = Service.query.filter_by(name=service_name).first()
+
+        if filter_by_environment is not None:
+            print(f"env set by filter_by_environment {filter_by_environment}")
+            environment = filter_by_environment
+        else:
+            print(f"env set by environment {environment}")
+            environment = request.args.get('environment')
+
         rack_id = request.args.get('rack_id')
-        if rack_id is not None:
+        if filter_by_rack is not None:
+            print(f"rack set by filter_by_rack {filter_by_rack}")
+            rack_id = filter_by_rack
             rack = Rack.query.get(rack_id)
+        else:
+            rack = Rack.query.get(rack_id)
+            print(f"rack set by rack_id {rack_id}")
+
+        if service is not None:
+            form.service.data = service.id
+
+        if environment is not None and environment != "all":
+            form.environment.data = environment
+
+        if rack is not None:
+            form.rack.data = rack.id
 
     input_search_query = []
+
     if service is not None:
         print("service: {}".format(service.name))
         input_search_query.append('(Server.service_id == service.id)')
+
     if environment is not None and environment != "all":
         print("env: {}".format(environment))
         input_search_query.append('(Server.environment == environment)')
+
     if rack is not None:
         print("env: {}".format(rack.name))
         input_search_query.append('(Server.rack_id == rack.id)')
 
     if len(input_search_query) < 1:
+        print(f"input_search_query {input_search_query}")
         servers = Server.query.order_by(eval(sortstr)).paginate(
             page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
     else:
         query = " & ".join(input_search_query)
-        print("query: {}".format(query))
         servers = Server.query.filter(eval(query)).order_by(eval(sortstr)).paginate(
             page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
-    next_url = url_for('main.server_list', page=servers.next_num) \
+    next_url = url_for('main.server_list', page=servers.next_num,
+        filter_by_environment=filter_by_environment,
+        filter_by_service=filter_by_service,
+        filter_by_rack=filter_by_rack) \
         if servers.has_next else None
-    prev_url = url_for('main.server_list', page=servers.prev_num) \
+    prev_url = url_for('main.server_list', page=servers.prev_num,
+        filter_by_environment=filter_by_environment,
+        filter_by_service=filter_by_service,
+        filter_by_rack=filter_by_rack) \
         if servers.has_prev else None
 
     return render_template('server.html', title=_('Server'),
