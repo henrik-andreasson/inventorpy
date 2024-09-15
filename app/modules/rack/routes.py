@@ -78,7 +78,8 @@ def rack_edit():
         return redirect(url_for('main.index'))
 
     else:
-        form.location.data = rack.location.id
+        if rack.location is not None:
+            form.location.data = rack.location.id
         return render_template('rack.html', title=_('Edit Rack'),
                                form=form)
 
