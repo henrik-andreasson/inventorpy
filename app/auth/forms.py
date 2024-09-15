@@ -62,7 +62,7 @@ class AdminChangePasswordForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username.choices = [(u.id, u.username)
-                                 for u in User.query.order_by(User.username).all()]
+                                 for u in User.query.filter(User.active!="inactive").order_by(User.username).all()]
         self.username.choices.insert(0, (-1, _l('- Select -')))
 
 
@@ -73,7 +73,7 @@ class AdminSelecteUserForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username.choices = [(u.id, u.username)
-                                 for u in User.query.order_by(User.username).all()]
+                                 for u in User.query.filter(User.active!="inactive").order_by(User.username).all()]
         self.username.choices.insert(0, (-1, _l('- Select -')))
 
 
@@ -86,6 +86,8 @@ class AdminUpdateUserForm(FlaskForm):
     work_percent = StringField(_l('Work Percent'), default=100)
     role = SelectField(_l('Role'), choices=[('user', 'User'),
                                             ('admin', 'Admin')])
+    active = SelectField(_l('Active'), choices=[('active', 'Active'),
+                                            ('inactive', 'Inactive')])
 
     submit = SubmitField(_l('Register'))
 

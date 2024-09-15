@@ -150,7 +150,7 @@ def compartment_add():
     form = CompartmentForm(formdata=request.form)
 
     form.safe.choices = [(s.id, s.name) for s in Safe.query.all()]
-    form.user.choices = [(u.id, u.username) for u in User.query.all()]
+    form.user.choices = [(u.id, u.username) for u in User.query.filter(User.active!="inactive").all()]
 
     if request.method == 'POST' and form.validate_on_submit():
         user = User.query.get(form.user.data)

@@ -72,6 +72,7 @@ def search():
         User.role.like(f"%{keyword}%") |
         User.about_me.like(f"%{keyword}%")
     ).order_by(User.username).all()
+
     servers = Server.query.filter(Server.hostname.like(f"%{keyword}%") |
        Server.role.like(f"%{keyword}%") |
        Server.status.like(f"%{keyword}%") |
@@ -83,6 +84,7 @@ def search():
        Server.comment.like(f"%{keyword}%") |
        Server.environment.like(f"%{keyword}%")
     ).order_by(Server.hostname).all()
+
     virtserv = VirtualServer.query.filter(VirtualServer.hostname.like(f"%{keyword}%") |
         VirtualServer.role.like(f"%{keyword}%") |
         VirtualServer.status.like(f"%{keyword}%") |
@@ -134,31 +136,28 @@ def search():
                 HsmPciCard.comment.like(f"%{keyword}%")
             ).order_by(HsmPciCard.name).all()
 
-
     hsmbackupunits = HsmBackupUnit.query.filter(HsmBackupUnit.name.like(f"%{keyword}%") |
                     HsmBackupUnit.serial.like(f"%{keyword}%") |
-                    HsmBackupUnit.fbno.like(f"%{keyword}%") |
                     HsmBackupUnit.model.like(f"%{keyword}%") |
                     HsmBackupUnit.manufacturedate.like(f"%{keyword}%") |
                     HsmBackupUnit.comment.like(f"%{keyword}%")
                 ).order_by(HsmBackupUnit.name).all()
 
-
-    # pcs = Pc.query.filter(Pc.name.like(f"%{keyword}%") |
-    #                         Pc.serial.like(f"%{keyword}%") |
-    #                         Pc.memory.like(f"%{keyword}%") |
-    #                         Pc.model.like(f"%{keyword}%") |
-    #                         Pc.manufacturer.like(f"%{keyword}%") |
-    #                         Pc.status.like(f"%{keyword}%") |
-    #                         Pc.cpu.like(f"%{keyword}%") |
-    #                         Pc.hd.like(f"%{keyword}%") |
-    #                         Pc.os_name.like(f"%{keyword}%") |
-    #                         Pc.os_version.like(f"%{keyword}%") |
-    #                         Pc.support_start.like(f"%{keyword}%") |
-    #                         Pc.support_end.like(f"%{keyword}%") |
-    #                         Pc.environment.like(f"%{keyword}%") |
-    #                         Pc.comment.like(f"%{keyword}%")
-    #                     ).order_by(HsmBackupUnit.name).all()
+    pcs = Pc.query.filter(Pc.name.like(f"%{keyword}%") |
+                            Pc.serial.like(f"%{keyword}%") |
+                            Pc.memory.like(f"%{keyword}%") |
+                            Pc.model.like(f"%{keyword}%") |
+                            Pc.manufacturer.like(f"%{keyword}%") |
+                            Pc.status.like(f"%{keyword}%") |
+                            Pc.cpu.like(f"%{keyword}%") |
+                            Pc.hd.like(f"%{keyword}%") |
+                            Pc.os_name.like(f"%{keyword}%") |
+                            Pc.os_version.like(f"%{keyword}%") |
+                            Pc.support_start.like(f"%{keyword}%") |
+                            Pc.support_end.like(f"%{keyword}%") |
+                            Pc.environment.like(f"%{keyword}%") |
+                            Pc.comment.like(f"%{keyword}%")
+                        ).order_by(Pc.name).all()
 
     racks = Rack.query.filter(Rack.name.like(f"%{keyword}%") |
                             Rack.comment.like(f"%{keyword}%")
@@ -200,7 +199,7 @@ def search():
                            hsmpeds=hsmpeds,
                            hsmpcicards=hsmpcicards,
                            hsmbackupunits=hsmbackupunits,
-#                           pcs=pcs,
+                           pcs=pcs,
                            racks=racks,
                            safes=safes,
                            compartments=compartments,
@@ -234,8 +233,14 @@ def user(username):
 @login_required
 def user_list():
     page = request.args.get('page', 1, type=int)
-    users = User.query.order_by(User.username).paginate(
-        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+    all = request.args.get('all', "no")
+    if all != "yes":
+        users = User.query.filter(User.active != "inactive").order_by(User.username).paginate(
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+    else:
+        users = User.query.order_by(User.username).paginate(
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+
     services = Service.query.all()
 
     next_url = url_for(

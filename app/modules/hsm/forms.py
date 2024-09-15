@@ -47,7 +47,7 @@ class HsmPedForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
         self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-        self.user.choices = [(u.id, u.username) for u in User.query.all()]
+        self.user.choices = [(u.id, u.username) for u in User.query.filter(User.active!="inactive").all()]
         self.duplicate_of.choices = [(p.id, f"{p.keysn}/{p.type}/{p.user.username}") for p in HsmPed.query.all()]
         self.duplicate_of.choices.insert(0, (0, 'None'))
 #        self.hsmped.choices = [(h.id, f"{h.keysn}/{h.type}/{h.user.username}") for h in HsmPed.query.all()]
@@ -77,7 +77,7 @@ class HsmPedUpdateForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.compartment.choices = [(c.id, '{} ({})'.format(c.name, c.user.username)) for c in Compartment.query.all()]
         self.hsmdomain.choices = [(h.id, h.name) for h in HsmDomain.query.all()]
-        self.user.choices = [(u.id, u.username) for u in User.query.all()]
+        self.user.choices = [(u.id, u.username) for u in User.query.filter(User.active!="inactive").all()]
         self.requested_by.choices = [(current_user.username, current_user.username)]
         self.hsmped.choices = [(h.id, f"{h.keysn}/{h.type}/{h.user.username}") for h in HsmPed.query.all()]
 

@@ -142,8 +142,7 @@ def user_set_password():
 def user_save():
     admin = User.query.filter_by(username=current_user.username).first()
     if admin.role != "admin":
-
-        flash(_('Updating other users is limited to admins'))
+        flash(_(f'Updating other users is limited to admins {admin.username} is {admin.role}'))
         return redirect(url_for('main.index'))
     userid = request.args.get('user')
     if userid is None:
@@ -152,7 +151,7 @@ def user_save():
 
     user = User.query.get(userid)
     if user is None:
-        flash(_('Userid not passed to user update'))
+        flash(_(f'User with id {userid} not found'))
         return redirect(url_for('main.index'))
 
     form = AdminUpdateUserForm()
@@ -162,6 +161,7 @@ def user_save():
         user.email = form.email.data
         user.work_percent = form.work_percent.data
         user.role = form.role.data
+        user.active = form.active.data
         db.session.commit()
         flash(_('User Updated'))
         return redirect(url_for('main.index'))

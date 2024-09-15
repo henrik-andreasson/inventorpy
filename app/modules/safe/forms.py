@@ -55,7 +55,7 @@ class CompartmentForm(FlaskForm):
         self.safe.choices = [(s.id, s.name)
                              for s in Safe.query.order_by(Safe.name).all()]
         self.user.choices = [(u.id, u.username)
-                             for u in User.query.order_by(User.username).all()]
+                             for u in User.query.filter(User.active!="inactive").order_by(User.username).all()]
 
 
 class AuditCompartmentForm(FlaskForm):

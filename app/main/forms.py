@@ -40,8 +40,8 @@ class ServiceForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.users.choices = [(u.id, u.username) for u in User.query.order_by(User.username).all()]
-        self.manager.choices = [(u.id, u.username) for u in User.query.order_by(User.username).all()]
+        self.users.choices = [(u.id, u.username) for u in User.query.filter(User.active!="inactive").order_by(User.username).all()]
+        self.manager.choices = [(u.id, u.username) for u in User.query.filter(User.active!="inactive").order_by(User.username).all()]
 
 
 class LocationForm(FlaskForm):

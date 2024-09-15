@@ -132,10 +132,11 @@ app_content %} {% if hsmdomains %}
 <table class="table table-hover">
     <tr>
         <td>{{_('Inventory id')}}</td>
+        <td>{{_('Key Type')}}</td>
         <td>{{_('Key No')}}</td>
         <td>{{_('Key S/N')}}</td>
         <td>{{_('HSM Domain')}}</td>
-        <td>{{_('Safe')}}</td>
+        <td>{{_('Compartment')}}</td>
         <td>{{_('Owner')}}</td>
     </tr>
 
@@ -143,13 +144,20 @@ app_content %} {% if hsmdomains %}
 
     <tr>
         <td>{{ i.inventory_id() }}</td>
+        <td>{% if i.ped %} {{i.ped.type}} {% endif %}</td>
         <td>
-            <a href="{{url_for('main.hsm_pin_edit', pin=i.id)}}"> i.id </a>
+            <a href="{{url_for('main.hsm_pin_edit', pin=i.id)}}"> {{i.id}} </a>
         </td>
-        <td>i.ped.keysn</td>
-        <td>i.ped.hsmdomain.name</td>
-        <td>i.safe.name</td>
-        <td>i.ped.user.username</td>
+        <td>{% if i.ped %} {{i.ped.keysn}} {% endif %}</td>
+        <td>
+            {% if i.ped %} {% if i.ped.hsmdomain %} {{i.ped.hsmdomain.name}} {%
+            endif %}{% endif %}
+        </td>
+        <td>{% if i.compartment %} {{i.compartment.name}} {% endif %}</td>
+        <td>
+            {% if i.ped %} {% if i.ped.user %} {{i.ped.user.username}} {% endif
+            %}{% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>

@@ -57,7 +57,7 @@ class PcForm(FlaskForm):
         self.service.choices = [(s.id, s.name)
                                 for s in Service.query.order_by(Service.name).all()]
         self.user.choices = [(u.id, u.username)
-                            for u in User.query.order_by(User.username).all()]
+                            for u in User.query.filter(User.active!="inactive").order_by(User.username).all()]
         self.network.choices = [(n.id, n.name)
                                 for n in Network.query.order_by(Network.name).all()]
         self.switchport.choices = [(s.id, s.name)
