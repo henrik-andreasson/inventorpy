@@ -3,43 +3,740 @@
 
 {% block app_content %}
 
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-6">
+{% if servers %}
+<h1>{{ _('Servers') }}</h1>
 
+<table class="table table-hover">
+    <tr>
+      <td><A HREF="{{url_for('main.server_list', sort='id',         order=order)}}">{{_('Inventory ID')}}</A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='hostname',   order=order)}}">{{_('Hostname')}}    </A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='ipaddress',  order=order)}}">{{_('IP Address')}}  </A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='service_id', order=order)}}">{{_('Service')}}     </A></td>
+      <td><A HREF="{{url_for('main.server_list', sort='rack_id',    order=order)}}">{{_('Rack')}}        </A></td>
+      <td>{{_('Actions')}}        </A></td>
+    </tr>
 
-          {% if hits %}
-          <div class="list-group">
-            {% for h in hits %}
-            <a href="{{ h.link }}" class="list-group-item">
-                    <div class="text-nowrap"><h4 class="list-group-item-heading">{{h.module}}: {{ h.title }}</h4></div>
-                    <div class="text-nowrap"><p class="list-group-item-text">{{h.text}}</p></div>
-            </a>
-            {% endfor %}
-          </div>
+    {% for s in servers %}
+
+      <tr>
+        <td>
+              {{ s.inventory_id() }}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.server_edit', server=s.id)}}">
+            {{ s.hostname }}
+          </A>
+        </td>
+        <td>
+                {{s.ipaddress}}
+        </td>
+        <td>
+          {% if s.service %}
+              {{s.service.name}}
           {% endif %}
-        </div>
-    </div>
-    <div class="row">
-      <div class="col-sm-6">
-        {% if form %}
-        {{ wtf.quick_form(form) }}
-        {% endif %}
+        </td>
+        <td>
+          {% if s.rack %}
+                {{s.rack.name}}
+          {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.server_edit', server=s.id)}}">
+            {{ _('Edit') }}
+          </A> -
+          <A HREF="{{url_for('main.server_copy', copy_from_server=s.id)}}">
+            {{ _('Copy') }}
+          </A>
+          {% if s.manufacturer.lower()  == "dell" %}
+            -
+            <A HREF="https://www.dell.com/support/home/en-us/product-support/servicetag/{{s.serial}}">
+              {{ _('Dell support') }}
+            </A>
+          {% endif %}
+        </td>
 
-      </div>
-  </div>
-  <div class="row">
-    <div class="col-sm-6">
-      {% if reindex %}
-        {{reindex}}
-      {% endif %}
+      </tr>
+    {% endfor %}
 
-    </div>
-</div>
-
-</div>
+    </table>
 
 
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span> {{ _('Previous page') }}
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    {{ _('Next page') }} <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+{% endif %}
+
+
+{% if virtual_servers %}
+<h1>{{ _('Virtual servers') }}</h1>
+
+<table class="table table-hover">
+    <tr>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='id',             order=order)}}">{{_('Inventory ID')}}</A></td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='hostname',       order=order)}}">{{_('Hostname')}}</td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='ipaddress',      order=order)}}">{{_('IP Address')}}</td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='service_id',     order=order)}}">{{_('Service')}}</td>
+      <td><A HREF="{{url_for('main.virtual_server_list', sort='hosting_server', order=order)}}">{{_('Hosting Server')}}</td>
+    </tr>
+
+    {% for vs in virtual_servers %}
+
+      <tr>
+        <td>
+              {{ vs.inventory_id() }}
+        </td>
+        <td>
+              <A HREF="{{url_for('main.virtual_server_edit', virtual_server=vs.id)}}">
+                {{ vs.hostname }}
+              </A>
+        </td>
+        <td>
+                {{vs.ipaddress}}
+        </td>
+        <td>
+          {% if vs.service %}
+              {{vs.service.name}}
+          {% endif %}
+        </td>
+        <td>
+            {{vs.hosting_server.hostname}}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </table>
+
+{% endif %}
+
+{% if users %}
+<h1>{{ _('Users') }}</h1>
+<table class="table table-hover">
+  <tr>
+      <td>  {{ _('User') }} </td>
+      <td>  {{ _('About') }}  </td>
+      <td>  {{ _('Services') }}  </td>
+      <td>  {{ _('Email') }} </td>
+      <td>  {{ _('Last seen') }} </td>
+  </tr>
+
+
+  {% for u in users %}
+  {% set user_link %}
+      <a href="{{ url_for('main.user', username=u.username) }}">
+          {{ u.username }}
+      </a>
+  {% endset %}
+
+    <tr>
+        <td>  {{ user_link }}  </td>
+        <td>  {{ u.about_me}} </td>
+        <td>
+          {% for service in services %}
+            {% for su in service.users %}
+              {% if su.username == u.username %}
+                {{ service.name }}
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+       </td>
+       <td>  {{ u.email}} </td>
+       <td>  {{ u.last_seen }} </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endif %}
+
+
+
+{% if firewalls %}
+<h1>{{ _('Firewall') }}</h1>
+
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('Alias')}}</td>
+      <td>{{_('Service')}}</td>
+      <td>{{_('Rack')}}</td>
+      <td>{{_('Actions')}}</td>
+    </tr>
+
+    {% for f in firewalls %}
+
+      <tr>
+        <td>
+              {{ f.inventory_id() }}
+        </td>
+        <td>
+                {{ f.name }}
+        </td>
+        <td>
+                {{f.alias}}
+        </td>
+        <td>
+          {% if f.service %}
+              {{f.service.name}}
+          {% endif %}
+        </td>
+        <td>
+          {% if f.rack %}
+                {{f.rack.name}}
+          {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.firewall_edit', firewall=f.id)}}"> {{ _('Edit') }}</A> <br/>
+          <A HREF="{{url_for('main.firewall_port_list', firewall=f.id)}}"> {{ _('List Ports') }}</A>
+        </td>
+
+      </tr>
+    {% endfor %}
+
+
+    </table>
+
+
+
+  {% endif %}
+
+  {% if firewallports %}
+  <h1>{{ _('firewallports') }}</h1>
+
+    <table class="table table-hover">
+        <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Name')}}</td>
+          <td>{{_('Firewall')}}</td>
+          <td>{{_('Switch')}}</td>
+          <td>{{_('Server')}}</td>
+        </tr>
+
+        {% for fp in firewallports %}
+
+          <tr>
+            <td>
+                  {{ fp.inventory_id() }}
+            </td>
+            <td>
+                  <A HREF="{{url_for('main.firewall_port_edit', firewallport=fp.id)}}">
+                    {{ fp.name }}
+                  </A>
+            </td>
+            <td>
+                    {{fp.firewall.name}}
+            </td>
+            <td>
+              {% if fp.switch %}
+                    {{fp.switch.name}}
+              {% endif %}
+            </td>
+            <td>
+              {% if fp.server %}
+                  {{fp.server.hostname}}
+              {% endif %}
+            </td>
+
+          </tr>
+        {% endfor %}
+
+      </table>
+
+
+  {% endif %}
+
+  {% if hsmdomains %}
+  <h1>{{ _('HSM Domain') }}</h1>
+
+  <table class="table table-hover">
+      <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Name')}}</td>
+          <td>{{_('Service')}}</td>
+          <td>{{_('Content')}}</td>
+      </tr>
+
+      {% for d in hsmdomains %}
+      <tr>
+          <td>{{ d.inventory_id() }}</td>
+          <td>
+              <a href="{{url_for('main.hsm_domain_edit', domain=d.id)}}">
+                  {{ d.name }}
+              </a>
+          </td>
+          <td>{{ d.service.name }}</td>
+          <td>
+              <a href="{{url_for('main.hsm_domain_content', domain=d.id)}}">
+                  {{ d.name }}
+              </a>
+          </td>
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if hsmpeds %}
+  <h1>{{ _('HSM PED') }}</h1>
+
+  <table class="table table-hover">
+      <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Key Type')}}</td>
+          <td>{{_('Key No')}}</td>
+          <td>{{_('Key S/N')}}</td>
+          <td>{{_('HSM Domain')}}</td>
+          <td>{{_('Safe')}}</td>
+          <td>{{_('Owner')}}</td>
+      </tr>
+
+      {% for p in hsmpeds %}
+
+      <tr>
+          <td>{% if p %} {{ p.inventory_id() }} {% endif %}</td>
+          <td>{{ p.type }}</td>
+          <td>
+              <a href="{{url_for('main.hsm_ped_edit', ped=p.id)}}">
+                  {{ p.keyno }}
+              </a>
+          </td>
+          <td>{{ p.keysn }}</td>
+          <td>{% if p.hsmdomain %} {{ p.hsmdomain.name }} {% endif %}</td>
+          <td>{% if p.compartment %} {{ p.compartment.name }} {% endif %}</td>
+          <td>{% if p.user %} {{ p.user.username }} {% endif %}</td>
+          {% if p.requested_by %}
+          <td>{{ p.requested_by.username }}</td>
+          {% endif %}
+      </tr>
+      {% endfor %}
+  </table>
+
+  {% endif %}
+
+
+  {% if hsmpcicards %}
+  <h1>{{ _('HSM PCI Card') }}</h1>
+
+  <table class="table table-hover">
+      <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Serial')}}</td>
+          <td>{{_('Name')}}</td>
+          <td>{{_('HSM Domain')}}</td>
+          <td>{{_('Server')}}</td>
+          <td>{{_('Safe')}}</td>
+      </tr>
+
+      {% for h in hsmpcicards %}
+
+      <tr>
+          <td>{{ h.inventory_id() }}</td>
+          <td>
+              <a href="{{url_for('main.hsm_pcicard_edit', pcicard=h.id)}}">
+                  {{ h.serial }}
+              </a>
+          </td>
+          <td>{{ h.name }}</td>
+          <td>{{ h.hsmdomain.name }}</td>
+          <td>{% if h.server %} {{ h.server.hostname }} {% endif %}</td>
+          <td>{% if h.safe %} {{ h.safe.name }} {% endif %}</td>
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if hsmbackupunits %}
+  <h1>{{ _('HSM Backupunits') }}</h1>
+
+  <table class="table table-hover">
+      <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Serial')}}</td>
+          <td>{{_('Name')}}</td>
+          <td>{{_('HSM Domain')}}</td>
+          <td>{{_('Service')}}</td>
+      </tr>
+
+      {% for b in hsmbackupunits %}
+
+      <tr>
+          <td>{{ b.inventory_id() }}</td>
+          <td>
+              <a href="{{url_for('main.hsm_backupunit_edit', id=b.id)}}">
+                  {{ b.serial }}
+              </a>
+          </td>
+          <td>{{ b.name }}</td>
+          <td>{{ b.hsmdomain.name }}</td>
+          <td>{{ b.hsmdomain.service.name }}</td>
+      </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+
+
+
+  {% if locations %}
+  <h1>{{ _('Location') }}</h1>
+
+  <table class="table table-hover">
+      <tr>
+        <td>{{_('Inventory id')}}</td>
+        <td>{{_('Place (City/Region)')}}</td>
+        <td>{{_('Facillity (House)')}}</td>
+        <td>{{_('Area (Room/Rack/Safe)')}}</td>
+        <td>{{_('Position')}}</td>
+        <td>{{_('Type of Facillity')}}</td>
+        <td>{{_('long name')}}</td>
+      </tr>
+
+      {% for l in locations %}
+
+        <tr>
+          <td>  {{ l.inventory_id() }} </td>
+
+          <td>
+                <A HREF="{{url_for('main.location_edit', location=l.id)}}">
+                  {{ l.place }}
+                </A>
+          </td>
+          <td>
+                  {{ l.facillity }}
+          </td>
+          <td>
+                  {{ l.area }}
+          </td>
+          <td>
+                  {{ l.position }}
+          </td>
+          <td>
+                  {{ l.type }}
+          </td>
+          <td>
+                  {{ l.longName() }}
+          </td>
+
+        </tr>
+      {% endfor %}
+
+      </table>
+
+{% endif %}
+
+
+
+{% if networks %}
+<h1>{{ _('Network') }}</h1>
+
+
+<table class="table table-hover">
+    <tr>
+      <td><A HREF="{{url_for('main.network_list', sort='id',          order=order)}}">{{_('Inventory id')}}</td>
+      <td><A HREF="{{url_for('main.network_list', sort='name',        order=order)}}">{{_('Name')}}        </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='network',     order=order)}}">{{_('IP Network')}}  </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='netmask',     order=order)}}">{{_('IP Netmask')}}  </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='gateway',     order=order)}}">{{_('IP Gateway')}}  </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='vlan',        order=order)}}">{{_('VLAN')}}        </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='service_id',  order=order)}}">{{_('Service')}}     </A></td>
+      <td><A HREF="{{url_for('main.network_list', sort='environment', order=order)}}">{{_('Environment')}} </A></td>
+    </tr>
+
+    {% for n in networks %}
+
+      <tr>
+        <td>  {{ n.inventory_id() }} </td>
+
+        <td>
+              {{ n.name }}
+              <A HREF="{{url_for('main.network_view', network=n.id)}}">
+                {{ _('View') }}
+              </A>
+              <A HREF="{{url_for('main.network_edit', network=n.id)}}">
+                {{ _('Edit') }}
+              </A>
+        </td>
+        <td>
+                {{ n.network }}
+        </td>
+        <td>
+                {{ n.netmask }}
+        </td>
+        <td>
+                {{ n.gateway }}
+        </td>
+        <td>
+                {{ n.vlan }}
+        </td>
+        <td>
+                {{ n.service.name }}
+        </td>
+        <td>
+                {{ n.environment }}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </table>
+
+
+{% endif %}
+
+
+{% if pcs %}
+<h1>{{ _('PCs') }}</h1>
+
+<table class="table table-hover">
+    <tr>
+      <td><A HREF="{{url_for('main.pc_list', sort='id',         order=order)}}">{{_('Inventory ID')}}</A></td>
+      <td><A HREF="{{url_for('main.pc_list', sort='serial',     order=order)}}">{{_('Serial')}}    </A></td>
+      <td><A HREF="{{url_for('main.pc_list', sort='env',        order=order)}}">{{_('Environment')}}  </A></td>
+      <td><A HREF="{{url_for('main.pc_list', sort='service_id', order=order)}}">{{_('Service')}}     </A></td>
+      <td>{{_('Actions')}}        </A></td>
+    </tr>
+
+    {% for s in pcs %}
+
+      <tr>
+        <td>
+              {{ s.inventory_id() }}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.pc_edit', pc=s.id)}}">
+            {{ s.serial }}
+          </A>
+        </td>
+        <td>
+                {{s.environmane}}
+        </td>
+        <td>
+          {% if s.service %}
+              {{s.service.name}}
+          {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.pc_edit', pc=s.id)}}">
+            {{ _('Edit') }}
+          </A> -
+          <A HREF="{{url_for('main.pc_copy', copy_from_pc=s.id)}}">
+            {{ _('Copy') }}
+          </A>
+          {% if s.manufacturer.lower()  == "dell" %}
+            -
+            <A HREF="https://www.dell.com/support/home/en-us/product-support/servicetag/{{s.serial}}">
+              {{ _('Dell support') }}
+            </A>
+          {% endif %}
+        </td>
+
+      </tr>
+    {% endfor %}
+
+    </table>
+
+
+{% endif %}
+
+
+{% if racks %}
+<h1>{{ _('Racks') }}</h1>
+
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('Location')}}</td>
+      <td>{{_('Actions')}}</td>
+    </tr>
+
+    {% for r in racks %}
+
+
+      <tr>
+        <td>  {{ r.inventory_id() }} </td>
+        <td>
+              <A HREF="{{url_for('main.rack_edit', rack=r.id)}}">
+                {{ r.name }}
+              </A>
+        </td>
+        <td>
+		{% if r.location %}
+	                {{ r.location.longName() }}
+		{% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.rack_edit', rack=r.id)}}">
+            {{ _('Edit') }}
+          </A>
+          -
+          <A HREF="{{url_for('main.rack_content', rack=r.id)}}">
+            {{ _('Content') }}
+          </A>
+          -
+          <A HREF="{{url_for('main.rack_audit', rack=r.id)}}">
+            {{ _('Audit') }}
+          </A>
+        </td>
+      </tr>
+    {% endfor %}
+
+  </table>
+
+
+
+{% endif %}
+
+
+
+
+{% if safes %}
+<h1>{{ _('Safes') }}</h1>
+
+  <table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory ID')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('Location')}}</td>
+    </tr>
+
+    {% for s in safes %}
+
+
+      <tr>
+        <td>
+          {{ s.inventory_id() }}
+        </td>
+        <td>
+           {{ s.name }} -
+            <A HREF="{{url_for('main.safe_edit', safe=s.id)}}">{{_('Edit')}}</A>
+            <A HREF="{{url_for('main.safe_content', safe=s.id)}}">{{_('Content')}}</A>
+        </td>
+        <td>
+          {% if s.location %}
+	          {{ s.location.longName() }}
+	  {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+
+  </table>
+{% endif %}
+
+{% if services %}
+<h1>{{ _('Services') }}</h1>
+      {% for service in services %}
+          {% include '_service.html' %}
+      {% endfor %}
+{% endif %}
+
+
+
+
+{% if switchs %}
+<h1>{{ _('Switches') }}</h1>
+
+<table class="table table-hover">
+    <tr>
+      <td>{{_('Inventory id')}}</td>
+      <td>{{_('Name')}}</td>
+      <td>{{_('Alias')}}</td>
+      <td>{{_('Service')}}</td>
+      <td>{{_('Rack')}}</td>
+      <td>{{_('Actions')}}</td>
+    </tr>
+
+    {% for s in switchs %}
+
+      <tr>
+        <td>
+              {{ s.inventory_id() }}
+        </td>
+        <td>
+                {{ s.name }}
+        </td>
+        <td>
+                {{s.alias}}
+        </td>
+        <td>
+          {% if s.service %}
+              {{s.service.name}}
+          {% endif %}
+        </td>
+        <td>
+          {% if s.rack %}
+                {{s.rack.name}}
+          {% endif %}
+        </td>
+        <td>
+          <A HREF="{{url_for('main.switch_edit', switch=s.id)}}"> {{ _('Edit') }}</A> <br/>
+          <A HREF="{{url_for('main.switch_port_list', switch=s.id)}}"> {{ _('List Ports') }}</A>
+        </td>
+
+      </tr>
+    {% endfor %}
+
+
+    </table>
+
+
+
+    {% endif %}
+
+    {% if switchports %}
+    <h1>{{ _('Switch Ports') }}</h1>
+
+    <table class="table table-hover">
+        <tr>
+          <td>{{_('Inventory id')}}</td>
+          <td>{{_('Name')}}</td>
+          <td>{{_('Switch')}}</td>
+          <td>{{_('Server')}}</td>
+        </tr>
+
+        {% for sp in switchports %}
+
+          <tr>
+            <td>
+                  {{ sp.inventory_id() }}
+            </td>
+            <td>
+                  <A HREF="{{url_for('main.switch_port_edit', switchport=sp.id)}}">
+                    {{ sp.name }}
+                  </A>
+            </td>
+            <td>
+                    {{sp.switch.name}}
+            </td>
+            <td>
+              {% if sp.server %}
+                  {{sp.server.hostname}}
+              {% endif %}
+            </td>
+
+          </tr>
+        {% endfor %}
+
+      </table>
+
+
+    {% endif %}
+
+
+
+{% if form %}
+      {{ wtf.quick_form(form) }}
+{% endif %}
 
 
 {% endblock %}

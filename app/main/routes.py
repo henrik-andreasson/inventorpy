@@ -1,4 +1,5 @@
 from flask import render_template, flash, redirect, url_for, request, g, current_app
+from app.modules.server.routes import virtual_server_add
 from flask_login import current_user, login_required
 from flask_babel import _, get_locale
 from app import db, audit
@@ -7,10 +8,11 @@ from app.models import User, Service, Location, Audit
 from app.modules.hsm.models import HsmDomain, HsmPed, HsmPin, HsmPciCard, HsmPedUpdates, HsmBackupUnit
 from app.modules.safe.models import Safe, Compartment
 from app.modules.rack.models import Rack
-from app.modules.server.models import Server
+from app.modules.server.models import Server, VirtualServer
 from app.modules.network.models import Network
 from app.modules.firewall.models import Firewall
-from app.modules.switch.models import Switch
+from app.modules.pc.models import Pc
+from app.modules.switch.models import Switch, SwitchPort
 from app.main import bp
 from datetime import datetime
 
@@ -65,12 +67,146 @@ def search():
         if 'keyword' in request.form:
             keyword = form.keyword.data
 
-    users = []
-    hits = []
+    users = User.query.filter(User.username.like(f"%{keyword}%") |
+        User.email.like(f"%{keyword}%") |
+        User.role.like(f"%{keyword}%") |
+        User.about_me.like(f"%{keyword}%")
+    ).order_by(User.username).all()
+    servers = Server.query.filter(Server.hostname.like(f"%{keyword}%") |
+       Server.role.like(f"%{keyword}%") |
+       Server.status.like(f"%{keyword}%") |
+       Server.ipaddress.like(f"%{keyword}%") |
+       Server.memory.like(f"%{keyword}%") |
+       Server.cpu.like(f"%{keyword}%") |
+       Server.os_name.like(f"%{keyword}%") |
+       Server.os_version.like(f"%{keyword}%") |
+       Server.comment.like(f"%{keyword}%") |
+       Server.environment.like(f"%{keyword}%")
+    ).order_by(Server.hostname).all()
+    virtserv = VirtualServer.query.filter(VirtualServer.hostname.like(f"%{keyword}%") |
+        VirtualServer.role.like(f"%{keyword}%") |
+        VirtualServer.status.like(f"%{keyword}%") |
+        VirtualServer.ipaddress.like(f"%{keyword}%") |
+        VirtualServer.memory.like(f"%{keyword}%") |
+        VirtualServer.cpu.like(f"%{keyword}%") |
+        VirtualServer.os_name.like(f"%{keyword}%") |
+        VirtualServer.os_version.like(f"%{keyword}%") |
+        VirtualServer.comment.like(f"%{keyword}%") |
+        VirtualServer.environment.like(f"%{keyword}%")
+    ).order_by(VirtualServer.hostname).all()
 
-# Switch
+    networks = Network.query.filter(Network.name.like(f"%{keyword}%") |
+            Network.network.like(f"%{keyword}%") |
+            Network.environment.like(f"%{keyword}%") |
+            Network.netmask.like(f"%{keyword}%") |
+            Network.gateway.like(f"%{keyword}%")
+        ).order_by(Network.name).all()
+
+    firewalls = Firewall.query.filter(Firewall.name.like(f"%{keyword}%") |
+            Firewall.alias.like(f"%{keyword}%") |
+            Firewall.ipaddress.like(f"%{keyword}%") |
+            Firewall.model.like(f"%{keyword}%") |
+            Firewall.status.like(f"%{keyword}%") |
+            Firewall.support_start.like(f"%{keyword}%") |
+            Firewall.support_end.like(f"%{keyword}%") |
+            Firewall.comment.like(f"%{keyword}%") |
+            Firewall.serial.like(f"%{keyword}%")
+        ).order_by(Firewall.name).all()
+
+    hsmdomains = HsmDomain.query.filter(HsmDomain.name.like(f"%{keyword}%")
+            ).order_by(HsmDomain.name).all()
+
+    hsmpeds = HsmPed.query.filter(HsmPed.type.like(f"%{keyword}%") |
+                HsmPed.keyno.like(f"%{keyword}%") |
+                HsmPed.keysn.like(f"%{keyword}%") |
+                HsmPed.comment.like(f"%{keyword}%")
+            ).order_by(HsmPed.type).all()
+
+    hsmpcicards = HsmPciCard.query.filter(HsmPciCard.name.like(f"%{keyword}%") |
+                HsmPciCard.serial.like(f"%{keyword}%") |
+                HsmPciCard.fbno.like(f"%{keyword}%") |
+                HsmPciCard.model.like(f"%{keyword}%") |
+                HsmPciCard.manufacturedate.like(f"%{keyword}%") |
+                HsmPciCard.status.like(f"%{keyword}%") |
+                HsmPciCard.support_start.like(f"%{keyword}%") |
+                HsmPciCard.support_end.like(f"%{keyword}%") |
+                HsmPciCard.contract.like(f"%{keyword}%") |
+                HsmPciCard.comment.like(f"%{keyword}%")
+            ).order_by(HsmPciCard.name).all()
+
+
+    hsmbackupunits = HsmBackupUnit.query.filter(HsmBackupUnit.name.like(f"%{keyword}%") |
+                    HsmBackupUnit.serial.like(f"%{keyword}%") |
+                    HsmBackupUnit.fbno.like(f"%{keyword}%") |
+                    HsmBackupUnit.model.like(f"%{keyword}%") |
+                    HsmBackupUnit.manufacturedate.like(f"%{keyword}%") |
+                    HsmBackupUnit.comment.like(f"%{keyword}%")
+                ).order_by(HsmBackupUnit.name).all()
+
+
+    # pcs = Pc.query.filter(Pc.name.like(f"%{keyword}%") |
+    #                         Pc.serial.like(f"%{keyword}%") |
+    #                         Pc.memory.like(f"%{keyword}%") |
+    #                         Pc.model.like(f"%{keyword}%") |
+    #                         Pc.manufacturer.like(f"%{keyword}%") |
+    #                         Pc.status.like(f"%{keyword}%") |
+    #                         Pc.cpu.like(f"%{keyword}%") |
+    #                         Pc.hd.like(f"%{keyword}%") |
+    #                         Pc.os_name.like(f"%{keyword}%") |
+    #                         Pc.os_version.like(f"%{keyword}%") |
+    #                         Pc.support_start.like(f"%{keyword}%") |
+    #                         Pc.support_end.like(f"%{keyword}%") |
+    #                         Pc.environment.like(f"%{keyword}%") |
+    #                         Pc.comment.like(f"%{keyword}%")
+    #                     ).order_by(HsmBackupUnit.name).all()
+
+    racks = Rack.query.filter(Rack.name.like(f"%{keyword}%") |
+                            Rack.comment.like(f"%{keyword}%")
+                        ).order_by(Rack.name).all()
+
+
+    safes = Safe.query.filter(Safe.name.like(f"%{keyword}%") |
+            Safe.status.like(f"%{keyword}%") |
+            Safe.comment.like(f"%{keyword}%")
+        ).order_by(Safe.name).all()
+
+    compartments = Compartment.query.filter(Compartment.name.like(f"%{keyword}%") |
+            Compartment.audit_date.like(f"%{keyword}%") |
+            Compartment.comment.like(f"%{keyword}%")
+        ).order_by(Compartment.name).all()
+
+    switches = Switch.query.filter(Switch.name.like(f"%{keyword}%") |
+                Switch.alias.like(f"%{keyword}%") |
+                Switch.support_start.like(f"%{keyword}%") |
+                Switch.support_end.like(f"%{keyword}%") |
+                Switch.manufacturer.like(f"%{keyword}%") |
+                Switch.serial.like(f"%{keyword}%") |
+                Switch.ipaddress.like(f"%{keyword}%") |
+                Switch.model.like(f"%{keyword}%") |
+                Switch.status.like(f"%{keyword}%") |
+                Switch.comment.like(f"%{keyword}%")
+            ).order_by(Switch.name).all()
+
+    switchports = SwitchPort.query.filter(SwitchPort.name.like(f"%{keyword}%") |
+                SwitchPort.comment.like(f"%{keyword}%")
+            ).order_by(SwitchPort.name).all()
+
     return render_template('search.html', title=_('Search'),
-                           hits=hits, form=form)
+                           users=users, servers=servers,
+                           virtual_servers=virtserv,
+                           networks=networks,
+                           firewalls=firewalls,
+                           hsmdomains=hsmdomains,
+                           hsmpeds=hsmpeds,
+                           hsmpcicards=hsmpcicards,
+                           hsmbackupunits=hsmbackupunits,
+#                           pcs=pcs,
+                           racks=racks,
+                           safes=safes,
+                           compartments=compartments,
+                           switches=switches,
+                           switchports=switchports,
+                           form=form)
 
 
 @bp.route('/reindex', methods=['GET', 'POST'])

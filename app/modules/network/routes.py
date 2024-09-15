@@ -98,38 +98,88 @@ def network_list():
     page = request.args.get('page', 1, type=int)
     sort = request.args.get('sort', 'name')
     order = request.args.get('order', 'desc')
+    filter_by_service = request.args.get('filter_by_service', None)
+    filter_by_environment = request.args.get('filter_by_environment', None)
 
     form = FilterNetworkListForm()
+    input_search_query = []
+    environment = None
+    service = None
 
     sortstr = "{}(Network.{})".format(order, sort)
     if request.method == 'POST' and form.validate_on_submit():
-
-        service = Service.query.get(form.service.data)
+        service_id = form.service.data
+        service = Service.query.get(service_id)
         environment = form.environment.data
 
         print("env: {} service: {}".format(environment, service))
 
-        if service is not None and environment is not None and environment != "all":
-            networks = Network.query.filter_by(service_id=service.id, environment=environment).paginate(
-                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
-        elif service is not None:
-            networks = Network.query.filter_by(service_id=service.id).paginate(
-                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+        if service is not None:
+            input_search_query.append('(Network.service_id == service.id)')
 
-        elif environment is not None and environment != "all":
-            networks = Network.query.filter_by(environment=environment).paginate(
-                    page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
-        else:
-            networks = Network.query.order_by(eval(sortstr)).paginate(
-                page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+        if environment is not None and environment != "all":
+            print("env: {}".format(environment))
+            input_search_query.append('(Network.environment == environment)')
+        if service is not None:
+            filter_by_service = service.id
+        if service_id == "all" or service_id == -1:
+            print(f"resetting service posted as all")
+            filter_by_service = None
+        if environment is not None:
+            filter_by_environment = environment
+        if environment == "all":
+            print(f"resetting environment posted as all")
+            filter_by_environment = None
+
     else:
+        service_name = request.args.get('service')
+        if filter_by_service is not None:
+            print(f"service set by filter_by_service {filter_by_service}")
+            service = Service.query.get(filter_by_service)
+        else:
+            print(f"service set by service {service}")
+            service = Service.query.filter_by(name=service_name).first()
+
+        if filter_by_environment is not None:
+            print(f"env set by filter_by_environment {filter_by_environment}")
+            environment = filter_by_environment
+        else:
+            print(f"env set by environment {environment}")
+            environment = request.args.get('environment')
+
+        if service is not None:
+            form.service.data = service.id
+
+        if environment is not None and environment != "all":
+            form.environment.data = environment
+
+    if service is not None:
+        print("service: {}".format(service.name))
+        input_search_query.append('(Network.service_id == service.id)')
+
+    if environment is not None and environment != "all":
+        print("env: {}".format(environment))
+        input_search_query.append('(Network.environment == environment)')
+
+    if len(input_search_query) < 1:
+        print(f"input_search_query {input_search_query}")
         networks = Network.query.order_by(eval(sortstr)).paginate(
             page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
 
-    next_url = url_for('main.network_list', page=networks.next_num) \
+    else:
+        query = " & ".join(input_search_query)
+        networks = Network.query.filter(eval(query)).order_by(eval(sortstr)).paginate(
+            page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+
+
+    next_url = url_for('main.network_list', page=networks.next_num,
+        filter_by_environment=filter_by_environment,
+        filter_by_service=filter_by_service) \
         if networks.has_next else None
 
-    prev_url = url_for('main.network_list', page=networks.prev_num) \
+    prev_url = url_for('main.network_list', page=networks.prev_num,
+        filter_by_environment=filter_by_environment,
+        filter_by_service=filter_by_service) \
         if networks.has_prev else None
 
     return render_template('network.html', title=_('Network'),
